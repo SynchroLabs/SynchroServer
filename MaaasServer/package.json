@@ -1,0 +1,17 @@
+{
+  "name": "MaaasServer",
+  "version": "0.0.0",
+  "description": "MaaasServer",
+  "main": "app.js",
+  "author": {
+    "name": "Bob",
+    "email": ""
+  },
+  "dependencies": {
+    "express": "3.4.4",
+    "jade": "*",
+    "stylus": "*",
+    "objectdiff": "~1.1.0",
+    "require-dir": "~0.1.0"
+  }
+}
