@@ -12,6 +12,7 @@
     "jade": "*",
     "stylus": "*",
     "objectdiff": "~1.1.0",
-    "require-dir": "~0.1.0"
+    "require-dir": "~0.1.0",
+    "faye-websocket": "~0.7.0"
   }
 }
