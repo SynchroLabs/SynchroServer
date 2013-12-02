@@ -5,6 +5,7 @@
 
 var express = require('express');
 var routes = require('./routes');
+var edit = require('./routes/edit');
 var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
@@ -41,6 +42,7 @@ if ('development' == app.get('env')) {
 }
 
 app.get('/', routes.index);
+app.get('/edit', edit.edit);
 app.get('/users', user.list);
 
 app.post('/api', function(request, response)
