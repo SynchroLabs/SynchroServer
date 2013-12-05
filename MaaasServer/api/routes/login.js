@@ -16,6 +16,7 @@ exports.View =
         ] },
         { type: "toggle", binding: "showPassword", header: "Show Password", onLabel: "Showing", offLabel: "Hiding", fontsize: 24 },
         { type: "text", value: "Current entered password: {password}", fontsize: 24, visibility: "{showPassword}" },
+        { type: "toggle", binding: "showPassword", header: "Show Password2", onLabel: "Showing", offLabel: "Hiding", fontsize: 24 },
     ]
 }
 

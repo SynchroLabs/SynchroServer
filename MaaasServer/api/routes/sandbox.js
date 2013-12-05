@@ -14,8 +14,9 @@ exports.View =
 
         { type: "slider", minimum: 10, maximum: 50, binding: "fontSize", width: 200 },
         { type: "text", value: "Heading to be sized", fontsize: "{fontSize}" },
+        { type: "slider", minimum: 10, maximum: 50, binding: "fontSize", width: 200 },
 
-        { type: "text", value: "{$parent.$parent.$parent.caption}: {color}", fontsize: 24, binding: { foreach: "colors" } },
+        { type: "text", value: "{$root.caption}: {color}", fontsize: 24, binding: { foreach: "colors" } },
         { type: "edit", fontsize: 24, binding: { foreach: "colors", value: "color" } },
     ]
 }
