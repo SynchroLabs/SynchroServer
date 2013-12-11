@@ -1,0 +1,44 @@
+
+Mobile Application As A Service (MAAAS) - Server
+=================================================
+
+App
+    Branches
+    Pages
+
+UX Test - Test in web view (see/edit view model live)
+Unit Test (app unit test)
+
+Mock support for test environment
+
+Diff
+    One page / all pages
+    Diff against branch
+
+Deploy (to branch)
+    One page / all pages
+    Version control / comments
+
+Team support (track who made which changes, deployments, etc)
+
+Revision history / revert
+
+MAAAS clients tied to app (with resource)
+    Optionally specify branch (so one client app can run "production", one can run "staging", etc)
+    App spec - app{branch} - branch defaults to "production"
+
+Client builder
+    Provide platform resources - app name, icon, etc.
+    Specify capabilities (location, photo library, etc)
+    Produce build images for download (signed by MAAAS or prepared for signing by customer)
+    Pre-build test client (auth to MAAAS, welcome page, enter app spec, remembers app specs, choose previously entered app spec)
+
+Persistent sessions
+
+Page state (view model state)
+    How to manage?  If we navigate back to a page and want to restore view model state
+    Persistence
+
+Platform filtering for view (to allow platform specific elemements, sections, or entire view)
+
+Push notifications / badges / etc

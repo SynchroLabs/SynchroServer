@@ -3,6 +3,7 @@
 var requireDir = require('require-dir');
 
 var objectMonitor = require('./objectmon');
+var util = require('./util');
 
 var routes = requireDir("routes");
 for (var routePath in routes) {

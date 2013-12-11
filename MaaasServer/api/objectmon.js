@@ -68,7 +68,8 @@ function logChange(changeType, path, value)
 
 exports.getChangeList = function(basePath, originalObject, newObject)
 {
-    var diffs = objectDiff.diff(originalObject, newObject);
+    // Doing "own properties" prevents inspection of prototype functions (among other things)
+    var diffs = objectDiff.diffOwnProperties(originalObject, newObject);
     console.log("Diffs: ", JSON.stringify(diffs, null, 4));
 
     var changes = [];
@@ -79,50 +80,6 @@ exports.getChangeList = function(basePath, originalObject, newObject)
     });
 
     return changes;
-}
-
-// !!! Needed a convenient place to put this - move later
-
-// Remove one or more items from an array.  
-//
-// Usage:
-//
-//   Single argument    - arr.remove("foo");
-//   Multiple arguments - arr.remove("foo", "bar");
-//   Array argument     - arr.remove(["foo", "bar"]);
-//
-Array.prototype.remove = function ()
-{
-    var itemsToRemove = [];
-
-    for (var argNum = 0; argNum < arguments.length; ++argNum) 
-    {
-        var item = arguments[argNum];
-        if (item instanceof Array)
-        {
-            for (var i = 0; i < item.length; ++i) 
-            {
-                itemsToRemove.push(item[i]);
-            }
-        }
-        else
-        {
-            itemsToRemove.push(item);
-        } 
-    }
-
-    var itemsLen = itemsToRemove.length;
-    while (itemsLen && this.length)
-    {
-        var foundAt = -1;
-        itemToRemove = itemsToRemove[--itemsLen];
-        while ((foundAt = this.indexOf(itemToRemove)) != -1)
-        {
-            this.splice(foundAt, 1);
-        }
-    }
-    
-    return this;
 }
 
 //=========================================================================================

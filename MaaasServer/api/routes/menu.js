@@ -10,6 +10,7 @@ exports.View =
         { type: "button", caption: "Login Sample", binding: "login" },
         { type: "button", caption: "Click Counter Sample", binding: "counter" },
         { type: "button", caption: "List Sample", binding: "list" },
+        { type: "button", caption: "Contacts", binding: "contacts" },
         { type: "button", caption: "Sandbox", binding: "sandbox" },
     ]
 }
@@ -31,6 +32,10 @@ exports.Commands =
     list: function(context)
     {
         return navigateToView(context, "list");
+    },
+    contacts: function(context)
+    {
+        return navigateToView(context, "listview");
     },
     sandbox: function(context)
     {

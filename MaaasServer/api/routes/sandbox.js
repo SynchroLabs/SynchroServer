@@ -29,8 +29,9 @@ exports.InitializeViewModelState = function(context, session)
         caption: "The Color",
         colors:
         [
-            { color: "red" }, { color: "green" }, { color: "blue" },
+            { color: "red", value: "0xff0000" }, { color: "green", value: "0x00ff00" }, { color: "blue", value: "0x0000ff" },
         ],
+        selection: { color: "green", value: "0x00ff00" },
         image: profileImage,
     }
     return vmState;
