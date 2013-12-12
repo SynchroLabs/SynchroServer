@@ -68,17 +68,21 @@ function fnShowMessage(context, messageBox)
 }
 showMessage = fnShowMessage;
 
-function fnNavigateToView(context, route)
+// context - the current context
+// route - the route to the new view
+// params - option dictionary of params, if provided is passed to InitializeViewModel
+//
+function fnNavigateToView(context, route, params)
 {
     var routeModule = routes[route];
     if (routeModule)
     {
         console.log("Found route module for " + route);
         context.session.ViewModel = {};
-        if (routeModule.InitializeViewModelState)
+        if (routeModule.InitializeViewModel)
         {
-            console.log("Initializing view model state (on nav)");
-            context.session.ViewModel = routeModule.InitializeViewModelState(context, context.session);
+            console.log("Initializing view model (on nav)");
+            context.session.ViewModel = routeModule.InitializeViewModel(context, context.session, params);
         }
 
         context.response.Path = route;
@@ -151,7 +155,7 @@ exports.process = function(session, requestObject)
                 viewModelAfterUpdate = JSON.parse(JSON.stringify(context.session.ViewModel));
             }
 
-            routeModule.Commands[context.request.Command](context, context.session, context.session.ViewModel);
+            routeModule.Commands[context.request.Command](context, context.session, context.session.ViewModel, context.request.Parameters);
 
             // If we have a change listener for this route, analyze changes, and call it as appropriate.
             if (routeModule.OnChange)
@@ -171,10 +175,10 @@ exports.process = function(session, requestObject)
         else
         {
             context.session.ViewModel = {};
-            if (routeModule.InitializeViewModelState)
+            if (routeModule.InitializeViewModel)
             {
-                console.log("Initializing view model state");
-                context.session.ViewModel = routeModule.InitializeViewModelState(context, context.session);
+                console.log("Initializing view model");
+                context.session.ViewModel = routeModule.InitializeViewModel(context, context.session);
             }
 
             context.response.View = routeModule.View;

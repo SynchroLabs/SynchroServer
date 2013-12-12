@@ -22,32 +22,32 @@ exports.View =
     ]
 }
 
-exports.InitializeViewModelState = function(context, session)
+exports.InitializeViewModel = function(context, session)
 {
-    var vmState =
+    var viewModel =
     {
         itemToAdd: "",
         items: [ "white", "black", "yellow" ],
         selectedItems: [ "black" ],
     }
-    return vmState;
+    return viewModel;
 }
 
 exports.Commands = 
 {
-    add: function(context, session, vmState)
+    add: function(context, session, viewModel)
     {
-        vmState.items.push(vmState.itemToAdd);
-        vmState.itemToAdd = "";
+        viewModel.items.push(viewModel.itemToAdd);
+        viewModel.itemToAdd = "";
     },
-    sort: function(context, session, vmState)
+    sort: function(context, session, viewModel)
     {
-        vmState.items.sort();
+        viewModel.items.sort();
     },
-    remove: function(context, session, vmState)
+    remove: function(context, session, viewModel)
     {
-        vmState.items.remove(vmState.selectedItems);
-        vmState.selectedItems = [];
+        viewModel.items.remove(viewModel.selectedItems);
+        viewModel.selectedItems = [];
     },
     exit: function(context)
     {

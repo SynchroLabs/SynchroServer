@@ -8,46 +8,46 @@ exports.View =
     [
         { type: "text", value: "Count: {count}", foreground: "{font.color}", fontweight: "{font.weight}", fontsize: 24 },
         { type: "button", caption: "Increment Count!", binding: "increment" },
-        { type: "button", caption: "Decrement Count!", binding: "decrement", enabled: "{count}" },
-        { type: "button", caption: "Reset Count!", binding: "reset" },
+        { type: "button", caption: "Decrement Count!", binding: { command: "decrement" }, enabled: "{count}" },
+        { type: "button", caption: "Reset Count!", binding: { onClick: "reset" } },
     ]
 }
 
-exports.InitializeViewModelState = function(context, session)
+exports.InitializeViewModel = function(context, session)
 {
-    var vmState =
+    var viewModel =
     {
         count: 0,
         font: { color: "Green", weight: "Normal" },
     }
-    return vmState;
+    return viewModel;
 }
 
-exports.OnChange = function(context, session, vmState, source, changes)
+exports.OnChange = function(context, session, viewModel, source, changes)
 {
-    if (vmState.count < 10)
+    if (viewModel.count < 10)
     {
-        vmState.font = { color: "Green", weight: "Normal" };
+        viewModel.font = { color: "Green", weight: "Normal" };
     }
     else
     {
-        vmState.font = { color: "Red", weight: "Bold" };
+        viewModel.font = { color: "Red", weight: "Bold" };
     }
 }
 
 exports.Commands = 
 {
-    increment: function(context, session, vmState)
+    increment: function(context, session, viewModel)
     {
-        vmState.count += 1;
+        viewModel.count += 1;
     },
-    decrement: function(context, session, vmState)
+    decrement: function(context, session, viewModel)
     {
-        vmState.count -= 1;
+        viewModel.count -= 1;
     },
-    reset: function(context, session, vmState)
+    reset: function(context, session, viewModel)
     {
-        vmState.count = 0;
+        viewModel.count = 0;
     },
     exit: function(context)
     {

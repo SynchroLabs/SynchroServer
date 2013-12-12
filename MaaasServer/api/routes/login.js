@@ -20,24 +20,24 @@ exports.View =
     ]
 }
 
-exports.InitializeViewModelState = function(context, session)
+exports.InitializeViewModel = function(context, session)
 {
-    var vmState =
+    var viewModel =
     {
         username: "test",
         password: "",
         showPassword: false
     }
-    return vmState;
+    return viewModel;
 }
 
 exports.Commands = 
 {
-    login: function(context, session, vmState)
+    login: function(context, session, viewModel)
     {
-        if (vmState.username && (vmState.username == vmState.password))
+        if (viewModel.username && (viewModel.username == viewModel.password))
         {
-            session.username = vmState.username;
+            session.username = viewModel.username;
             var messageBox = 
             {
                 title: "Winner",

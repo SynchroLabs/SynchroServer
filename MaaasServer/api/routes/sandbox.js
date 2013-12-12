@@ -21,9 +21,9 @@ exports.View =
     ]
 }
 
-exports.InitializeViewModelState = function(context, session)
+exports.InitializeViewModel = function(context, session)
 {
-    var vmState =
+    var viewModel =
     {
         fontSize: 24,
         caption: "The Color",
@@ -34,20 +34,20 @@ exports.InitializeViewModelState = function(context, session)
         selection: { color: "green", value: "0x00ff00" },
         image: profileImage,
     }
-    return vmState;
+    return viewModel;
 }
 
 exports.Commands =
 {
-    switchImages: function (context, session, vmState)
+    switchImages: function(context, session, viewModel)
     {
-        if (vmState.image == tddLogo)
+        if (viewModel.image == tddLogo)
         {
-            vmState.image = profileImage;
+            viewModel.image = profileImage;
         }
         else
         {
-            vmState.image = tddLogo;
+            viewModel.image = tddLogo;
         }
     },
     exit: function(context)

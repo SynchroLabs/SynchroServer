@@ -42,3 +42,9 @@ Page state (view model state)
 Platform filtering for view (to allow platform specific elemements, sections, or entire view)
 
 Push notifications / badges / etc
+
+Localization (language/locale reported from client / token substitution)
+
+Resources (shared values that can be used as tokens?)
+
+Styles (collection of attributes that can be applied to a control - integrate with resources?)

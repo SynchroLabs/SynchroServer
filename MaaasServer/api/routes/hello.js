@@ -19,14 +19,14 @@ exports.View =
     ]
 }
 
-exports.InitializeViewModelState = function(context, session)
+exports.InitializeViewModel = function(context, session)
 {
-    var vmState =
+    var viewModel =
     {
         firstName: "Planet",
         lastName: "Earth",
     }
-    return vmState;
+    return viewModel;
 }
 
 exports.Commands =
