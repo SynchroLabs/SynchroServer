@@ -6,17 +6,17 @@ exports.View =
     onBack: "cancel",
     elements:
     [
-        { type: "text", value: "Username", fontsize: 24, margin: { bottom: 0 } },
+        { type: "text", value: "Username", fontsize: 12, margin: { bottom: 0 } },
         { type: "edit", binding: "username", width: 200 },
-        { type: "text", value: "Password", fontsize: 24, margin: { bottom: 0 } },
+        { type: "text", value: "Password", fontsize: 12, margin: { bottom: 0 } },
         { type: "password", binding: "password", width: 200 },
-        { type: "stackpanel", margin: { top: 10 }, contents: [
+        { type: "stackpanel", orientation: "Horizontal", margin: { top: 10 }, contents: [
             { type: "button", caption: "Login", width: 100, binding: "login" },
             { type: "button", caption: "Cancel", width: 100, binding: "cancel" },
         ] },
-        { type: "toggle", binding: "showPassword", header: "Show Password", onLabel: "Showing", offLabel: "Hiding", fontsize: 24 },
-        { type: "text", value: "Current entered password: {password}", fontsize: 24, visibility: "{showPassword}" },
-        { type: "toggle", binding: "showPassword", header: "Show Password2", onLabel: "Showing", offLabel: "Hiding", fontsize: 24 },
+        { type: "toggle", binding: "showPassword", header: "Show Password", onLabel: "Showing", offLabel: "Hiding", fontsize: 12 },
+        { type: "text", value: "Current entered password: {password}", fontsize: 12, visibility: "{showPassword}" },
+        { type: "toggle", binding: "showPassword", header: "Show Password2", onLabel: "Showing", offLabel: "Hiding", fontsize: 12 },
     ]
 }
 

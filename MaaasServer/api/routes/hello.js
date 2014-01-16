@@ -6,16 +6,16 @@ exports.View =
     onBack: "exit",
     elements:
     [
-        { type: "stackpanel", contents: [
-            { type: "text", value: "First name:", fontsize: 24, margin: { top: 10, right: 10 } },
-            { type: "edit", fontsize: 24, binding: "firstName" },
+        { type: "stackpanel", orientation: "Horizontal", contents: [
+            { type: "text", value: "First name:", fontsize: 12, margin: { top: 10, right: 10 } },
+            { type: "edit", fontsize: 12, binding: "firstName" },
         ] },
-        { type: "stackpanel", contents: [
-            { type: "text", value: "Last name:", fontsize: 24, margin: { top: 10, right: 10 } },
-            { type: "edit", fontsize: 24, binding: "lastName" },
+        { type: "stackpanel", orientation: "Horizontal", contents: [
+            { type: "text", value: "Last name:", fontsize: 12, margin: { top: 10, right: 10 } },
+            { type: "edit", fontsize: 12, binding: "lastName" },
         ] },
 
-        { type: "text", value: "Hello {firstName} {lastName}", fontsize: 24 },
+        { type: "text", value: "Hello {firstName} {lastName}", fontsize: 12 },
     ]
 }
 

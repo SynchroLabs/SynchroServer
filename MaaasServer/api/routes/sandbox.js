@@ -9,15 +9,25 @@ exports.View =
     onBack: "exit",
     elements:
     [
-        { type: "image", resource: "{image}" },
-        { type: "button", caption: "Switch images", binding: "switchImages" },
+        { type: "border", border: "White", borderthickness: "5", contents: [
+            { type: "scrollview", orientation: "horizontal", height: 150, width: 150, contents: [
+                { type: "image", height: 300, width: 300, resource: "{image}" },
+            ] },
+        ] },
+
+        /*
+        { type: "canvas", height: 150, contents: [
+            { type: "image", top: 0, left: 0, resource: "{image}" },
+        ] },
+        { type: "button", caption: "Switch images", margin: "{fontSize}", binding: "switchImages" },
+        */
 
         { type: "slider", minimum: 10, maximum: 50, binding: "fontSize", width: 200 },
         { type: "text", value: "Heading to be sized", fontsize: "{fontSize}" },
         { type: "slider", minimum: 10, maximum: 50, binding: "fontSize", width: 200 },
 
-        { type: "text", value: "{$root.caption}: {color}", fontsize: 24, binding: { foreach: "colors" } },
-        { type: "edit", fontsize: 24, binding: { foreach: "colors", value: "color" } },
+        { type: "text", value: "{$parent.$parent.caption}: {$data}", fontsize: 12, binding: { foreach: "colors", with: "color" } },
+        { type: "edit", fontsize: 12, binding: { foreach: "colors", value: "color" } },
     ]
 }
 
