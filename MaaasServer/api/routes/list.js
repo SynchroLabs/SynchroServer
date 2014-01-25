@@ -9,11 +9,11 @@ exports.View =
         { type: "stackpanel", orientation: "Horizontal", contents: [
             { type: "text", value: "New item:", fontsize: 12 },
             { type: "edit", binding: "itemToAdd" },
-            { type: "button", caption: "Add", binding: "add", enabled: "{itemToAdd}" },
         ] },
+        { type: "button", caption: "Add", binding: "add", enabled: "{itemToAdd}" },
 
         { type: "text", value: "Your items", fontsize: 12 },
-        { type: "listbox", width: 250, select: "multiple", binding: { items: "items", selection: "selectedItems" } },
+        { type: "listbox", width: 250, height: 300, select: "Multiple", binding: { items: "items", selection: "selectedItems" } },
 
         { type: "stackpanel", orientation: "Horizontal", contents: [
             { type: "button", caption: "Remove", binding: "remove", enabled: "{selectedItems}" },

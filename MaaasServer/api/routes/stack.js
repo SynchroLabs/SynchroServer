@@ -12,6 +12,11 @@ exports.View =
         ] },
 
         { type: "stackpanel", orientation: "Horizontal", contents: [
+            { type: "text", value: "Margin", fontsize: 10, width: 140 },
+            { type: "slider", minimum: 0, maximum: 20, binding: "margin", width: 300 },
+        ] },
+
+        { type: "stackpanel", orientation: "Horizontal", contents: [
             { type: "button", caption: "Horizontal", binding: { command: "setOrientation", orientation: "Horizontal" } },
             { type: "button", caption: "Vertical", binding: { command: "setOrientation", orientation: "Vertical" } },
         ] },
@@ -28,9 +33,9 @@ exports.View =
             { type: "button", width: 150, caption: "Right", binding: { command: "setHAlign", align: "Right" } },
         ] },
 
-        { type: "border", border: "Gray", borderThickness: "5", padding: "{padding}", contents: [
-            { type: "stackpanel", background: "Red", orientation: "{orientation}", alignContentH: "{alignContentH}", alignContentV: "{alignContentV}", contents: [
-                { type: "button", caption: "Button", width: 125 },
+        { type: "border", border: "Gray", borderThickness: "5", contents: [
+            { type: "stackpanel", background: "Red", padding: "{padding}", orientation: "{orientation}", alignContentH: "{alignContentH}", alignContentV: "{alignContentV}", contents: [
+                { type: "button", caption: "Button", width: 125, margin: "{margin}" },
                 { type: "button", caption: "Tall and Fat", height: 150, width: 250 },
             ] },
         ] },
@@ -42,6 +47,7 @@ exports.InitializeViewModel = function(context, session)
     var viewModel =
     {
         padding: 0,
+        margin: 0,
         orientation: "Horizontal",
         alignContentH: "Left",
         alignContentV: "Top",

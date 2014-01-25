@@ -22,7 +22,7 @@ exports.View =
             { type: "text", value: "Content", fontsize: 10, width: 140, foreground: "Green" },
             { type: "slider", minimum: 0, maximum: 300, binding: "content", width: 300 },
         ] },
-        { type: "border", alignContentV: "Bottom", alignContentH: "Right", border: "Red", borderThickness: "{border}", cornerRadius: "{radius}", padding: "{padding}", background: "Blue", contents: [
+        { type: "border", alignContentV: "Bottom", alignContentH: "Right", border: "Red", borderThickness: "{border}", cornerRadius: "{radius}", padding: "{padding}", background: "Blue", contents: [              
             { type: "rectangle", width: "{content}", height: "{content}", fill: "Green" },
         ] },
         { type: "border", background: "Gray", padding: 20, contents: [

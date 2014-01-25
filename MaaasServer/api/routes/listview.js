@@ -17,8 +17,8 @@ exports.View =
             { type: "stackpanel", orientation: "Vertical", contents: [
 
                 { type: "text", value: "Your Contacts", fontsize: 12 },
-                { type: "listview", select: "multiple", maxheight: 300, binding: { items: "contacts", selection: "selectedContacts" }, itemTemplate:
-                    { type: "stackpanel", orientation: "Horizontal", contents: [
+                { type: "listview", select: "Multiple", height: 300, maxheight: 300, binding: { items: "contacts", selection: "selectedContacts" }, itemTemplate:
+                    { type: "stackpanel", orientation: "Horizontal", padding: 5, contents: [
                         { type: "image", resource: "resources/user.png", height: 50, width: 50 },
                         { type: "stackpanel", orientation: "Vertical", contents: [
                             { type: "text", value: "{first}" },
@@ -27,7 +27,7 @@ exports.View =
                     ] },
                 },
             ] },
-
+            /*
             { type: "stackpanel", orientation: "Vertical", contents: [
 
                 { type: "text", value: "Selected Contacts", fontsize: 12 },
@@ -42,6 +42,7 @@ exports.View =
                 },
 
             ] },
+            */
 
         ] },
 

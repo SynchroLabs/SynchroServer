@@ -10,7 +10,7 @@ exports.View =
     elements:
     [
         { type: "border", border: "White", borderthickness: "5", contents: [
-            { type: "scrollview", orientation: "horizontal", height: 150, width: 150, contents: [
+            { type: "scrollview", orientation: "Horizontal", height: 150, width: 150, contents: [
                 { type: "image", height: 300, width: 300, resource: "{image}" },
             ] },
         ] },
@@ -22,9 +22,9 @@ exports.View =
         { type: "button", caption: "Switch images", margin: "{fontSize}", binding: "switchImages" },
         */
 
-        { type: "slider", minimum: 10, maximum: 50, binding: "fontSize", width: 200 },
+        { type: "slider", minimum: 10, maximum: 50, binding: "fontSize", width: 400 },
         { type: "text", value: "Heading to be sized", fontsize: "{fontSize}" },
-        { type: "slider", minimum: 10, maximum: 50, binding: "fontSize", width: 200 },
+        { type: "slider", minimum: 10, maximum: 50, binding: "fontSize", width: 400 },
 
         { type: "text", value: "{$parent.$parent.caption}: {$data}", fontsize: 12, binding: { foreach: "colors", with: "color" } },
         { type: "edit", fontsize: 12, binding: { foreach: "colors", value: "color" } },
