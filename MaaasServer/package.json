@@ -8,7 +8,7 @@
     "email": ""
   },
   "dependencies": {
-    "express": "3.4.4",
+    "express": "~3.4.8",
     "jade": "*",
     "stylus": "*",
     "objectdiff": "~1.1.0",
