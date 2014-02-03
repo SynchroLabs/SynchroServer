@@ -10,7 +10,7 @@ exports.View =
             { type: "stackpanel", orientation: "Vertical", contents: [
 
                 { type: "text", value: "Click an item...", fontsize: 16 },
-                { type: "listview", select: "None", height: 300, maxheight: 300, width: 300, binding: { items: "items", onItemClick: { command: "itemClicked", itemData: "{data}" } }, itemTemplate:
+                { type: "listview", select: "None", height: 300, maxheight: 300, width: 350, binding: { items: "items", onItemClick: { command: "itemClicked", itemData: "{data}" } }, itemTemplate:
                     { type: "stackpanel", orientation: "Horizontal", padding: 5, contents: [
                         { type: "image", resource: "resources/user.png", height: 50, width: 50 },
                         { type: "text", value: "{title}" },
