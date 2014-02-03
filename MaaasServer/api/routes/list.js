@@ -17,7 +17,7 @@ exports.View =
 
         { type: "stackpanel", orientation: "Horizontal", contents: [
             { type: "button", caption: "Remove", binding: "remove", enabled: "{selectedItems}" },
-            { type: "button", caption: "Sort", binding: "sort" },
+            { type: "button", caption: "Sort", binding: "sort", enabled: "{items}" },
         ] },
     ]
 }

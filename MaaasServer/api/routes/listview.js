@@ -17,7 +17,7 @@ exports.View =
             { type: "stackpanel", orientation: "Vertical", contents: [
 
                 { type: "text", value: "Your Contacts", fontsize: 12 },
-                { type: "listview", select: "Multiple", height: 300, maxheight: 300, binding: { items: "contacts", selection: "selectedContacts" }, itemTemplate:
+                { type: "listview", select: "Multiple", height: 300, maxheight: 300, width: 300, binding: { items: "contacts", selection: "selectedContacts" }, itemTemplate:
                     { type: "stackpanel", orientation: "Horizontal", padding: 5, contents: [
                         { type: "image", resource: "resources/user.png", height: 50, width: 50 },
                         { type: "stackpanel", orientation: "Vertical", contents: [

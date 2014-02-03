@@ -1,0 +1,33 @@
+﻿// Webview page
+//
+exports.View =
+{
+    title: "Webview",
+    onBack: "exit",
+    elements:
+    [
+        { type: "border", border: "Blue", borderThickness: "5", contents: [
+            { type: "webview", width: 400, height: 200, contents: "<h1>Local Content</h1><i>This is <b>local</b> content</i>" },
+        ] },
+
+        { type: "border", border: "Blue", borderThickness: "5", contents: [
+            { type: "webview", width: 400, height: 200, url: "http://www.google.com" },
+        ] },
+    ]
+}
+
+exports.InitializeViewModel = function(context, session)
+{
+    var viewModel =
+    {
+    }
+    return viewModel;
+}
+
+exports.Commands =
+{
+    exit: function(context)
+    {
+        return navigateToView(context, "menu");
+    },
+}

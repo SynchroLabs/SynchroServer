@@ -12,9 +12,12 @@ exports.View =
         { type: "button", caption: "Login Sample", binding: { command: "goToView", view: "login" } },
         { type: "button", caption: "Click Counter Sample", binding: { command: "goToView", view: "counter" } },
         { type: "button", caption: "List Sample", binding: { command: "goToView", view: "list" } },
+        { type: "button", caption: "List Click", binding: { command: "goToView", view: "listclick" } },
         { type: "button", caption: "Contacts", binding: { command: "goToView", view: "listview" } },
         { type: "button", caption: "StackPanel", binding: { command: "goToView", view: "stack" } },
         { type: "button", caption: "Border", binding: { command: "goToView", view: "layout" } },
+        { type: "button", caption: "Font", binding: { command: "goToView", view: "font" } },
+        { type: "button", caption: "Webview", binding: { command: "goToView", view: "webview" } },
         { type: "button", caption: "Sandbox", binding: { command: "goToView", view: "sandbox" } },
     ]
 }

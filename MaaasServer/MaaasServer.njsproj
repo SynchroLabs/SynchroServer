@@ -32,6 +32,8 @@
   <ItemGroup>
     <Compile Include="api\api.js" />
     <Compile Include="api\objectmon.js" />
+    <Compile Include="api\routes\font.js" />
+    <Compile Include="api\routes\listclick.js" />
     <Compile Include="api\routes\stack.js" />
     <Compile Include="api\routes\counter.js" />
     <Compile Include="api\routes\hello.js" />
@@ -41,6 +43,7 @@
     <Compile Include="api\routes\login.js" />
     <Compile Include="api\routes\menu.js" />
     <Compile Include="api\routes\sandbox.js" />
+    <Compile Include="api\routes\webview.js" />
     <Compile Include="api\util.js" />
     <Compile Include="app.js" />
     <Compile Include="public\script\ace\ace.js" />

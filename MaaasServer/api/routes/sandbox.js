@@ -9,6 +9,8 @@ exports.View =
     onBack: "exit",
     elements:
     [
+        { type: "webview", width: 400, height: 200, contents: "<h1>Suck it</h1><i>it being a <b>dick</b></i>" },
+
         { type: "border", border: "White", borderthickness: "5", contents: [
             { type: "scrollview", orientation: "Horizontal", height: 150, width: 150, contents: [
                 { type: "image", height: 300, width: 300, resource: "{image}" },

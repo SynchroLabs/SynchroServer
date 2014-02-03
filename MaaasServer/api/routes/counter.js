@@ -6,7 +6,7 @@ exports.View =
     onBack: "exit",
     elements: 
     [
-        { type: "text", value: "Count: {count}", foreground: "{font.color}", fontweight: "{font.weight}", fontsize: 24 },
+        { type: "text", value: "Count: {count}", foreground: "{font.color}", font: { size: 24, bold: "{font.isBold}" } },
         { type: "button", caption: "Increment Count", binding: "increment" },
         { type: "button", caption: "Decrement Count", binding: "decrement", enabled: "{count}" },
         { type: "button", caption: "Reset Count", binding: "reset" },
@@ -18,7 +18,7 @@ exports.InitializeViewModel = function(context, session)
     var viewModel =
     {
         count: 0,
-        font: { color: "Green", weight: "Normal" },
+        font: { color: "Green", isBold: false },
     }
     return viewModel;
 }
@@ -27,11 +27,11 @@ exports.OnChange = function(context, session, viewModel, source, changes)
 {
     if (viewModel.count < 10)
     {
-        viewModel.font = { color: "Green", weight: "Normal" };
+        viewModel.font = { color: "Green", isBold: false };
     }
     else
     {
-        viewModel.font = { color: "Red", weight: "Bold" };
+        viewModel.font = { color: "Red", isBold: true };
     }
 }
 
