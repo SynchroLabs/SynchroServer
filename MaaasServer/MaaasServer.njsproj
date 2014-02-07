@@ -34,6 +34,7 @@
     <Compile Include="api\objectmon.js" />
     <Compile Include="api\routes\font.js" />
     <Compile Include="api\routes\listclick.js" />
+    <Compile Include="api\routes\picker.js" />
     <Compile Include="api\routes\stack.js" />
     <Compile Include="api\routes\counter.js" />
     <Compile Include="api\routes\hello.js" />

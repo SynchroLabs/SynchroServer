@@ -9,8 +9,6 @@ exports.View =
     onBack: "exit",
     elements:
     [
-        { type: "webview", width: 400, height: 200, contents: "<h1>Suck it</h1><i>it being a <b>dick</b></i>" },
-
         { type: "border", border: "White", borderthickness: "5", contents: [
             { type: "scrollview", orientation: "Horizontal", height: 150, width: 150, contents: [
                 { type: "image", height: 300, width: 300, resource: "{image}" },
@@ -41,9 +39,9 @@ exports.InitializeViewModel = function(context, session)
         caption: "The Color",
         colors:
         [
-            { color: "red", value: "0xff0000" }, { color: "green", value: "0x00ff00" }, { color: "blue", value: "0x0000ff" },
+            { name: "Red", color: "red", value: "0xff0000" }, { name: "Green", color: "green", value: "0x00ff00" }, { name: "Blue", color: "blue", value: "0x0000ff" },
         ],
-        selection: { color: "green", value: "0x00ff00" },
+        selection: { name: "Green", color: "green", value: "0x00ff00" },
         image: profileImage,
     }
     return viewModel;

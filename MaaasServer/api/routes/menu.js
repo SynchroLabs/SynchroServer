@@ -17,6 +17,7 @@ exports.View =
         { type: "button", caption: "StackPanel", binding: { command: "goToView", view: "stack" } },
         { type: "button", caption: "Border", binding: { command: "goToView", view: "layout" } },
         { type: "button", caption: "Font", binding: { command: "goToView", view: "font" } },
+        { type: "button", caption: "Picker", binding: { command: "goToView", view: "picker" } },
         { type: "button", caption: "Webview", binding: { command: "goToView", view: "webview" } },
         { type: "button", caption: "Sandbox", binding: { command: "goToView", view: "sandbox" } },
     ]
