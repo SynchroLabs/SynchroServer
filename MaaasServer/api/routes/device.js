@@ -12,8 +12,18 @@ exports.View =
         { control: "text", value: "Type: {deviceMetrics.deviceType}", fontsize: 12 },
         { control: "text", value: "Class: {deviceMetrics.deviceClass}", fontsize: 12 },
         { filter: [
-            { control: "text", filterDeviceType: "Phone", value: "Primary orientation is Portrait", fontsize: 12 },
-            { control: "text", filterDeviceType: "Tablet", value: "Primary orientation is Landscape", fontsize: 12 },
+            { control: "text", filterDeviceType: "Phone", value: "Primary orientation is Portrait (phone)", fontsize: 12 },
+            { control: "text", filterDeviceType: "Tablet", value: "Primary orientation is Landscape (tablet)", fontsize: 12 },
+            ]},
+        { filter: [
+            { control: "text", filterOS: "Windows", value: "Windows Rules!", fontsize: 12 },
+            { control: "text", filterOS: "WinPhone", value: "Windows Phone Rules!", fontsize: 12 },
+            { control: "text", filterOS: "Android", value: "Android Rules!", fontsize: 12 },
+            { control: "text", filterOS: "iOS", value: "iOS Rules!", fontsize: 12 },
+            ]},
+        { filter: [
+            { control: "text", filterOS: ["Windows", "WinPhone"], value: "Microsoft OS", fontsize: 12 },
+            { control: "text", value: "Non-Microsoft OS", fontsize: 12 },
             ]},
         { control: "text", value: "Scaling: {deviceMetrics.scalingFactor}", fontsize: 12 },
         { control: "text", value: "Height (inches): {deviceMetrics.heightInches}", fontsize: 12 },

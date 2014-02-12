@@ -97,7 +97,17 @@ function processObject(session, obj)
             {
                 var filterElement = filter[i] 
 
+                if (filterElement["filterOS"] && !equalsOrContains(filterElement["filterOS"], session.DeviceMetrics.os))
+                {
+                    continue;
+                }
+
                 if (filterElement["filterDeviceType"] && !equalsOrContains(filterElement["filterDeviceType"], session.DeviceMetrics.deviceType))
+                {
+                    continue;
+                }
+
+                if (filterElement["filterDeviceClass"] && !equalsOrContains(filterElement["filterDeviceClass"], session.DeviceMetrics.deviceClass))
                 {
                     continue;
                 }
