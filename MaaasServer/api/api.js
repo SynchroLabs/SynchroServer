@@ -1,4 +1,4 @@
-﻿
+﻿var lodash = require("lodash");
 
 var requireDir = require('require-dir');
 
@@ -62,6 +62,87 @@ function setObjectProperty(obj, propertyPath, value)
     }
 }
 
+function equalsOrContains(haystack, needle)
+{
+    if (haystack instanceof Array)
+    {
+        for (var i = 0; i < haystack.length; i++) 
+        {
+            if (haystack[i] == needle)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    else
+    {
+        return haystack == needle;
+    }
+}
+
+function processObject(session, obj)
+{
+    // If the object is a "filter", process it now (promote eligible child, if any)
+    if (obj["filter"] && (obj["filter"] instanceof Array))
+    {
+        var filter = obj["filter"];
+        obj = null;
+
+        // For each filter element...
+        for (var i = 0; i < filter.length; i++) 
+        {
+            // If the filter element is an Object (it should be), inspect to see if it meets the criteria
+            if (filter[i] && (filter[i] instanceof Object))
+            {
+                var filterElement = filter[i] 
+
+                if (filterElement["filterDeviceType"] && !equalsOrContains(filterElement["filterDeviceType"], session.DeviceMetrics.deviceType))
+                {
+                    continue;
+                }
+
+                // If we get here, we didn't fail to meet any filter criteria, so we won!
+                obj = filterElement;
+                break;
+            }
+        }            
+    }
+    
+    if (obj)
+    {
+        // Iterate properties of object...
+        for (var property in obj)
+        {
+            // Process properties that contain arrays...
+            if (obj[property] && (obj[property] instanceof Array))
+            {
+                // For each array element...
+                for (var i = 0; i < obj[property].length; i++) 
+                {
+                    // If the array element is an Object, recurse into that object...
+                    if (obj[property][i] && (obj[property][i] instanceof Object))
+                    {
+                        obj[property][i] = processObject(session, obj[property][i]);
+                    }
+                }
+                
+                // Some of the array elements may now be null (a filter may have produced no valid element), so
+                // we want to remove the empy array elements.
+                obj[property].clean();
+            }
+        }
+    }
+
+    return obj;
+}
+
+function getFilteredView(session, view)
+{
+    console.log("Applying filter to view");
+    return processObject(session, lodash.cloneDeep(view));
+}
+
 function fnShowMessage(context, messageBox)
 {
     context.response.MessageBox = messageBox;
@@ -86,7 +167,7 @@ function fnNavigateToView(context, route, params)
         }
 
         context.response.Path = route;
-        context.response.View = routeModule.View
+        context.response.View = getFilteredView(context.session, routeModule.View);
         context.response.ViewModel = context.session.ViewModel;
     }
 }
@@ -100,7 +181,7 @@ exports.process = function(session, requestObject)
     {
         session: session,
         request: requestObject,
-        response: { Type: "response", Path: requestObject.Path }
+        response: { control: "response", Path: requestObject.Path }
     };
 
     console.log("Processing path " + context.request.Path);
@@ -111,6 +192,13 @@ exports.process = function(session, requestObject)
         var viewModelAfterUpdate = null;
 
         console.log("Found route module for " + context.request.Path);
+        
+        // Store device metrics in session if provided
+        //
+        if (context.request.DeviceMetrics)
+        {
+            context.session.DeviceMetrics = context.request.DeviceMetrics;
+        }
 
         if (context.request.ViewModelDeltas)
         {
@@ -181,7 +269,7 @@ exports.process = function(session, requestObject)
                 context.session.ViewModel = routeModule.InitializeViewModel(context, context.session);
             }
 
-            context.response.View = routeModule.View;
+            context.response.View = getFilteredView(context.session, routeModule.View);
             context.response.ViewModel = session.ViewModel;
         }
     }

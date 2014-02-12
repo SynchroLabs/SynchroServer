@@ -6,18 +6,18 @@ exports.View =
     onBack: "exit",
     elements:
     [
-        { type: "stackpanel", orientation: "Horizontal", contents: [
-            { type: "text", value: "New item:", fontsize: 12 },
-            { type: "edit", binding: "itemToAdd" },
+        { control: "stackpanel", orientation: "Horizontal", contents: [
+            { control: "text", value: "New item:", fontsize: 12 },
+            { control: "edit", binding: "itemToAdd" },
         ] },
-        { type: "button", caption: "Add", binding: "add", enabled: "{itemToAdd}" },
+        { control: "button", caption: "Add", binding: "add", enabled: "{itemToAdd}" },
 
-        { type: "text", value: "Your items", fontsize: 12 },
-        { type: "listbox", width: 250, height: 300, select: "Multiple", binding: { items: "items", selection: "selectedItems" } },
+        { control: "text", value: "Your items", fontsize: 12 },
+        { control: "listbox", width: 250, height: 300, select: "Multiple", binding: { items: "items", selection: "selectedItems" } },
 
-        { type: "stackpanel", orientation: "Horizontal", contents: [
-            { type: "button", caption: "Remove", binding: "remove", enabled: "{selectedItems}" },
-            { type: "button", caption: "Sort", binding: "sort", enabled: "{items}" },
+        { control: "stackpanel", orientation: "Horizontal", contents: [
+            { control: "button", caption: "Remove", binding: "remove", enabled: "{selectedItems}" },
+            { control: "button", caption: "Sort", binding: "sort", enabled: "{items}" },
         ] },
     ]
 }

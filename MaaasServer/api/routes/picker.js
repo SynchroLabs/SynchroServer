@@ -7,30 +7,30 @@ exports.View =
     onBack: "exit",
     elements:
     [
-        { type: "picker", width: 100, margin: { bottom: 10 }, binding: { 
-            items: "colors", item: "name", selection: "selectedColor", selectionItem: "value", 
-            onItemClick: { command: "clicked", control: "Picker", colorName: "{name}" } 
+        { control: "picker", width: 150, margin: { bottom: 10 }, binding: { 
+            items: "colors", itemContent: "Color: {name}", selection: "selectedColor", selectionItem: "value", 
+            onSelectionChange: { command: "clicked", control: "Picker", colorName: "{name}" } 
             } 
         },
 
-        { type: "border", border: "White", borderthickness: "5", contents: [
-            { type: "rectangle", width: "100", height: "100", fill: "{selectedColor}" },
+        { control: "border", border: "White", borderThickness: "5", contents: [
+            { control: "rectangle", width: "100", height: "100", fill: "{selectedColor}" },
         ] },
 
-        { type: "listbox", select: "Single", height: 150, width: 200, binding: { 
-            items: "colors", item: "name",  selection: "selectedColor", selectionItem: "value", 
-            onItemClick: { command: "clicked", control: "ListBox", colorName: "{name}" }
+        { control: "listbox", select: "Single", height: 250, width: 250, binding: { 
+            items: "colors", itemContent: "{name}",  selection: "selectedColor", selectionItem: "value", 
+            onSelectionChange: { command: "clicked", control: "ListBox", colorName: "{name}" }
             } 
         },
 
-        { type: "listview", select: "Single", height: 300, width: 200, 
+        { control: "listview", select: "Single", height: 300, width: 250, 
             binding: { 
                 items: "colors", selection: "selectedColor", selectionItem: "value", 
-                onItemClick: { command: "clicked", control: "ListView", colorName: "{name}" } 
+                onSelectionChange: { command: "clicked", control: "ListView", colorName: "{name}" } 
             }, 
-            itemTemplate: { type: "stackpanel", orientation: "Horizontal", padding: 5, contents: [
-                { type: "text", width: 65, value: "{name}" },
-                { type: "rectangle", height: 25, width: 100, fill: "{value}" },
+            itemTemplate: { control: "stackpanel", orientation: "Horizontal", padding: 5, contents: [
+                { control: "text", width: 65, value: "{name}" },
+                { control: "rectangle", height: 25, width: 100, fill: "{value}" },
             ] },
         },
     ]

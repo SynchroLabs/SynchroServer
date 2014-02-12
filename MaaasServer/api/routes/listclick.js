@@ -6,20 +6,20 @@ exports.View =
     onBack: "exit",
     elements:
     [
-        { type: "stackpanel", orientation: "Horizontal", contents: [
-            { type: "stackpanel", orientation: "Vertical", contents: [
+        { control: "stackpanel", orientation: "Horizontal", contents: [
+            { control: "stackpanel", orientation: "Vertical", contents: [
 
-                { type: "text", value: "Click an item...", fontsize: 16 },
-                { type: "listview", select: "None", height: 300, maxheight: 300, width: 350, binding: { items: "items", onItemClick: { command: "itemClicked", itemData: "{data}" } }, itemTemplate:
-                    { type: "stackpanel", orientation: "Horizontal", padding: 5, contents: [
-                        { type: "image", resource: "resources/user.png", height: 50, width: 50 },
-                        { type: "text", value: "{title}" },
+                { control: "text", value: "Click an item...", fontsize: 16 },
+                { control: "listview", select: "None", height: 300, maxheight: 300, width: 350, binding: { items: "items", onItemClick: { command: "itemClicked", itemData: "{data}" } }, itemTemplate:
+                    { control: "stackpanel", orientation: "Horizontal", padding: 5, contents: [
+                        { control: "image", resource: "resources/user.png", height: 50, width: 50 },
+                        { control: "text", value: "{title}" },
                     ] },
                 },
             ] },
         ] },
 
-        { type: "text", value: "Last item clicked: {lastClicked}", fontsize: 12 },
+        { control: "text", value: "Last item clicked: {lastClicked}", fontsize: 12 },
     ]
 }
 

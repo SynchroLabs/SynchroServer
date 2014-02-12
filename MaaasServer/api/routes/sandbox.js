@@ -9,25 +9,25 @@ exports.View =
     onBack: "exit",
     elements:
     [
-        { type: "border", border: "White", borderthickness: "5", contents: [
-            { type: "scrollview", orientation: "Horizontal", height: 150, width: 150, contents: [
-                { type: "image", height: 300, width: 300, resource: "{image}" },
+        { control: "border", border: "White", borderthickness: "5", contents: [
+            { control: "scrollview", orientation: "Horizontal", height: 150, width: 150, contents: [
+                { control: "image", height: 300, width: 300, resource: "{image}" },
             ] },
         ] },
 
         /*
-        { type: "canvas", height: 150, contents: [
-            { type: "image", top: 0, left: 0, resource: "{image}" },
+        { control: "canvas", height: 150, contents: [
+            { control: "image", top: 0, left: 0, resource: "{image}" },
         ] },
-        { type: "button", caption: "Switch images", margin: "{fontSize}", binding: "switchImages" },
+        { control: "button", caption: "Switch images", margin: "{fontSize}", binding: "switchImages" },
         */
 
-        { type: "slider", minimum: 10, maximum: 50, binding: "fontSize", width: 400 },
-        { type: "text", value: "Heading to be sized", fontsize: "{fontSize}" },
-        { type: "slider", minimum: 10, maximum: 50, binding: "fontSize", width: 400 },
+        { control: "slider", minimum: 10, maximum: 50, binding: "fontSize", width: 400 },
+        { control: "text", value: "Heading to be sized", fontsize: "{fontSize}" },
+        { control: "slider", minimum: 10, maximum: 50, binding: "fontSize", width: 400 },
 
-        { type: "text", value: "{$parent.$parent.caption}: {$data}", fontsize: 12, binding: { foreach: "colors", with: "color" } },
-        { type: "edit", fontsize: 12, binding: { foreach: "colors", value: "color" } },
+        { control: "text", value: "{$parent.$parent.caption}: {$data}", fontsize: 12, binding: { foreach: "colors", with: "color" } },
+        { control: "edit", fontsize: 12, binding: { foreach: "colors", value: "color" } },
     ]
 }
 

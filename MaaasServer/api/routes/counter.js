@@ -6,10 +6,10 @@ exports.View =
     onBack: "exit",
     elements: 
     [
-        { type: "text", value: "Count: {count}", foreground: "{font.color}", font: { size: 24, bold: "{font.isBold}" } },
-        { type: "button", caption: "Increment Count", binding: "increment" },
-        { type: "button", caption: "Decrement Count", binding: "decrement", enabled: "{count}" },
-        { type: "button", caption: "Reset Count", binding: "reset" },
+        { control: "text", value: "Count: {count}", foreground: "{font.color}", font: { size: 24, bold: "{font.isBold}" } },
+        { control: "button", caption: "Increment Count", binding: "increment" },
+        { control: "button", caption: "Decrement Count", binding: "decrement", enabled: "{count}" },
+        { control: "button", caption: "Reset Count", binding: "reset" },
     ]
 }
 

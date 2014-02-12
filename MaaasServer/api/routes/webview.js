@@ -6,12 +6,12 @@ exports.View =
     onBack: "exit",
     elements:
     [
-        { type: "border", border: "Blue", borderThickness: "5", contents: [
-            { type: "webview", width: 400, height: 200, contents: "<h1>Local Content</h1><i>This is <b>local</b> content</i>" },
+        { control: "border", border: "Blue", borderThickness: "5", contents: [
+            { control: "webview", width: 400, height: 200, contents: "<h1>Local Content</h1><i>This is <b>local</b> content</i>" },
         ] },
 
-        { type: "border", border: "Blue", borderThickness: "5", contents: [
-            { type: "webview", width: 400, height: 200, url: "http://www.google.com" },
+        { control: "border", border: "Blue", borderThickness: "5", contents: [
+            { control: "webview", width: 400, height: 200, url: "http://www.google.com" },
         ] },
     ]
 }

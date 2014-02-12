@@ -1,6 +1,7 @@
 ﻿
 var lodash = require("lodash");
 
+// 
 // Remove one or more items from an array.  
 //
 // Usage:
@@ -61,3 +62,18 @@ Array.prototype.remove = function ()
     
     return this;
 }
+
+// Remove null items from array
+//
+Array.prototype.clean = function() 
+{
+    for (var i = 0; i < this.length; i++) 
+    {
+        if (this[i] == null) 
+        {         
+            this.splice(i, 1);
+            i--;
+        }
+    }
+    return this;
+};

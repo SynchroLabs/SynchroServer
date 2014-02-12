@@ -6,37 +6,37 @@ exports.View =
     onBack: "exit",
     elements:
     [
-        { type: "stackpanel", orientation: "Horizontal", contents: [
-            { type: "text", value: "New Contact:", fontsize: 12 },
-            { type: "edit", binding: "addFirst" },
-            { type: "edit", binding: "addLast" },
-            { type: "button", caption: "Add", binding: "add", enabled: "{addFirst}" },
+        { control: "stackpanel", orientation: "Horizontal", contents: [
+            { control: "text", value: "New Contact:", fontsize: 12 },
+            { control: "edit", binding: "addFirst" },
+            { control: "edit", binding: "addLast" },
+            { control: "button", caption: "Add", binding: "add", enabled: "{addFirst}" },
         ] },
 
-        { type: "stackpanel", orientation: "Horizontal", contents: [
-            { type: "stackpanel", orientation: "Vertical", contents: [
+        { control: "stackpanel", orientation: "Horizontal", contents: [
+            { control: "stackpanel", orientation: "Vertical", contents: [
 
-                { type: "text", value: "Your Contacts", fontsize: 12 },
-                { type: "listview", select: "Multiple", height: 300, maxheight: 300, width: 300, binding: { items: "contacts", selection: "selectedContacts" }, itemTemplate:
-                    { type: "stackpanel", orientation: "Horizontal", padding: 5, contents: [
-                        { type: "image", resource: "resources/user.png", height: 50, width: 50 },
-                        { type: "stackpanel", orientation: "Vertical", contents: [
-                            { type: "text", value: "{first}" },
-                            { type: "text", value: "{last}" },
+                { control: "text", value: "Your Contacts", fontsize: 12 },
+                { control: "listview", select: "Multiple", height: 300, maxheight: 300, width: 300, binding: { items: "contacts", selection: "selectedContacts" }, itemTemplate:
+                    { control: "stackpanel", orientation: "Horizontal", padding: 5, contents: [
+                        { control: "image", resource: "resources/user.png", height: 50, width: 50 },
+                        { control: "stackpanel", orientation: "Vertical", contents: [
+                            { control: "text", value: "{first}" },
+                            { control: "text", value: "{last}" },
                         ] },
                     ] },
                 },
             ] },
             /*
-            { type: "stackpanel", orientation: "Vertical", contents: [
+            { control: "stackpanel", orientation: "Vertical", contents: [
 
-                { type: "text", value: "Selected Contacts", fontsize: 12 },
-                { type: "listview", select: "none", maxheight: 300, binding: { items: "selectedContacts" }, itemTemplate:
-                    { type: "stackpanel", orientation: "Horizontal", contents: [
-                        { type: "image", resource: "resources/user.png", height: 50, width: 50 },
-                        { type: "stackpanel", orientation: "Vertical", contents: [
-                            { type: "text", value: "{first}" },
-                            { type: "text", value: "{last}" },
+                { control: "text", value: "Selected Contacts", fontsize: 12 },
+                { control: "listview", select: "none", maxheight: 300, binding: { items: "selectedContacts" }, itemTemplate:
+                    { control: "stackpanel", orientation: "Horizontal", contents: [
+                        { control: "image", resource: "resources/user.png", height: 50, width: 50 },
+                        { control: "stackpanel", orientation: "Vertical", contents: [
+                            { control: "text", value: "{first}" },
+                            { control: "text", value: "{last}" },
                         ] },
                     ] },
                 },
@@ -46,9 +46,9 @@ exports.View =
 
         ] },
 
-        { type: "stackpanel", orientation: "Horizontal", contents: [
-            { type: "button", caption: "Remove", binding: "remove", enabled: "{selectedContacts}" },
-            { type: "button", caption: "Sort", binding: "sort" },
+        { control: "stackpanel", orientation: "Horizontal", contents: [
+            { control: "button", caption: "Remove", binding: "remove", enabled: "{selectedContacts}" },
+            { control: "button", caption: "Sort", binding: "sort" },
         ] },
     ]
 }
