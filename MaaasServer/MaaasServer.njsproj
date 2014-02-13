@@ -32,6 +32,7 @@
   <ItemGroup>
     <Compile Include="api\api.js" />
     <Compile Include="api\objectmon.js" />
+    <Compile Include="api\routes\binding.js" />
     <Compile Include="api\routes\device.js" />
     <Compile Include="api\routes\font.js" />
     <Compile Include="api\routes\listclick.js" />

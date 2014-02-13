@@ -15,19 +15,10 @@ exports.View =
             ] },
         ] },
 
-        /*
         { control: "canvas", height: 150, contents: [
             { control: "image", top: 0, left: 0, resource: "{image}" },
         ] },
-        { control: "button", caption: "Switch images", margin: "{fontSize}", binding: "switchImages" },
-        */
-
-        { control: "slider", minimum: 10, maximum: 50, binding: "fontSize", width: 400 },
-        { control: "text", value: "Heading to be sized", fontsize: "{fontSize}" },
-        { control: "slider", minimum: 10, maximum: 50, binding: "fontSize", width: 400 },
-
-        { control: "text", value: "{$parent.$parent.caption}: {$data}", fontsize: 12, binding: { foreach: "colors", with: "color" } },
-        { control: "edit", fontsize: 12, binding: { foreach: "colors", value: "color" } },
+        { control: "button", caption: "Switch images", binding: "switchImages" },
     ]
 }
 
@@ -35,13 +26,6 @@ exports.InitializeViewModel = function(context, session)
 {
     var viewModel =
     {
-        fontSize: 24,
-        caption: "The Color",
-        colors:
-        [
-            { name: "Red", color: "red", value: "0xff0000" }, { name: "Green", color: "green", value: "0x00ff00" }, { name: "Blue", color: "blue", value: "0x0000ff" },
-        ],
-        selection: { name: "Green", color: "green", value: "0x00ff00" },
         image: profileImage,
     }
     return viewModel;
