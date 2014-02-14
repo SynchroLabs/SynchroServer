@@ -17,6 +17,8 @@ var app = express();
 var MemoryStore = express.session.MemoryStore;
 var sessionStore = new MemoryStore();
 
+var uuid = require('node-uuid');
+
 // all environments
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
@@ -45,10 +47,21 @@ app.get('/', routes.index);
 app.get('/edit', edit.edit);
 app.get('/users', user.list);
 
+var MaaasSessionIdHeader = "maaas-session-id";
+
 app.post('/api', function(request, response)
 {
+    var sessionId = request.headers[MaaasSessionIdHeader];
+    console.log("Session ID: " + sessionId);
+
     var responseObject = api.process(request.session, request.body);
     response.socket.setNoDelay(true);
+
+    if (sessionId == null)
+    {
+        responseObject.NewSessionId = uuid.v4();
+        console.log("Generated new session id: " + responseObject.NewSessionId);
+    }
     response.send(responseObject);
 });
 app.use('/api/resources', express.static(path.join(__dirname, 'api/resources')));
@@ -92,6 +105,9 @@ server.on('upgrade', function(request, socket, body)
         // If a websocket connection is disconnected, the client will fire up a new one,
         // and that one won't have any session state.
         //
+        var sessionId = request.headers[MaaasSessionIdHeader];
+        console.log("Session ID: " + sessionId);
+        
         session = {};
 
         ws.on('message', function(event) 
@@ -99,6 +115,12 @@ server.on('upgrade', function(request, socket, body)
             console.log('message', event.data);
             var requestObject = JSON.parse(event.data);
             var responseObject = api.process(session, requestObject);
+            if (sessionId == null)
+            {
+                sessionId = uuid.v4();
+                responseObject.NewSessionId = sessionId;
+                console.log("Generated session id: " + sessionId);
+            }
             ws.send(JSON.stringify(responseObject));
         });
 
