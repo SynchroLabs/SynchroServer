@@ -9,7 +9,11 @@ exports.View =
         { control: "text", value: "Count: {count}", foreground: "{font.color}", font: { size: 24, bold: "{font.isBold}" } },
         { control: "button", caption: "Increment Count", binding: "increment" },
         { control: "button", caption: "Decrement Count", binding: "decrement", enabled: "{count}" },
-        { control: "button", caption: "Reset Count", binding: "reset" },
+        { filter: [
+            { filterOS: "Windows", control: "command", label: "Reset", icon: "Stop", commandBar: "Bottom", binding: "reset" },
+            { filterOS: "Android", control: "action", title: "Reset", binding: "reset" },
+            { control: "button", caption: "Reset Count", binding: "reset" },
+            ]},
     ]
 }
 
