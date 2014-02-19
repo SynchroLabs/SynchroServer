@@ -10,8 +10,9 @@ exports.View =
         { control: "button", caption: "Increment Count", binding: "increment" },
         { control: "button", caption: "Decrement Count", binding: "decrement", enabled: "{count}" },
         { filter: [
-            { filterOS: "Windows", control: "command", label: "Reset", icon: "Stop", commandBar: "Bottom", binding: "reset" },
-            { filterOS: "Android", control: "action", title: "Reset", binding: "reset" },
+            { filterOS: "Windows", control: "commandBar.button", text: "Reset", icon: "Stop", commandBar: "Bottom", binding: "reset" },
+            { filterOS: "WinPhone", control: "appBar.button", text: "Reset", icon: "refresh", binding: "reset" },
+            { filterOS: "Android", control: "actionBar.item", text: "Reset", binding: "reset" },
             { control: "button", caption: "Reset Count", binding: "reset" },
             ]},
     ]
