@@ -7,7 +7,7 @@ exports.View =
     elements: 
     [
         { control: "text", value: "OS: {deviceMetrics.os}", fontsize: 12 },
-        { control: "text", value: "OS Name: {deviceMetrics.osName}", fontsize: 12 },
+        { control: "text", value: "OS Name: {^deviceMetrics.osName}", fontsize: 12 },
         { control: "text", value: "Device Name: {deviceMetrics.deviceName}", fontsize: 12 },
         { control: "text", value: "Type: {deviceMetrics.deviceType}", fontsize: 12 },
         { control: "text", value: "Class: {deviceMetrics.deviceClass}", fontsize: 12 },
@@ -25,11 +25,11 @@ exports.View =
             { control: "text", filterOS: ["Windows", "WinPhone"], value: "Microsoft OS", fontsize: 12 },
             { control: "text", value: "Non-Microsoft OS", fontsize: 12 },
             ]},
-        { control: "text", value: "Scaling: {deviceMetrics.scalingFactor}", fontsize: 12 },
-        { control: "text", value: "Height (inches): {deviceMetrics.heightInches}", fontsize: 12 },
-        { control: "text", value: "Width (inches): {deviceMetrics.widthInches}", fontsize: 12 },
-        { control: "text", value: "Height (units): {deviceMetrics.heightUnits}", fontsize: 12 },
-        { control: "text", value: "Width (units): {deviceMetrics.widthUnits}", fontsize: 12 },
+        { control: "text", value: "Scaling: {deviceMetrics.scalingFactor:P1}", fontsize: 12 },
+        { control: "text", value: "Height (inches): {deviceMetrics.heightInches:F2}", fontsize: 12 },
+        { control: "text", value: "Width (inches): {deviceMetrics.widthInches:F2}", fontsize: 12 },
+        { control: "text", value: "Height (units): {deviceMetrics.heightUnits:F2}", fontsize: 12 },
+        { control: "text", value: "Width (units): {deviceMetrics.widthUnits:F2}", fontsize: 12 },
     ]
 }
 
