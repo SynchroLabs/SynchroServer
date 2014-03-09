@@ -1,5 +1,7 @@
 ﻿// Hello page
 //
+var maaas = require('../maaas');
+
 exports.View =
 {
     title: "Hello World",
@@ -33,6 +35,6 @@ exports.Commands =
 {
     exit: function(context)
     {
-        return navigateToView(context, "menu");
+        return maaas.navigateToView(context, "menu");
     },
 }

@@ -1,5 +1,7 @@
 ﻿// Webview page
 //
+var maaas = require('../maaas');
+
 exports.View =
 {
     title: "Webview",
@@ -28,6 +30,6 @@ exports.Commands =
 {
     exit: function(context)
     {
-        return navigateToView(context, "menu");
+        return maaas.navigateToView(context, "menu");
     },
 }

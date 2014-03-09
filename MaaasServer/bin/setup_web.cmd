@@ -2,6 +2,9 @@
 
 cd /d "%~dp0"
 
+rem This unlocks the config section so that webSocket can be disabled in web.config
+%APPCMD% unlock config /section:system.webServer/webSocket
+
 if "%EMULATED%"=="true" if DEFINED APPCMD goto emulator_setup
 if "%EMULATED%"== "true" exit /b 0
 
@@ -13,13 +16,17 @@ echo OK
 echo Configuring powershell permissions
 powershell -c "set-executionpolicy unrestricted"
 
-echo Copying web.cloud.config to web.config...
-copy /y ..\Web.cloud.config ..\Web.config
-if %ERRORLEVEL% neq 0 goto error
-echo OK
+rem echo Copying web.cloud.config to web.config...
+rem copy /y ..\Web.cloud.config ..\Web.config
+rem if %ERRORLEVEL% neq 0 goto error
+rem echo OK
 
 echo Downloading and installing runtime components
 powershell .\download.ps1 '%RUNTIMEURL%' '%RUNTIMEURLOVERRIDE%'
+if %ERRORLEVEL% neq 0 goto error
+
+echo Installing updated nodeiis
+msiexec /i iisnode-full-iis7-v0.2.7-x64.msi /passive
 if %ERRORLEVEL% neq 0 goto error
 
 echo SUCCESS

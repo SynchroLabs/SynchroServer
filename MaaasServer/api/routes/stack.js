@@ -1,5 +1,7 @@
 ﻿// Stackpanel page
 //
+var maaas = require('../maaas');
+
 exports.View =
 {
     title: "StackPanel",
@@ -71,6 +73,6 @@ exports.Commands =
     },
     exit: function(context)
     {
-        return navigateToView(context, "menu");
+        return maaas.navigateToView(context, "menu");
     },
 }

@@ -5,7 +5,7 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <Name>MaaasServer</Name>
     <RootNamespace>MaaasServer</RootNamespace>
-    <NameOfLastUsedPublishProfile>maaas - Web Deploy</NameOfLastUsedPublishProfile>
+    <NameOfLastUsedPublishProfile>maaas - Cloud Web Deploy</NameOfLastUsedPublishProfile>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -31,12 +31,17 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="api\api.js" />
+    <Compile Include="api\maaas.js" />
     <Compile Include="api\objectmon.js" />
     <Compile Include="api\routes\binding.js" />
     <Compile Include="api\routes\device.js" />
     <Compile Include="api\routes\font.js" />
     <Compile Include="api\routes\listclick.js" />
     <Compile Include="api\routes\picker.js" />
+    <Compile Include="api\routes\propx_detail.js" />
+    <Compile Include="api\routes\propx_favs.js" />
+    <Compile Include="api\routes\propx_list.js" />
+    <Compile Include="api\routes\propx_main.js" />
     <Compile Include="api\routes\stack.js" />
     <Compile Include="api\routes\counter.js" />
     <Compile Include="api\routes\hello.js" />
@@ -323,12 +328,16 @@
     <Compile Include="routes\index.js" />
     <Compile Include="routes\user.js" />
     <Content Include="api\resources\tdd.png" />
+    <Content Include="bin\iisnode-full-iis7-v0.2.7-x64.msi" />
     <Content Include="package.json" />
     <Content Include="public\stylesheets\style.styl" />
     <Content Include="README.md" />
     <Content Include="views\edit.jade" />
     <Content Include="views\index.jade" />
     <Content Include="views\layout.jade" />
+    <None Include="Web.local.config" />
+    <Content Include="Web.Debug.config" />
+    <Content Include="Web.Release.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="api\resources\" />
@@ -345,7 +354,9 @@
     <Folder Include="views\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <Publish>True</Publish>
+    </Content>
     <Content Include="Web.cloud.config" />
     <Content Include="bin\ChangeConfig.ps1" />
     <Content Include="bin\download.ps1" />

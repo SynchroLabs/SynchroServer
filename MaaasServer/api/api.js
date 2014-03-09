@@ -150,7 +150,6 @@ function processSelectAll(obj, containingArray)
     }
 }
 
-
 function processObject(session, obj)
 {    
     if (!filterObject(session, obj))
@@ -196,17 +195,16 @@ function getFilteredView(session, view)
     return processObject(session, lodash.cloneDeep(view));
 }
 
-function fnShowMessage(context, messageBox)
+exports.showMessage = function(context, messageBox)
 {
     context.response.MessageBox = messageBox;
 }
-showMessage = fnShowMessage;
 
 // context - the current context
 // route - the route to the new view
 // params - option dictionary of params, if provided is passed to InitializeViewModel
 //
-function fnNavigateToView(context, route, params)
+exports.navigateToView = function(context, route, params)
 {
     var routeModule = routes[route];
     if (routeModule)
@@ -224,7 +222,6 @@ function fnNavigateToView(context, route, params)
         context.response.ViewModel = context.session.ViewModel;
     }
 }
-navigateToView = fnNavigateToView;
 
 // Takes a Maaas request object and returns a Maaas response object
 //
@@ -289,7 +286,7 @@ exports.process = function(session, requestObject)
             // If no view model updates happened on the client, we need to record the state of the
             // view model now, before we run any commands, so we can diff it after...
             // (this is really "ViewModel after update from client, if any" or "ViewModel before
-            // any server code gets a crack at them).
+            // any server code gets a crack at them").
             //
             if (!viewModelAfterUpdate)
             {

@@ -10,6 +10,8 @@ var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
 
+var wait = require('wait.for');
+
 var api = require('./api/api');
 
 var app = express();
@@ -49,8 +51,10 @@ app.get('/users', user.list);
 
 var MaaasSessionIdHeader = "maaas-session-id";
 
-app.post('/api', function(request, response)
+function processHttpPostRequest(request, response)
 {
+    console.log("Processing http post request");
+
     var sessionId = request.headers[MaaasSessionIdHeader];
     console.log("Session ID: " + sessionId);
 
@@ -63,6 +67,20 @@ app.post('/api', function(request, response)
         console.log("Generated new session id: " + responseObject.NewSessionId);
     }
     response.send(responseObject);
+}
+
+app.post('/api', function(request, response)
+{
+    console.log("Launching fiber for http post request");
+    try
+    {
+        wait.launchFiber(processHttpPostRequest, request, response); //handle in a fiber, keep node spinning
+    }
+    catch (err)
+    {
+        console.log("Error launching fiber for http post request: " + err);
+    }
+    console.log("Done launching fiber for http post request");
 });
 app.use('/api/resources', express.static(path.join(__dirname, 'api/resources')));
 
@@ -89,6 +107,22 @@ function isWebSocket(request)
            upgrade.toLowerCase() === 'websocket';
 }
 
+function processWebSocketRequest(ws, session, event)
+{
+    console.log("Processing websocket request");
+
+    console.log('message', event.data);
+    var requestObject = JSON.parse(event.data);
+    var responseObject = api.process(session, requestObject);
+    if (session.id == null)
+    {
+        session.id = uuid.v4();
+        responseObject.NewSessionId = session.id;
+        console.log("Generated session id: " + session.id);
+    }
+    ws.send(JSON.stringify(responseObject));
+}
+
 server.on('upgrade', function(request, socket, body) 
 {
     if (isWebSocket(request)) // was: if (WebSocket.isWebSocket(request))
@@ -108,20 +142,13 @@ server.on('upgrade', function(request, socket, body)
         var sessionId = request.headers[MaaasSessionIdHeader];
         console.log("Session ID: " + sessionId);
         
-        session = {};
+        session = { id: sessionId };
 
         ws.on('message', function(event) 
         {
-            console.log('message', event.data);
-            var requestObject = JSON.parse(event.data);
-            var responseObject = api.process(session, requestObject);
-            if (sessionId == null)
-            {
-                sessionId = uuid.v4();
-                responseObject.NewSessionId = sessionId;
-                console.log("Generated session id: " + sessionId);
-            }
-            ws.send(JSON.stringify(responseObject));
+            console.log("Launching fiber for websocket request");
+            wait.launchFiber(processWebSocketRequest, ws, session, event); //handle in a fiber, keep node spinning
+            console.log("Done launching fiber for websocket request");
         });
 
         ws.on('close', function(event) 
@@ -133,5 +160,5 @@ server.on('upgrade', function(request, socket, body)
 });
 
 server.listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+  console.log('Express server listening on port ' + app.get('port') + ", node version: " + process.version);
 });

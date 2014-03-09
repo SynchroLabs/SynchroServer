@@ -1,5 +1,7 @@
 ﻿// Binding page
 //
+var maaas = require('../maaas');
+
 exports.View =
 {
     title: "Binding",
@@ -60,6 +62,6 @@ exports.Commands =
     },
     exit: function(context)
     {
-        return navigateToView(context, "menu");
+        return maaas.navigateToView(context, "menu");
     },
 }

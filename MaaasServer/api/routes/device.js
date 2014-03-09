@@ -1,5 +1,7 @@
 ﻿// Device page
 //
+var maaas = require('../maaas');
+
 exports.View =
 {
     title: "Device Metrics",
@@ -56,6 +58,6 @@ exports.Commands =
 {
     exit: function(context)
     {
-        return navigateToView(context, "menu");
+        return maaas.navigateToView(context, "menu");
     },
 }

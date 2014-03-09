@@ -1,5 +1,6 @@
 ﻿// Picker page
 //
+var maaas = require('../maaas');
 
 exports.View =
 {
@@ -53,10 +54,10 @@ exports.Commands =
 {
     clicked: function(context, session, viewModel, params)
     {
-        return showMessage(context, { message: params.control + " selection changed, new color: " + params.colorName });
+        return maaas.showMessage(context, { message: params.control + " selection changed, new color: " + params.colorName });
     },
     exit: function(context)
     {
-        return navigateToView(context, "menu");
+        return maaas.navigateToView(context, "menu");
     },
 }

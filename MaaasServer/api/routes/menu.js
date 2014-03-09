@@ -1,13 +1,16 @@
 // Menu page
 //
+var maaas = require('../maaas');
+
 exports.View =
 {
-    title: "MAaaS Menu",
+    title: "Maaas.io Menu",
     elements: 
     [
         { control: "border", border: "Red", borderThickness: 10, cornerRadius: 15, padding: 30, background: "Blue", contents: [
             { control: "image", width: 150, height: 150, resource: "http://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash3/c23.23.285.285/s160x160/943786_10201215910308278_1343091684_n.jpg" },
         ] },
+        { control: "button", caption: "PropertyCross", binding: { command: "goToView", view: "propx_main" } },
         { control: "button", caption: "Hello World", binding: { command: "goToView", view: "hello" } },
         { control: "button", caption: "Device", binding: { command: "goToView", view: "device" } },
         { control: "button", caption: "Login Sample", binding: { command: "goToView", view: "login" } },
@@ -29,6 +32,6 @@ exports.Commands =
 {
     goToView: function(context, session, viewModel, params)
     {
-        return navigateToView(context, params.view);
+        return maaas.navigateToView(context, params.view);
     },
 }

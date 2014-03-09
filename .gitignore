@@ -154,3 +154,9 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
+
+# RDD - iisnode log files (not sure why they get sprayed into the project
+/MaaasServer/iisnode
+
+# RDD - We want to check in the pre-built binaries for the "fibers" node_module
+!/MaaasServer/node_modules/wait.for/node_modules/fibers/bin

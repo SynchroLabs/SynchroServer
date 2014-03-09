@@ -1,5 +1,7 @@
 // List page
 //
+var maaas = require('../maaas');
+
 exports.View =
 {
     title: "List example",
@@ -51,6 +53,6 @@ exports.Commands =
     },
     exit: function(context)
     {
-        return navigateToView(context, "menu");
+        return maaas.navigateToView(context, "menu");
     },
 }

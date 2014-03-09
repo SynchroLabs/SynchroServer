@@ -1,5 +1,7 @@
 ﻿// Sandbox page
 //
+var maaas = require('../maaas');
+
 var tddLogo = "resources/tdd.png";
 var profileImage = "http://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash3/c23.23.285.285/s160x160/943786_10201215910308278_1343091684_n.jpg";
 
@@ -46,6 +48,6 @@ exports.Commands =
     },
     exit: function(context)
     {
-        return navigateToView(context, "menu");
+        return maaas.navigateToView(context, "menu");
     },
 }
