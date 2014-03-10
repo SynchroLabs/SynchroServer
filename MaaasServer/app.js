@@ -47,6 +47,7 @@ if ('development' == app.get('env')) {
 
 app.get('/', routes.index);
 app.get('/edit', edit.edit);
+app.post('/edit', edit.save);
 app.get('/users', user.list);
 
 var MaaasSessionIdHeader = "maaas-session-id";

@@ -2,6 +2,7 @@
 html
   head
     title Maaas - Edit Application
+    script(type='text/javascript', src="http://code.jquery.com/jquery-1.9.1.min.js")
     link(rel='stylesheet', href='/stylesheets/style.css')
     style(type="text/css" media="screen")
       #editor { 
@@ -9,15 +10,40 @@ html
         top: 0;
         right: 0;
         bottom: 0;
-        left: 0;
+        left: 260px;
         }
 
   body
+
+    div(id="optionsPanel" style="position:absolute; width:260px")
+      ul
+        each val in files
+          li
+            if val == page
+              b: a(href="edit?page=" + val) >> #{val} <<
+            else
+              a(href="edit?page=" + val) #{val}
+              
+      form(action='/signup',method='post')
+        input(type='button',value='Save Changes',onClick='doSave();')
 
     #editor.div #{code}
 
     script(src="/script/ace/ace.js" type="text/javascript" charset="utf-8")
     script.
+      var page = "#{page}";
       var editor = ace.edit("editor");
       editor.setTheme("ace/theme/monokai");
       editor.getSession().setMode("ace/mode/javascript");
+      function doSave() 
+      {
+        $.post("edit", { page: page, content: editor.getValue() }, function(result)
+        {
+            alert("posted stuff");
+        })
+        .fail(function() 
+        {
+            alert( "error" );
+        });
+      }
+
