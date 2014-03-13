@@ -31,6 +31,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="api\api.js" />
+    <Compile Include="api\cloud-module-store.js" />
+    <Compile Include="api\file-module-store.js" />
+    <Compile Include="api\maaas-modules.js" />
     <Compile Include="api\maaas.js" />
     <Compile Include="api\objectmon.js" />
     <Compile Include="api\routes\binding.js" />

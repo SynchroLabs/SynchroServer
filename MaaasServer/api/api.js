@@ -1,15 +1,20 @@
 ﻿var lodash = require("lodash");
 
-var requireDir = require('require-dir');
-
 var objectMonitor = require('./objectmon');
 var util = require('./util');
 
-var routes = requireDir("routes");
-for (var routePath in routes) {
-    console.log("Found route processor for: " + routePath);
-    var route = routes[routePath];
-    route.View["path"] = routePath;
+// Load the Maaas modules asynchronously...
+//
+var maaasModules = require('./maaas-modules');
+var wait = require('wait.for');
+try
+{
+    console.log("Launching fiber to load Maaas modules...");
+    wait.launchFiber(maaasModules.loadModules); // Load modules in a fiber - keep node spinning on async module load operations
+}
+catch (err)
+{
+    console.log("Error launching fiber to load Maaas modules: " + err);
 }
 
 function getObjectProperty(obj, propertyPath)
@@ -206,7 +211,7 @@ exports.showMessage = function(context, messageBox)
 //
 exports.navigateToView = function(context, route, params)
 {
-    var routeModule = routes[route];
+    var routeModule = maaasModules.getModule(route);
     if (routeModule)
     {
         console.log("Found route module for " + route);
@@ -236,7 +241,7 @@ exports.process = function(session, requestObject)
 
     console.log("Processing path " + context.request.Path);
 
-	var routeModule = routes[context.request.Path];
+	var routeModule = maaasModules.getModule(context.request.Path);
     if (routeModule)
     {
         var viewModelAfterUpdate = null;

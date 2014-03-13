@@ -4,7 +4,7 @@ html
     title Maaas - Edit Application
     script(type='text/javascript', src="http://code.jquery.com/jquery-1.9.1.min.js")
     link(rel='stylesheet', href='/stylesheets/style.css')
-    style(type="text/css" media="screen")
+    style(type="text/css" media="screen").
       #editor { 
         position: absolute;
         top: 0;
@@ -16,6 +16,10 @@ html
   body
 
     div(id="optionsPanel" style="position:absolute; width:260px")
+      if page
+        b Editing: #{page}
+        form(action='/save',method='post')
+          input(type='button',value='Save Changes',onClick='doSave();')
       ul
         each val in files
           li
@@ -23,9 +27,7 @@ html
               b: a(href="edit?page=" + val) >> #{val} <<
             else
               a(href="edit?page=" + val) #{val}
-              
-      form(action='/signup',method='post')
-        input(type='button',value='Save Changes',onClick='doSave();')
+      
 
     #editor.div #{code}
 

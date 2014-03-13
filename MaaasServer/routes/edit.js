@@ -3,22 +3,27 @@
  * GET edit page.
  */
 
-var fs = require("fs");
+var maaasModules = require("../api/maaas-modules");
+var moduleStore = maaasModules.getModuleStore();
 
 // Using the ACE editor - http://ace.c9.io/
 
 exports.edit = function(req, res)
 {
-    var page = "sandbox.js";
+    var page = null;
+    var code = "";
     if (req.query["page"])
     {
         page = req.query["page"];
     }
 
-    var files = fs.readdirSync("api/routes");
+    if (page)
+    {
+        code = moduleStore.getModuleSource(page);
+    }
 
-    var code = fs.readFileSync("api/routes/" + page, 'utf8').toString();
-    code = code.replace(/^\uFEFF/, ''); // !!! Needed? (to whack unicode marker)
+    var files = moduleStore.listModules();
+
     res.render('edit', { title: 'Mobile Application As A Service (MAAAS)', code: code, page: page, files: files });
 };
 
@@ -26,7 +31,7 @@ exports.save = function(req, res)
 {
     console.log("Save");
 
-    var page = "sandbox.js";
+    var page = null;
     if (req.body["page"])
     {
         page = req.body["page"];
@@ -34,7 +39,11 @@ exports.save = function(req, res)
 
     var content = req.body["content"];
 
-    var result = fs.writeFileSync("api/routes/" + page, content, 'utf8');
+    if (page)
+    {
+        var result = moduleStore.putModuleSource(page, content);
+        maaasModules.reloadModule(page, content);
+    }
 
     res.send({status: "OK", message: "File was saved"});
 };

@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -45,10 +44,22 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-app.get('/', routes.index);
-app.get('/edit', edit.edit);
-app.post('/edit', edit.save);
 app.get('/users', user.list);
+app.get('/', routes.index);
+
+// We need to process /edit (get and put) on a fiber, since they used wait.for to do async processing...
+//
+
+//app.get('/edit', edit.edit);
+app.get('/edit', function(req,res){
+      wait.launchFiber(edit.edit, req, res); //handle in a fiber, keep node spinning
+});
+
+//app.post('/edit', edit.save);
+app.post('/edit', function(req,res){
+      wait.launchFiber(edit.save, req, res); //handle in a fiber, keep node spinning
+});
+
 
 var MaaasSessionIdHeader = "maaas-session-id";
 
