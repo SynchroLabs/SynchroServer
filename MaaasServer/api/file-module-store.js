@@ -39,5 +39,11 @@ exports.getModuleSource = function(moduleFilename)
 exports.putModuleSource = function(moduleFilename, content)
 {
     var moduleFilePath = path.resolve(moduleDir, moduleFilename);
-    var result = fs.writeFileSync(moduleFilePath, content, 'utf8');
+    fs.writeFileSync(moduleFilePath, content, 'utf8');
+};
+
+exports.removeModuleSource = function(moduleFilename)
+{
+    var moduleFilePath = path.resolve(moduleDir, moduleFilename);
+    fs.unlinkSync(moduleFilePath);
 };

@@ -38,6 +38,14 @@ function setBlobText(blobName, text, callback)
     });
 }
 
+function removeBlob(blobName, callback)
+{
+    blobService.deleteBlob(containerName, blobName, function(err, result)
+    {
+        callback(err, result);
+    });
+}
+
 exports.listModules = function()
 {
     var modules = [];
@@ -59,4 +67,9 @@ exports.getModuleSource = function(moduleFilename)
 exports.putModuleSource = function(moduleFilename, content)
 {
     return wait.for(setBlobText, moduleFilename, content);
+};
+
+exports.removeModuleSource = function(moduleFilename)
+{
+    return wait.for(removeBlob, moduleFilename, content);
 };

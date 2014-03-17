@@ -6,6 +6,12 @@
     <Name>MaaasServer</Name>
     <RootNamespace>MaaasServer</RootNamespace>
     <NameOfLastUsedPublishProfile>maaas - Cloud Web Deploy</NameOfLastUsedPublishProfile>
+    <NodeExePath />
+    <NodeExeArguments>
+    </NodeExeArguments>
+    <ScriptArguments />
+    <StartWebBrowser>True</StartWebBrowser>
+    <LaunchUrl />
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -30,6 +36,8 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="api\api-request-delegatee.js" />
+    <Compile Include="api\api-request-delegator.js" />
     <Compile Include="api\api.js" />
     <Compile Include="api\cloud-module-store.js" />
     <Compile Include="api\file-module-store.js" />
@@ -57,6 +65,7 @@
     <Compile Include="api\routes\webview.js" />
     <Compile Include="api\util.js" />
     <Compile Include="app.js" />
+    <Compile Include="routes\debug-api.js" />
     <Compile Include="public\script\ace\ace.js" />
     <Compile Include="public\script\ace\ext-chromevox.js" />
     <Compile Include="public\script\ace\ext-elastic_tabstops_lite.js" />

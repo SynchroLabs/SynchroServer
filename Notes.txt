@@ -34,17 +34,32 @@ Client builder
     Pre-build test client (auth to MAAAS, welcome page, enter app spec, remembers app specs, choose previously entered app spec)
 
 Persistent sessions
-
-Page state (view model state)
-    How to manage?  If we navigate back to a page and want to restore view model state
-    Persistence
-
-Platform filtering for view (to allow platform specific elemements, sections, or entire view)
+    Redis, Azure cache+table
 
 Push notifications / badges / etc
 
 Localization (language/locale reported from client / token substitution)
 
 Resources (shared values that can be used as tokens?)
+    Resolution/scale resource mapping
 
 Styles (collection of attributes that can be applied to a control - integrate with resources?)
+
+
+Editing
+-------
+http://ace.c9.io/
+
+Setting/maintaining breakpoints: https://groups.google.com/forum/#!msg/ace-discuss/sfGv4tRWZdY/ca1LuolbLnAJ
+See also: Acebug project, startup.js
+
+Debugging using node debugger
+------------------------------
+https://code.google.com/p/v8/wiki/DebuggerProtocol
+
+node debug app.js
+telnet <host> 5858
+http://nodejs.org/api/debugger.html
+https://github.com/joyent/node/blob/master/lib/_debugger.js
+https://github.com/joyent/node/blob/master/deps/v8/src/d8.js
+https://github.com/sidorares/node-cli-debugger

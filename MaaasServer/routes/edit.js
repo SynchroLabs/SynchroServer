@@ -42,6 +42,14 @@ exports.save = function(req, res)
     if (page)
     {
         var result = moduleStore.putModuleSource(page, content);
+
+        // !!! Now that the API processor can be run as a forked child process, we need to signal it via a
+        //     message (the maaasModules reference here will not be the same instance as the maaasModules
+        //     used by forked child process, will not have loaded any modules, and will not be able to reload).
+        //     This is a micro version of the macro problem, which is that we need some kind of notification
+        //     method to let all API processors (possible spread across multple machine/vm instances) know that
+        //     a module needs hot reloading.
+        //
         maaasModules.reloadModule(page, content);
     }
 
