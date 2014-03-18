@@ -2,7 +2,13 @@
 //
 var wait = require('wait.for');
 var WebSocket = require('faye-websocket');
-var api = require('./api');
+
+// !!! This is causing modules to be loaded twice when run as a forked process - once for the inproc load
+//     that is needed to get access to postProcessHttpRequest (which does not itself require access to the
+//     API module), and once for the forked process.
+//
+var api = require('./api'); 
+
 var uuid = require('node-uuid');
 
 // This module may be loaded normally or as a forked process, or both...
@@ -15,6 +21,18 @@ if (module.parent)
 else
 {
     childId = process.argv[2];
+
+    // Maybe we just hook stdout/stderr when we're running user modules, so we can pipe just that to the debugger.
+    //
+    // https://gist.github.com/pguillory/729616
+    /*
+    process.stdout.write = (function(write) {
+        return function(string, encoding, fd) {
+            write.apply(process.stdout, arguments)
+            // Do whatever else you want with "string" here...
+        }
+    })(process.stdout.write);
+    */
 }
 
 // !!! World's worst session store.  Fix this.  As a first step, these APIs should all be async (since they'll presumably
@@ -145,6 +163,7 @@ function processWebSocketMessage(ws, event, state)
         responseObject.NewSessionId = state.session.id;
         state.newSession = false;
     }
+    responseObject.stdout = stdout;
     ws.send(JSON.stringify(responseObject));
 }
 

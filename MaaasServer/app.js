@@ -18,7 +18,7 @@ var MemoryStore = express.session.MemoryStore;
 var sessionStore = new MemoryStore();
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 1337);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
@@ -44,6 +44,8 @@ if ('development' == app.get('env')) {
 app.get('/users', user.list);
 app.get('/', routes.index);
 
+app.use('/static', express.static(path.join(__dirname, 'static')));
+
 // We need to process /edit (get and put) on a fiber, since they use wait.for to do async processing...
 //
 app.get('/edit', function(req,res){
@@ -57,7 +59,6 @@ app.post('/edit', function(req,res){
 var apiProcessor = require("./api/api-request-delegator")(true, 6969); // Forked sub-process
 
 var debugApi = require('./routes/debug-api');
-debugApi.setDebugPort(apiProcessor.debugPort);
 
 // Let the API processor handle requests to /api
 //

@@ -3,6 +3,7 @@ html
   head
     title Maaas - Edit Application
     script(type='text/javascript', src="http://code.jquery.com/jquery-1.9.1.min.js")
+    script(type='text/javascript', src="/static/js/debugger.js")
     link(rel='stylesheet', href='/stylesheets/style.css')
     style(type="text/css" media="screen").
       #editor { 
@@ -27,7 +28,13 @@ html
               b: a(href="edit?page=" + val) >> #{val} <<
             else
               a(href="edit?page=" + val) #{val}
-      
+
+      form(action='/debug',method='post')
+        input(type='button',value='Start Debugging',onClick='debugStart();')
+        br
+        input(type='button',value='Stop Debugging',onClick='debugStop();')
+        br
+        input(type='button',value='Continue',onClick='debugContinue();')      
 
     #editor.div #{code}
 

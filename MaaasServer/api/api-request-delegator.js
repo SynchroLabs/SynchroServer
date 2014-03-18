@@ -21,9 +21,18 @@ module.exports = function(fork, debugPort)
         if (debugPort)
         {
             options['execArgv'] = ['--debug=' + debugPort];
+            options['silent'] = true;
         }
 
         var childProcess = require('child_process').fork(__dirname + '/api-request-delegatee.js', args, options);
+
+        childProcess.stdout.on('data', function(data) {
+            console.log("[API]" + data.toString()); 
+        });
+
+        childProcess.stderr.on('data', function(data) {
+            console.log("[API]" + data.toString()); 
+        });
 
         // This mechanism is supposed to put the child process into debug mode, but doesn't seem to work.
         // This would be particularly useful if there was a way to talk to the child process debugger without
