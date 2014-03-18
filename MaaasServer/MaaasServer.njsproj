@@ -65,7 +65,9 @@
     <Compile Include="api\routes\webview.js" />
     <Compile Include="api\util.js" />
     <Compile Include="app.js" />
-    <Compile Include="routes\debug-api.js" />
+    <Compile Include="debug\debug-server.js" />
+    <Compile Include="debug\v8client.js" />
+    <Compile Include="debug\v8protocol.js" />
     <Compile Include="public\script\ace\ace.js" />
     <Compile Include="public\script\ace\ext-chromevox.js" />
     <Compile Include="public\script\ace\ext-elastic_tabstops_lite.js" />
@@ -357,6 +359,7 @@
     <Folder Include="api\routes\" />
     <Folder Include="bin\" />
     <Folder Include="api\" />
+    <Folder Include="debug\" />
     <Folder Include="static\" />
     <Folder Include="public\" />
     <Folder Include="public\images\" />

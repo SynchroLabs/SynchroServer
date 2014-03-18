@@ -58,7 +58,7 @@ app.post('/edit', function(req,res){
 //var apiProcessor = require("./api/api-request-delegator")(false); // In-proc
 var apiProcessor = require("./api/api-request-delegator")(true, 6969); // Forked sub-process
 
-var debugApi = require('./routes/debug-api');
+var debugApi = require('./debug/debug-server');
 
 // Let the API processor handle requests to /api
 //

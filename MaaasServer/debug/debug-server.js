@@ -2,7 +2,7 @@
 //
 var WebSocket = require('faye-websocket');
 var wait = require('wait.for');
-var v8debugger = require('v8-debugger');
+var v8Client = require('./v8client');
 
 function sendResponse(ws, responseObject)
 {
@@ -17,7 +17,10 @@ function sendResponse(ws, responseObject)
 function DebugSession(ws, port)
 {
     console.log("Firing up debugger client, connecting to port: " + port);
-    this.client = v8debugger.createClient({port: port});
+
+    this.client = new v8Client();
+    this.client.connect(port);
+
     this.client.reqVersion(function(err, version) {
        console.log("DEBUGGER: Remote debugger version: " + version);
     });
@@ -36,6 +39,18 @@ function DebugSession(ws, port)
     {
         console.log("DEBUGGER: Got break at: " + response.body.script.name + " - line: " + response.body.sourceLine);
         sendResponse(ws, { event: "break", script: response.body.script.name, line: response.body.sourceLine });
+        this.reqBacktrace(function (err, data){
+            console.log("Stacktrace contained " + data.frames.length + " frames");
+            for (var i = 0; i < data.frames.length; i++)
+            {
+                var name = data.frames[i].func.name;
+                if (!name || (name == ""))
+                {
+                    name = data.frames[i].func.inferredName + "(inferred)";
+                }
+                console.log("Frame[" + i + "]: " + name);
+            }
+        });
     });
 
     this.client.on("end", function() 

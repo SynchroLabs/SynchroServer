@@ -163,7 +163,6 @@ function processWebSocketMessage(ws, event, state)
         responseObject.NewSessionId = state.session.id;
         state.newSession = false;
     }
-    responseObject.stdout = stdout;
     ws.send(JSON.stringify(responseObject));
 }
 

@@ -35,6 +35,12 @@ html
         input(type='button',value='Stop Debugging',onClick='debugStop();')
         br
         input(type='button',value='Continue',onClick='debugContinue();')      
+        br
+        input(type='button',value='Step In',onClick='debugStep("in");')      
+        br
+        input(type='button',value='Step Out',onClick='debugStep("out");')      
+        br
+        input(type='button',value='Step Over',onClick='debugStep("next");')      
 
     #editor.div #{code}
 

@@ -21,6 +21,11 @@ function debugContinue()
     doSend({ command: "continue" });
 }
 
+function debugStep(action) // next, in, out
+{
+    doSend({ command: "step", action: action });
+}
+
 function onOpen(evt) 
 { 
     console.log("CONNECTED"); 

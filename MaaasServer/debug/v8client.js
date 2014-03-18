@@ -1,4 +1,4 @@
-// Copyright Joyent, Inc. and other Node contributors.
+﻿// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
@@ -19,10 +19,14 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+// RDD - originally derived from code in Node.js internal _debugger module
+//       https://github.com/joyent/node/blob/master/lib/_debugger.js
+//
+
 var util = require('util'),
     net = require('net'),
     inherits = util.inherits,
-    Protocol = require('./protocol');
+    Protocol = require('./v8protocol');
 
 var NO_FRAME=1;
 
