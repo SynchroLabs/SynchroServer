@@ -2,6 +2,8 @@
 
 var websocket;
 
+var currentScriptPath;
+
 function debugStart() 
 { 
     websocket = new WebSocket('ws://' + window.location.host + '/debug'); 
@@ -39,13 +41,47 @@ function onClose(evt)
 }  
 
 function onMessage(evt) 
-{ 
-    console.log('RESPONSE: ' + evt.data); 
+{
+    var event = JSON.parse(evt.data);
+
+    switch (event.event)
+    {
+        case "ready":
+        {
+            console.log("[Debug client] Debugger ready!");
+        }
+        break;
+
+        case "break":
+        {
+            console.log("[Debug client] Got breakpoint at: " + event.breakPoint.scriptName + " line: " + event.breakPoint.sourceLine);
+            doSend({ command: "source", frame: 0, context: { scriptPath: event.breakPoint.scriptPath, lineNumber: event.breakPoint.sourceLine } });
+        }
+        break;
+
+        case "source":
+        {
+            console.log("[Debug client] Got source, context: " + event.context);
+            if (currentScriptPath != event.context.scriptPath)
+            {
+                editor.session.setValue(event.source.source);
+            }
+            setActiveBreakpoint(event.context.lineNumber);
+            editor.renderer.scrollToLine(event.context.lineNumber, true, true);
+        }
+        break;
+
+        default:
+        {
+            console.log('[Debug client] Unhandled response: ' + evt.data); 
+        }
+        break;
+    }
 }  
 
 function onError(evt) 
 { 
-    console.log('<span style="color: red;">ERROR:</span> ' + evt.data); 
+    console.log('ERROR: ' + evt.data); 
 }  
 
 function doSend(message) 

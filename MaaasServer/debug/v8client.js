@@ -99,11 +99,11 @@ Client.prototype._handleBreak = function(r)
     var self = this;
 
     // Save execution context's data
-    this.currentSourceLine = r.sourceLine;
-    this.currentSourceLineText = r.sourceLineText;
-    this.currentSourceColumn = r.sourceColumn;
+    this.currentSourceLine = r.body.sourceLine;
+    this.currentSourceLineText = r.body.sourceLineText;
+    this.currentSourceColumn = r.body.sourceColumn;
     this.currentFrame = 0;
-    this.currentScript = r.script && r.script.name;
+    this.currentScript = r.body.script && r.body.script.name;
 
     // Update watched values
     console.log("Processing " + this.watches.length + " watches");

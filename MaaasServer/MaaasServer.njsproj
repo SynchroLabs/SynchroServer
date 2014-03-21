@@ -342,6 +342,7 @@
     <Compile Include="routes\index.js" />
     <Compile Include="routes\user.js" />
     <Compile Include="static\js\debugger.js" />
+    <Compile Include="static\js\editpage.js" />
     <Content Include="api\resources\tdd.png" />
     <Content Include="bin\iisnode-full-iis7-v0.2.7-x64.msi" />
     <Content Include="package.json" />

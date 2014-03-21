@@ -7,11 +7,34 @@
 var WebSocket = require('faye-websocket');
 var wait = require('wait.for');
 var v8Client = require('./v8client');
+var path = require('path');
+
+// Path of Node app - even when launched from another process (supervisor, pm2, forever, mocha, etc)
+var appDir = path.dirname(Object.keys(require.cache)[0]);
 
 function sendResponse(ws, responseObject)
 {
     ws.send(JSON.stringify(responseObject));
 }
+
+function convertFullToRelativePath(scriptPath)
+{
+    // Change path to relative, if possible
+    if (scriptPath && (scriptPath.indexOf(appDir) === 0))
+    {
+        var relativePath = path.relative(appDir, scriptPath);
+        console.log("Relative name: " + relativePath);
+        return relativePath;
+    }
+
+    return null;
+}
+
+function convertRelativeToFullPath(scriptPath)
+{
+    return path.join(appDir, scriptPath);
+}
+
 
 // https://github.com/joyent/node/blob/master/lib/_debugger.js
 //
@@ -41,7 +64,7 @@ function DebugSession(ws, port)
         }
     });
 
-    // On the break you need to send back the breakpoint infos, the stack frame (possibly frame summary only), and the
+    // On the break you need to send back the breakpoint info, the stack frame (possibly frame summary only), and the
     // fully resolved "current" frame (frame 0), which will contain the arguments and values for the frame, as well as
     // the watches resolved in the context of that frame.
     //
@@ -57,18 +80,38 @@ function DebugSession(ws, port)
         var self = this;
 
         console.log("DEBUGGER: Got break at: " + response.body.script.name + " - line: " + response.body.sourceLine);
-        sendResponse(ws, { event: "break", script: response.body.script.name, line: response.body.sourceLine });
-        this.reqBacktrace(function (err, data)
+        var breakData = 
+        {
+            frameIndex: 0,
+            scriptId: response.body.script.id,
+            scriptName: path.basename(response.body.script.name),
+            scriptPath: convertFullToRelativePath(response.body.script.name),
+            lineCount: response.body.script.lineCount,
+            sourceLine: response.body.sourceLine,
+            sourceColumn: response.body.sourceColumn
+        }
+
+        sendResponse(ws, { event: "break", breakPoint: breakData });
+        /*
+        this.fullTrace(function (err, data)
         {
             console.log("Stacktrace contained " + data.frames.length + " frames");
             data.frames.forEach(function(frame) 
             {
-                var name = frame.func.name;
-                if (!name || (name == ""))
+                var frameData = 
                 {
-                    name = frame.func.inferredName + "(inferred)";
+                    frameIndex: frame.index,
+                    scriptId: frame.script.id,
+                    scriptName: path.basename(frame.script.name),
+                    scriptPath: convertFullToRelativePath(frame.script.name),
+                    lineCount: frame.script.lineCount,
+                    isNative: frame.script.isNative,
+                    sourceLine: frame.line,
+                    sourceColumn: frame.column,
+                    funcName: (frame.func.name !== "") ? frame.func.name : frame.func.inferredName
                 }
-                console.log("Frame[" + frame.index + "]: " + name);
+
+                console.log("Frame[" + frameData.frameIndex + "]: " + frameData.funcName);
 
                 // The current resolve frame resolves all arguments and locals, mirroring the objects up to a specified number of levels deep.
                 // This is probably not a viable long term solution for sending this over the wire to the browser, because this can produce some
@@ -89,6 +132,7 @@ function DebugSession(ws, port)
                 });
             });
         });
+        */
     });
 
     this.client.on("end", function() 
@@ -169,6 +213,16 @@ function processWebSocketMessage(ws, event, state)
                 //
                 console.log("DEBUGGER: step completed");
                 sendResponse(ws, { event: "stepped" });
+            });
+        }
+        break;
+
+        case "source":
+        {
+            state.debugSession.client.reqSource(requestObject.frame, null, null, function(err, response) 
+            {
+                console.log("DEBUGGER: got source for frame " + requestObject.frame);
+                sendResponse(ws, { event: "source", context: requestObject.context, source: response });
             });
         }
         break;

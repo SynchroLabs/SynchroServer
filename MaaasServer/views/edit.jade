@@ -13,7 +13,16 @@ html
         bottom: 0;
         left: 260px;
         }
-
+      .ace_gutter-cell.ace_breakpoint {
+        border-radius: 20px 20px 20px 20px; 
+        box-shadow: 0px 0px 1px 1px red inset; 
+        } 
+      .active-breakpoint {
+        background: rgba(255, 50, 50, 0.5);
+        position: absolute;
+        width: 100% !important;
+        left: 0 !important;
+        }
   body
 
     div(id="optionsPanel" style="position:absolute; width:260px")
@@ -45,29 +54,7 @@ html
     #editor.div #{code}
 
     script(src="/script/ace/ace.js" type="text/javascript" charset="utf-8")
+    script(type='text/javascript', src="/static/js/editpage.js")
     script.
-      var page = "#{page}";
-      var editor = ace.edit("editor");
-      editor.setTheme("ace/theme/monokai");
-      editor.getSession().setMode("ace/mode/javascript");
-      editor.commands.addCommand({
-        name: 'saveCommand',
-        bindKey: {win: 'Ctrl-S',  mac: 'Command-S'},
-        exec: function(editor) {
-          doSave();
-        },
-        readOnly: false // false if this command should not apply in readOnly mode
-      });
-
-      function doSave() 
-      {
-        $.post("edit", { page: page, content: editor.getValue() }, function(result)
-        {
-            alert("Module saved");
-        })
-        .fail(function() 
-        {
-            alert( "error" );
-        });
-      }
+      initEditPage("#{page}");
 
