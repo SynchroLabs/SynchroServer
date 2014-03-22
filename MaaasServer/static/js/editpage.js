@@ -1,6 +1,8 @@
 ﻿// Edit page javascript
 //
-var page;
+var currentScriptPath = null;
+var editMode = false;
+
 var editor;
 
 // Here is some code to deal with moving breakpoints on line insert/delete:
@@ -10,7 +12,9 @@ var editor;
 
 function initEditPage(page)
 {
-    page = "#{page}";
+    currentScriptPath = "api\\routes\\" + page;
+    editMode = true;
+
     editor = ace.edit("editor");
     editor.setTheme("ace/theme/monokai");
     editor.getSession().setMode("ace/mode/javascript");
@@ -39,11 +43,12 @@ function initEditPage(page)
         if (e.editor.session.getBreakpoints()[row]) 
         {
             e.editor.session.clearBreakpoint(row);
+            clearBreakpoint(currentScriptPath, row);
         }
         else 
         {
         	e.editor.session.setBreakpoint(row);
-            setActiveBreakpoint(row); // !!! Temp/test
+            setBreakpoint(currentScriptPath, row);
         }
         e.stop();
     });

@@ -2,8 +2,6 @@
 
 var websocket;
 
-var currentScriptPath;
-
 function debugStart() 
 { 
     websocket = new WebSocket('ws://' + window.location.host + '/debug'); 
@@ -26,6 +24,16 @@ function debugContinue()
 function debugStep(action) // next, in, out
 {
     doSend({ command: "step", action: action });
+}
+
+function setBreakpoint(scriptName, line)
+{
+    doSend({ command: "setbreakpoint", scriptName: scriptName, line: line });
+}
+
+function clearBreakpoint(scriptName, line)
+{
+    doSend({ command: "clearbreakpoint", scriptName: scriptName, line: line });
 }
 
 function onOpen(evt) 
@@ -55,19 +63,44 @@ function onMessage(evt)
         case "break":
         {
             console.log("[Debug client] Got breakpoint at: " + event.breakPoint.scriptName + " line: " + event.breakPoint.sourceLine);
-            doSend({ command: "source", frame: 0, context: { scriptPath: event.breakPoint.scriptPath, lineNumber: event.breakPoint.sourceLine } });
+            if (currentScriptPath != event.breakPoint.scriptPath)
+            {
+                doSend({ command: "source", frame: 0, context: { scriptPath: event.breakPoint.scriptPath, lineNumber: event.breakPoint.sourceLine } });
+            }
+            else
+            {
+                setActiveBreakpoint(event.breakPoint.sourceLine);
+                editor.renderer.scrollToLine(event.breakPoint.sourceLine, true, true);
+            }
         }
         break;
 
         case "source":
         {
             console.log("[Debug client] Got source, context: " + event.context);
-            if (currentScriptPath != event.context.scriptPath)
-            {
-                editor.session.setValue(event.source.source);
-            }
+            currentScriptPath = event.context.scriptPath;
+            editMode = false;
+            editor.session.setValue(event.source.source);
             setActiveBreakpoint(event.context.lineNumber);
             editor.renderer.scrollToLine(event.context.lineNumber, true, true);
+        }
+        break;
+
+        case "breakpoint-set":
+        {
+            if (event.scriptName == currentScriptPath)
+            {
+                editor.session.setBreakpoint(event.line);
+            }
+        }
+        break;
+
+        case "breakpoint-cleared":
+        {
+            if (event.scriptName == currentScriptPath)
+            {
+                editor.session.clearBreakpoint(event.line);
+            }
         }
         break;
 

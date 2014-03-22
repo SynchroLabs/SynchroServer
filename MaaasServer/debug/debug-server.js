@@ -9,32 +9,10 @@ var wait = require('wait.for');
 var v8Client = require('./v8client');
 var path = require('path');
 
-// Path of Node app - even when launched from another process (supervisor, pm2, forever, mocha, etc)
-var appDir = path.dirname(Object.keys(require.cache)[0]);
-
 function sendResponse(ws, responseObject)
 {
     ws.send(JSON.stringify(responseObject));
 }
-
-function convertFullToRelativePath(scriptPath)
-{
-    // Change path to relative, if possible
-    if (scriptPath && (scriptPath.indexOf(appDir) === 0))
-    {
-        var relativePath = path.relative(appDir, scriptPath);
-        console.log("Relative name: " + relativePath);
-        return relativePath;
-    }
-
-    return null;
-}
-
-function convertRelativeToFullPath(scriptPath)
-{
-    return path.join(appDir, scriptPath);
-}
-
 
 // https://github.com/joyent/node/blob/master/lib/_debugger.js
 //
@@ -85,7 +63,7 @@ function DebugSession(ws, port)
             frameIndex: 0,
             scriptId: response.body.script.id,
             scriptName: path.basename(response.body.script.name),
-            scriptPath: convertFullToRelativePath(response.body.script.name),
+            scriptPath: response.body.script.name,
             lineCount: response.body.script.lineCount,
             sourceLine: response.body.sourceLine,
             sourceColumn: response.body.sourceColumn
@@ -219,10 +197,52 @@ function processWebSocketMessage(ws, event, state)
 
         case "source":
         {
+            // !!! Ideally, we should automatically (or maybe by param) get the breakpoints associated with the
+            //     module and return those at the same time.
+            //
             state.debugSession.client.reqSource(requestObject.frame, null, null, function(err, response) 
             {
                 console.log("DEBUGGER: got source for frame " + requestObject.frame);
                 sendResponse(ws, { event: "source", context: requestObject.context, source: response });
+            });
+        }
+        break;
+
+        // !!! getbreakpoints - optionally specify scriptName or scriptId to get just the breakpoints for the
+        //     particular script
+
+        case "setbreakpoint":
+        {
+            var target = requestObject.scriptId;
+            if (!target)
+            {
+                target = state.debugSession.client.scriptIdFromName[requestObject.scriptName];
+            }
+
+            args = { type: "scriptId",  target: target, line: requestObject.line, column: 0 };
+
+            state.debugSession.client.setBreakpoint(args, function(err, response) 
+            {
+                console.log("DEBUGGER: breakpoint set");
+                sendResponse(ws, { event: "breakpoint-set", scriptId: target, scriptName: requestObject.scriptName, line: requestObject.line });
+            });
+        }
+        break;
+
+        case "clearbreakpoint":
+        {
+            var target = requestObject.scriptId;
+            if (!target)
+            {
+                target = state.debugSession.client.scriptIdFromName[requestObject.scriptName];
+            }
+
+            args = { type: "scriptId",  target: target, line: requestObject.line, column: 0 };
+
+            state.debugSession.client.clearBreakpoint(args, function(err, response) 
+            {
+                console.log("DEBUGGER: breakpoint cleared");
+                sendResponse(ws, { event: "breakpoint-cleared", scriptId: target, scriptName: requestObject.scriptName, line: requestObject.line });
             });
         }
         break;

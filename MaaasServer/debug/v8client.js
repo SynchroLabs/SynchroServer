@@ -27,6 +27,7 @@
 //
 
 var util = require('util');
+var path = require('path');
 var net = require('net');
 var inherits = util.inherits;
 var natives = process.binding('natives');
@@ -43,15 +44,25 @@ function Client()
     this._reqCallbacks = [];
     var socket = this;
 
+    // Path of Node app - even when launched from another process (supervisor, pm2, forever, mocha, etc)
+    this.appDir = path.dirname(Object.keys(require.cache)[0]);
+
     this.currentFrame = NO_FRAME;
     this.currentSourceLine = -1;
     this.currentSource = null;
     this.handles = {};
     this.scripts = {};
     this.scriptIdFromName = {};
-    this.breakpoints = [];
     this.watches = [];
     this.resolvedWatches = [];
+
+    // !!! Currently, breakpoints are not tracked by the client (the are tracked in the Interface definition in the 
+    //     old code).  It might be a good idea to track them here, since we handle all of the setting and clearing
+    //     and could track the exact state (it's not like the V8 debugger changes them underneath of us).  This
+    //     would also facilitate things like clearAllBreakpoints, and getting the breakpoints for a particular
+    //     module (which we could then do synchronously).
+    //
+    this.breakpoints = [];
 
     // Note that 'Protocol' requires strings instead of Buffers.
     socket.setEncoding('utf8');
@@ -79,24 +90,41 @@ Client.prototype._addHandle = function(desc)
     }
 };
 
-Client.prototype._addScript = function(desc) 
+Client.prototype._convertFullToRelativePath = function(scriptPath)
 {
-    this.scripts[desc.id] = desc;
-    if (desc.name) 
+    // Change path to relative, if possible
+    if (scriptPath && (scriptPath.indexOf(this.appDir) === 0))
     {
-        desc.isNative = (desc.name.replace('.js', '') in natives) || desc.name == 'node.js';
-        this.scriptIdFromName[desc.name] = desc.id;
+        return path.relative(this.appDir, scriptPath);
+    }
+
+    return scriptPath;
+}
+
+Client.prototype._addScript = function(script) 
+{
+    this.scripts[script.id] = script;
+    if (script.name) 
+    {
+        script.name = this._convertFullToRelativePath(script.name)
+        script.isNative = (script.name.replace('.js', '') in natives) || script.name == 'node.js';
+        this.scriptIdFromName[script.name] = script.id;
     }
 };
 
-Client.prototype._removeScript = function(desc) 
+Client.prototype._removeScript = function(script) 
 {
-    this.scripts[desc.id] = undefined;
+    this.scripts[script.id] = undefined;
 };
 
 Client.prototype._handleBreak = function(r) 
 {
     var self = this;
+
+    if (r.body.script)
+    {
+        r.body.script.name = self._convertFullToRelativePath(r.body.script.name)
+    }
 
     // Save execution context's data
     this.currentSourceLine = r.body.sourceLine;
@@ -140,7 +168,6 @@ Client.prototype._onResponse = function(res)
             self.emit('ready', res);
         });
         handled = true;
-
     } 
     else if (res.body && res.body.event == 'break') 
     {
@@ -156,7 +183,7 @@ Client.prototype._onResponse = function(res)
     }
     else if (res.body && res.body.event == 'afterCompile') 
     {
-        this._addHandle(res.body.body.script);
+        this._addScript(res.body.body.script);
         handled = true;
     }
     else if (res.body && res.body.event == 'scriptCollected') 
@@ -437,18 +464,18 @@ Client.prototype.reqScripts = function(cb)
     var self = this;
     cb = cb || function() {};
 
-    this.req({ command: 'scripts', arguments: {'includeSource': true} } , function(err, res) 
+    this.req({ command: 'scripts', arguments: {'includeSource': true} } , function(err, scripts) 
     {
         if (err)
         {
             return cb(err);
         }
 
-        for (var i = 0; i < res.length; i++) 
+        for (var i = 0; i < scripts.length; i++) 
         {
-            self._addHandle(res[i]);
+            self._addScript(scripts[i]);
         }
-        cb(null);
+        cb(null, scripts);
     });
 };
 
@@ -836,62 +863,3 @@ Client.prototype.updateWatches = function(frame, cb)
         }
     }
 };
-
-/*
- * Not clear if SourceUnderline or SourceInfo are used/useful
- */
-
-function SourceUnderline(sourceText, position, repl) 
-{
-    if (!sourceText) 
-    {
-        return '';
-    }
-
-    var head = sourceText.slice(0, position);
-    var tail = sourceText.slice(position);
-
-    // Colourize char if stdout supports colours
-    if (repl.useColors) 
-    {
-        tail = tail.replace(/(.+?)([^\w]|$)/, '\u001b[32m$1\u001b[39m$2');
-    }
-
-    // Return source line with coloured char at `position`
-    return [ head, tail ].join('');
-}
-
-function SourceInfo(body) 
-{
-    var result = body.exception ? 'exception in ' : 'break in ';
-
-    if (body.script) 
-    {
-        if (body.script.name) 
-        {
-            var name = body.script.name;
-            var dir = path.resolve() + '/';
-
-            // Change path to relative, if possible
-            if (name.indexOf(dir) === 0) 
-            {
-                name = name.slice(dir.length);
-            }
-
-            result += name;
-        }
-        else 
-        {
-            result += '[unnamed]';
-        }
-    }
-    result += ':';
-    result += body.sourceLine + 1;
-
-    if (body.exception)
-    {
-        result += '\n' + body.exception.text;
-    }
-
-    return result;
-}
