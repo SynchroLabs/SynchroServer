@@ -486,19 +486,110 @@ Client.prototype.reqContinue = function(cb)
     this.req({ command: 'continue' }, cb);
 };
 
-Client.prototype.listbreakpoints = function(cb) 
+Client.prototype.reqListbreakpoints = function(cb) 
 {
     this.req({ command: 'listbreakpoints' }, cb);
 };
 
-Client.prototype.setBreakpoint = function(req, cb) 
+Client.prototype.reqSetbreakpoint = function(req, cb) 
 {
     this.req({ command: 'setbreakpoint', arguments: req }, cb);
 };
 
-Client.prototype.clearBreakpoint = function(req, cb) 
+Client.prototype.reqClearbreakpoint = function(req, cb) 
 {
     this.req({ command: 'clearbreakpoint', arguments: req }, cb);
+};
+
+Client.prototype.setBreakpoint = function(scriptName, line, cb) 
+{
+    var self = this;
+    cb = cb || function() {};
+
+    var target = state.debugSession.client.scriptIdFromName[scriptName];
+    var args = { type: "scriptId",  target: target, line: line, column: 0 };
+
+    this.reqSetbreakpoint(args, function(err, breakpoint)
+    {
+        if (err)
+        {
+            cb(err);
+        }
+        else
+        {
+            var bp = 
+            {
+                id: breakpoint.breakpoint,
+                scriptId: target,
+                scriptName: scriptName, 
+                line: line
+            }
+            self.breakpoints.push(bp);
+            cb(null, bp);
+        }
+    });
+};
+
+Client.prototype._findBreakpoint = function(scriptName, line)
+{
+    var index = -1;
+    this.breakpoints.some(function(breakpoint, i)
+    {
+        if ((breakpoint.scriptName == scriptName) && (breakpoint.line == line))
+        {
+            index = i;
+            return true;
+        }
+    });
+
+    return index;
+}
+
+Client.prototype.clearBreakpoint = function(scriptName, line, cb) 
+{
+    var self = this;
+    cb = cb || function() {};
+
+    var bpIndex = self._findBreakpoint(scriptName, line);
+
+    var args = { breakpoint: self.breakpoints[bpIndex].id };
+
+    this.reqClearbreakpoint(args, function(err, breakpoint)
+    {
+        if (err)
+        {
+            cb(err);
+        }
+        else
+        {
+            var bp = null;
+            var bpIndexToRemove = self._findBreakpoint(scriptName, line);
+            if (bpIndexToRemove != -1)
+            {
+                bp = self.breakpoints.splice(bpIndexToRemove, 1)[0];
+            }
+            cb(null, bp);
+        }
+    });
+};
+
+// List breakpoints, optionally specifying a scriptName to list breakpoints for only that script
+//
+Client.prototype.listBreakpoints = function(scriptName) 
+{
+    var breakpoints = this.breakpoints();
+    if (scriptName)
+    {
+        breakpoints = [];
+        for (var i = 0; i < this.breakpoints.length; i++)
+        {
+            if (this.breakpoints[i].scriptName == scriptName)
+            {
+                breakpoints.push(this.breakpoints[i]);
+        }
+    }
+
+    return breakpoints;
 };
 
 Client.prototype.reqSource = function(frame, from, to, cb) 

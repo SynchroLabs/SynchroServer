@@ -88,18 +88,18 @@ function onMessage(evt)
 
         case "breakpoint-set":
         {
-            if (event.scriptName == currentScriptPath)
+            if (event.breakpoint.scriptName == currentScriptPath)
             {
-                editor.session.setBreakpoint(event.line);
+                editor.session.setBreakpoint(event.breakpoint.line);
             }
         }
         break;
 
         case "breakpoint-cleared":
         {
-            if (event.scriptName == currentScriptPath)
+            if (event.breakpoint.scriptName == currentScriptPath)
             {
-                editor.session.clearBreakpoint(event.line);
+                editor.session.clearBreakpoint(event.breakpoint.line);
             }
         }
         break;

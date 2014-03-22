@@ -152,7 +152,7 @@ function processWebSocketMessage(ws, event, state)
     //
          
     var requestObject = JSON.parse(event.data);
-    console.log("Processing debug API command: " + requestObject.cmd);
+    console.log("Processing debug API command: " + requestObject.command);
     switch (requestObject.command)
     {
         case "connect":
@@ -200,49 +200,30 @@ function processWebSocketMessage(ws, event, state)
             // !!! Ideally, we should automatically (or maybe by param) get the breakpoints associated with the
             //     module and return those at the same time.
             //
-            state.debugSession.client.reqSource(requestObject.frame, null, null, function(err, response) 
+            state.debugSession.client.reqSource(requestObject.frame, null, null, function(err, source) 
             {
                 console.log("DEBUGGER: got source for frame " + requestObject.frame);
-                sendResponse(ws, { event: "source", context: requestObject.context, source: response });
+                sendResponse(ws, { event: "source", context: requestObject.context, source: source });
             });
         }
         break;
 
-        // !!! getbreakpoints - optionally specify scriptName or scriptId to get just the breakpoints for the
-        //     particular script
-
         case "setbreakpoint":
         {
-            var target = requestObject.scriptId;
-            if (!target)
+            state.debugSession.client.setBreakpoint(requestObject.scriptName, requestObject.line, function(err, breakpoint) 
             {
-                target = state.debugSession.client.scriptIdFromName[requestObject.scriptName];
-            }
-
-            args = { type: "scriptId",  target: target, line: requestObject.line, column: 0 };
-
-            state.debugSession.client.setBreakpoint(args, function(err, response) 
-            {
-                console.log("DEBUGGER: breakpoint set");
-                sendResponse(ws, { event: "breakpoint-set", scriptId: target, scriptName: requestObject.scriptName, line: requestObject.line });
+                console.log("DEBUGGER: breakpoint set: " + JSON.stringify(breakpoint));
+                sendResponse(ws, { event: "breakpoint-set", breakpoint: breakpoint });
             });
         }
         break;
 
         case "clearbreakpoint":
         {
-            var target = requestObject.scriptId;
-            if (!target)
+            state.debugSession.client.clearBreakpoint(requestObject.scriptName, requestObject.line, function(err, breakpoint) 
             {
-                target = state.debugSession.client.scriptIdFromName[requestObject.scriptName];
-            }
-
-            args = { type: "scriptId",  target: target, line: requestObject.line, column: 0 };
-
-            state.debugSession.client.clearBreakpoint(args, function(err, response) 
-            {
-                console.log("DEBUGGER: breakpoint cleared");
-                sendResponse(ws, { event: "breakpoint-cleared", scriptId: target, scriptName: requestObject.scriptName, line: requestObject.line });
+                console.log("DEBUGGER: breakpoint cleared: " + JSON.stringify(breakpoint));
+                sendResponse(ws, { event: "breakpoint-cleared", breakpoint: breakpoint });
             });
         }
         break;
