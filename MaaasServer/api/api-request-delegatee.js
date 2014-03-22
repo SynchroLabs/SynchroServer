@@ -2,25 +2,41 @@
 //
 var wait = require('wait.for');
 var WebSocket = require('faye-websocket');
-
-// !!! This is causing modules to be loaded twice when run as a forked process - once for the inproc load
-//     that is needed to get access to postProcessHttpRequest (which does not itself require access to the
-//     API module), and once for the forked process.
-//
-var api = require('./api'); 
-
 var uuid = require('node-uuid');
+
+// When this module is launched as a forked process, it is also loaded inproc by the parent in order to call 
+// postProcessHttpRequest inproc (from the main thread).  Caution must be exercised, and specifically, the api
+// module should only be required by this module for the instance of this module that is going to call into it
+// (otherwise the api module gets loaded twice, meaning that it unnecesarily launches two module loaders/manangers
+// in sepatate processes).
+//
+// When this module is loaded for inproc execution only, the caller (api-request-delegator) will call init().
+// When this module is loaded as a forked process, it will call init() itself in the child process initialization
+// code below.
+//
+var api;
+exports.init = function()
+{
+    api = require('./api'); 
+}
+function apiProcess(session, body)
+{
+    return api.process(session, body);
+}
 
 // This module may be loaded normally or as a forked process, or both...
 //
 var childId = null;
-if (module.parent)
+if (module.parent) // Loaded normally (inproc via "require")
 {
     childId = "inproc";
 }
-else
+else // Forked child process
 {
     childId = process.argv[2];
+    exports.init();
+
+    console.log("API child process with id " + childId + " started: " + process.argv[1]); // argv[1] is the filename of this file
 
     // Maybe we just hook stdout/stderr when we're running user modules, so we can pipe just that to the debugger.
     //
@@ -94,7 +110,7 @@ function processHttpRequest(request, callback)
         newSession = true;
     }
         
-    var responseObject = api.process(session, request.body);
+    var responseObject = apiProcess(session, request.body);
 
     sessionStore.putSession(session);
 
@@ -153,7 +169,7 @@ function processWebSocketMessage(ws, event, state)
 
     console.log('message', event.data);
     var requestObject = JSON.parse(event.data);
-    var responseObject = api.process(state.session, requestObject);
+    var responseObject = apiProcess(state.session, requestObject);
 
     sessionStore.putSession(state.session);
 
@@ -199,8 +215,8 @@ exports.processWebSocket = function(request, socket, body)
 
 if (!module.parent)
 {
-    console.log("API child process with id " + childId + " started: " + process.argv[1]); // argv[1] is the filename of this file
-
+    // Listen for messages from the parent process...
+    //
     process.on('message', function(message, handle) 
     {
         // Process messages (commands) from the parent process...

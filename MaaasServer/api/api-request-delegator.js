@@ -101,6 +101,8 @@ module.exports = function(fork, debugPort)
     }
     else
     {
+        child.init();
+
         childProcessor =
         {
             debugPort: null,
