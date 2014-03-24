@@ -543,7 +543,7 @@ Client.prototype._findBreakpoint = function(scriptName, line)
     });
 
     return index;
-}
+};
 
 Client.prototype.clearBreakpoint = function(scriptName, line, cb) 
 {
@@ -577,7 +577,7 @@ Client.prototype.clearBreakpoint = function(scriptName, line, cb)
 //
 Client.prototype.listBreakpoints = function(scriptName) 
 {
-    var breakpoints = this.breakpoints();
+    var breakpoints = this.breakpoints;
     if (scriptName)
     {
         breakpoints = [];
@@ -586,6 +586,7 @@ Client.prototype.listBreakpoints = function(scriptName)
             if (this.breakpoints[i].scriptName == scriptName)
             {
                 breakpoints.push(this.breakpoints[i]);
+            }
         }
     }
 
@@ -609,7 +610,6 @@ Client.prototype.mirrorObject = function(handle, depth, cb)
 {
     var self = this;
     cb = cb || function() {};
-
     var val;
 
     if (handle.type === 'object') 

@@ -8,6 +8,7 @@ var moduleStore = maaasModules.getModuleStore();
 
 // Using the ACE editor - http://ace.c9.io/
 
+// GET /edit
 exports.edit = function(req, res)
 {
     var page = null;
@@ -27,21 +28,41 @@ exports.edit = function(req, res)
     res.render('edit', { title: 'Mobile Application As A Service (MAAAS)', code: code, page: page, files: files });
 };
 
-exports.save = function(req, res)
+// GET /module
+exports.loadModule = function(req, res)
 {
-    console.log("Save");
+    console.log("Load module");
+    var result = { };
 
-    var page = null;
-    if (req.body["page"])
+    if (req.query["module"])
     {
-        page = req.body["page"];
+        result.status = "OK";
+        result.message = "Module source found";
+        result.source = moduleStore.getModuleSource(req.query["module"]);
     }
-
-    var content = req.body["content"];
-
-    if (page)
+    else
     {
-        var result = moduleStore.putModuleSource(page, content);
+        result.status = "Fail";
+        result.message = "Module source not found";
+    }
+    res.send(result);
+};
+
+// POST /module
+exports.saveModule = function(req, res)
+{
+    console.log("Save module");
+    var result = { };
+
+    if (req.body["module"] && req.body["source"])
+    {
+        var moduleName = req.body["module"];
+        var source = req.body["source"];
+
+        var putResult = moduleStore.putModuleSource(moduleName, source);
+
+        result.status = "OK";
+        result.message = "Module source saved";
 
         // !!! Now that the API processor can be run as a forked child process, we need to signal it via a
         //     message (the maaasModules reference here will not be the same instance as the maaasModules
@@ -50,8 +71,13 @@ exports.save = function(req, res)
         //     method to let all API processors (possible spread across multple machine/vm instances) know that
         //     a module needs hot reloading.
         //
-        maaasModules.reloadModule(page, content);
+        maaasModules.reloadModule(moduleName, source);
+    }
+    else
+    {
+        result.status = "Fail";
+        result.message = "Module source not saved";
     }
 
-    res.send({status: "OK", message: "File was saved"});
+    res.send(result);
 };

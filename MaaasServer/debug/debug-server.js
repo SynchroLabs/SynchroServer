@@ -203,6 +203,10 @@ function processWebSocketMessage(ws, event, state)
             state.debugSession.client.reqSource(requestObject.frame, null, null, function(err, source) 
             {
                 console.log("DEBUGGER: got source for frame " + requestObject.frame);
+                if (requestObject.scriptPath)
+                {
+                    source.breakpoints = state.debugSession.client.listBreakpoints(requestObject.scriptPath);
+                }
                 sendResponse(ws, { event: "source", context: requestObject.context, source: source });
             });
         }

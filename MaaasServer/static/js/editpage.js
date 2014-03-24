@@ -1,5 +1,6 @@
 ﻿// Edit page javascript
 //
+var currentModule = null; // Only if loaded via modules (not via debugger)
 var currentScriptPath = null;
 var editMode = false;
 
@@ -9,6 +10,46 @@ var editor;
 //
 //     https://github.com/MikeRatcliffe/Acebug/blob/master/chrome/content/ace%2B%2B/startup.js
 //
+
+function loadSource(sourceData)
+{
+    // sourceData.moduleName
+    // sourceData.scriptPath
+    // sourceData.source
+    // sourceData.breakpoints
+    // sourceData.executionPointer
+
+    currentModule = sourceData.moduleName;
+    currentScriptPath = sourceData.scriptPath;
+
+    editor.session.clearBreakpoints();
+    editor.session.setValue(sourceData.source);
+    if (sourceData.breakpoints)
+    {
+        for (var i = 0; i < sourceData.breakpoints.length; i++)
+        {
+            var breakpoint = sourceData.breakpoints[i];
+            editor.session.setBreakpoint(breakpoint.line);
+        }
+    }
+    var executionPointer = sourceData.executionPointer || -1;
+    setActiveBreakpoint(executionPointer);
+    if (executionPointer >= 0)
+    {
+        editor.renderer.scrollToLine(executionPointer, true, true);
+    }
+
+    $("div#module").text("Module: " + currentScriptPath);
+    if (currentModule)
+    {
+        $("button#save").show();
+    }
+    else
+    {
+        $("button#save").hide();
+    }
+}
+
 
 function initEditPage(page)
 {
@@ -76,9 +117,37 @@ function setActiveBreakpoint(row) // Use -1 to clear
     }
 }
 
+function loadModule(moduleName)
+{
+    var modulePath = 'api\\routes\\' + moduleName;
+    $.getJSON("module", { module: moduleName }, function(data)
+    {
+        // Process JSON response
+        console.log("loadModule " + moduleName + ": " + JSON.stringify(data));
+        loadSource(
+        {
+            moduleName: moduleName,
+            scriptPath: modulePath,
+            source: data.source
+        });
+    })
+    .fail(function() 
+    {
+        alert( "loadModule error" );
+    });
+
+    return false; // To prevent default click behavior
+}
+
 function doSave() 
 {
-    $.post("edit", { page: page, content: editor.getValue() }, function(result)
+    if (!currentModule)
+    {
+        alert("No module loaded");
+        return;
+    }
+
+    $.post("module", { module: currentModule, source: editor.getValue() }, function(result)
     {
         alert("Module saved");
     })

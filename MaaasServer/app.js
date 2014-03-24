@@ -46,13 +46,16 @@ app.get('/', routes.index);
 
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
-// We need to process /edit (get and put) on a fiber, since they use wait.for to do async processing...
+// We need to process /sandbox and /module (get and put) on a fiber, since they use wait.for to do async processing...
 //
-app.get('/edit', function(req,res){
-      wait.launchFiber(edit.edit, req, res); //handle in a fiber, keep node spinning
+app.get('/sandbox', function(req,res){
+    wait.launchFiber(edit.edit, req, res); //handle in a fiber, keep node spinning
 });
-app.post('/edit', function(req,res){
-      wait.launchFiber(edit.save, req, res); //handle in a fiber, keep node spinning
+app.get('/module', function(req,res){
+    wait.launchFiber(edit.loadModule, req, res); //handle in a fiber, keep node spinning
+});
+app.post('/module', function(req,res){
+    wait.launchFiber(edit.saveModule, req, res); //handle in a fiber, keep node spinning
 });
 
 //var apiProcessor = require("./api/api-request-delegator")(false); // In-proc

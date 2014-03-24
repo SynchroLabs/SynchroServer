@@ -65,7 +65,22 @@ function onMessage(evt)
             console.log("[Debug client] Got breakpoint at: " + event.breakPoint.scriptName + " line: " + event.breakPoint.sourceLine);
             if (currentScriptPath != event.breakPoint.scriptPath)
             {
-                doSend({ command: "source", frame: 0, context: { scriptPath: event.breakPoint.scriptPath, lineNumber: event.breakPoint.sourceLine } });
+                // !!! If the module being loaded is one of our api\routes modules, then we want to load it from the module
+                //     source loader (/module), which means we need to get the breakpoints for it separately (possibly in
+                //     advance of loading it so we can pass the breakpoints/executionPointer to the module loader).
+                //
+                if (event.breakPoint.scriptPath.lastIndexOf("api\\routes\\") == 0)
+                {
+                    console.log("Really should be loading this from the module loader: " + event.breakPoint.scriptPath);
+                }
+
+                doSend(
+                { 
+                    command: "source", 
+                    frame: 0, 
+                    scriptPath: event.breakPoint.scriptPath, // This will get us breakpoints
+                    context: { scriptPath: event.breakPoint.scriptPath, lineNumber: event.breakPoint.sourceLine } 
+                });
             }
             else
             {
@@ -78,11 +93,13 @@ function onMessage(evt)
         case "source":
         {
             console.log("[Debug client] Got source, context: " + event.context);
-            currentScriptPath = event.context.scriptPath;
-            editMode = false;
-            editor.session.setValue(event.source.source);
-            setActiveBreakpoint(event.context.lineNumber);
-            editor.renderer.scrollToLine(event.context.lineNumber, true, true);
+            loadSource(
+            {
+                scriptPath: event.context.scriptPath,
+                source: event.source.source,
+                breakpoints: event.source.breakpoints,
+                executionPointer: event.context.lineNumber
+            });
         }
         break;
 
