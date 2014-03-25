@@ -4,7 +4,6 @@
 var express = require('express');
 var routes = require('./routes');
 var edit = require('./routes/edit');
-var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
 var url = require('url');
@@ -19,8 +18,17 @@ var sessionStore = new MemoryStore();
 
 // all environments
 app.set('port', process.env.PORT || 1337);
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+
+// Use express3-handlebars template engine
+// https://www.npmjs.org/package/express3-handlebars
+//
+var exphbs  = require('express3-handlebars');
+app.engine('handlebars', exphbs({defaultLayout: 'main'}));
+app.set('view engine', 'handlebars');
+
+app.get('/', function (req, res) {
+    res.render('home');
+});
 
 app.use(express.cookieParser());
 // Note: Setting the maxAge value to 60000 (one hour) generates a cookie that .NET does not record (date generation/parsing
@@ -33,16 +41,12 @@ app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
 app.use(app.router);
-app.use(require('stylus').middleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // development only
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
-
-app.get('/users', user.list);
-app.get('/', routes.index);
 
 app.use('/static', express.static(path.join(__dirname, 'static')));
 

@@ -39,7 +39,7 @@ function loadSource(sourceData)
         editor.renderer.scrollToLine(executionPointer, true, true);
     }
 
-    $("div#module").text("Module: " + currentScriptPath);
+    $("#module").text("Module: " + currentScriptPath);
     if (currentModule)
     {
         $("button#save").show();

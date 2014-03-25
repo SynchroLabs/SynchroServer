@@ -25,7 +25,7 @@ exports.edit = function(req, res)
 
     var files = moduleStore.listModules();
 
-    res.render('edit', { title: 'Mobile Application As A Service (MAAAS)', code: code, page: page, files: files });
+    res.render('sandbox', { title: 'Mobile Application As A Service (MAAAS)', code: code, page: page, files: files });
 };
 
 // GET /module
