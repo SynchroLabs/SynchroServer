@@ -65,9 +65,9 @@
     <Compile Include="api\routes\webview.js" />
     <Compile Include="api\util.js" />
     <Compile Include="app.js" />
-    <Compile Include="debug\debug-server.js" />
-    <Compile Include="debug\v8client.js" />
-    <Compile Include="debug\v8protocol.js" />
+    <Compile Include="routes\debug\debug-server.js" />
+    <Compile Include="routes\debug\v8client.js" />
+    <Compile Include="routes\debug\v8protocol.js" />
     <Compile Include="public\script\ace\ace.js" />
     <Compile Include="public\script\ace\ext-chromevox.js" />
     <Compile Include="public\script\ace\ext-elastic_tabstops_lite.js" />
@@ -340,16 +340,19 @@
     <Compile Include="public\script\ace\worker-xquery.js" />
     <Compile Include="routes\edit.js" />
     <Compile Include="routes\index.js" />
-    <Compile Include="static\js\debugger.js" />
-    <Compile Include="static\js\editpage.js" />
+    <Compile Include="routes\login.js" />
+    <Compile Include="public\script\debugger.js" />
+    <Compile Include="public\script\editpage.js" />
     <Content Include="api\resources\tdd.png" />
     <Content Include="bin\iisnode-full-iis7-v0.2.7-x64.msi" />
     <Content Include="package.json" />
+    <Content Include="public\stylesheets\style.css" />
     <Content Include="README.md" />
-    <Content Include="views\home.handlebars" />
     <None Include="Web.local.config" />
-    <Content Include="views\layouts\main.handlebars" />
-    <Content Include="views\sandbox.handlebars" />
+    <Content Include="views\index.hbs" />
+    <Content Include="views\layouts\default.hbs" />
+    <Content Include="views\login.hbs" />
+    <Content Include="views\sandbox.hbs" />
     <Content Include="Web.Debug.config" />
     <Content Include="Web.Release.config" />
   </ItemGroup>
@@ -358,8 +361,7 @@
     <Folder Include="api\routes\" />
     <Folder Include="bin\" />
     <Folder Include="api\" />
-    <Folder Include="debug\" />
-    <Folder Include="static\" />
+    <Folder Include="routes\debug\" />
     <Folder Include="public\" />
     <Folder Include="public\images\" />
     <Folder Include="public\script\" />
@@ -367,9 +369,9 @@
     <Folder Include="public\script\ace\snippets\" />
     <Folder Include="public\stylesheets\" />
     <Folder Include="routes\" />
-    <Folder Include="static\js\" />
     <Folder Include="views\" />
     <Folder Include="views\layouts\" />
+    <Folder Include="views\partials\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Web.config">

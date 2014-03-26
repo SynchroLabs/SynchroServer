@@ -4,6 +4,7 @@
 var express = require('express');
 var routes = require('./routes');
 var edit = require('./routes/edit');
+var login = require('./routes/login');
 var http = require('http');
 var path = require('path');
 var url = require('url');
@@ -19,16 +20,17 @@ var sessionStore = new MemoryStore();
 // all environments
 app.set('port', process.env.PORT || 1337);
 
-// Use express3-handlebars template engine
-// https://www.npmjs.org/package/express3-handlebars
-//
-var exphbs  = require('express3-handlebars');
-app.engine('handlebars', exphbs({defaultLayout: 'main'}));
-app.set('view engine', 'handlebars');
+var hbs = require('express-hbs');
 
-app.get('/', function (req, res) {
-    res.render('home');
-});
+// Use `.hbs` for extensions and find partials in `views/partials`.
+app.engine('hbs', hbs.express3({
+    partialsDir: __dirname + '/views/partials',
+    layoutsDir: __dirname + '/views/layouts',
+    defaultLayout: __dirname + '/views/layouts/default.hbs',
+    contentHelperName: 'content'
+}));
+app.set('view engine', 'hbs');
+app.set('views', __dirname + '/views');
 
 app.use(express.cookieParser());
 // Note: Setting the maxAge value to 60000 (one hour) generates a cookie that .NET does not record (date generation/parsing
@@ -48,24 +50,28 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-app.use('/static', express.static(path.join(__dirname, 'static')));
+app.get('/', function(req, res) {
+    res.render('index');
+});
+app.all('/login', login.login);
+app.get('/logout', login.logout);
 
 // We need to process /sandbox and /module (get and put) on a fiber, since they use wait.for to do async processing...
 //
-app.get('/sandbox', function(req,res){
+app.get('/sandbox', login.checkAuth, function(req,res){
     wait.launchFiber(edit.edit, req, res); //handle in a fiber, keep node spinning
 });
-app.get('/module', function(req,res){
+app.get('/module', login.checkAuth, function(req,res){
     wait.launchFiber(edit.loadModule, req, res); //handle in a fiber, keep node spinning
 });
-app.post('/module', function(req,res){
+app.post('/module', login.checkAuth, function(req,res){
     wait.launchFiber(edit.saveModule, req, res); //handle in a fiber, keep node spinning
 });
 
 //var apiProcessor = require("./api/api-request-delegator")(false); // In-proc
 var apiProcessor = require("./api/api-request-delegator")(true, 6969); // Forked sub-process
 
-var debugApi = require('./debug/debug-server');
+var debugApi = require('./routes/debug/debug-server');
 
 // Let the API processor handle requests to /api
 //
@@ -105,7 +111,7 @@ server.on('upgrade', function(request, socket, body)
         {
             apiProcessor.processWebSocket(request, socket, body);
         }
-        else if (path === "/debug")
+        else if (path === "/debug") // !!! Web session auth (maybe inside websocket processor - to get/use session)
         {
             debugApi.processWebSocket(request, socket, body);
         }
