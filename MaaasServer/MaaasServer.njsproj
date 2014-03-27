@@ -66,10 +66,6 @@
     <Compile Include="api\routes\webview.js" />
     <Compile Include="api\util.js" />
     <Compile Include="app.js" />
-    <Compile Include="routes\debug\async-callback-manager.js" />
-    <Compile Include="routes\debug\ws-debug-server.js" />
-    <Compile Include="routes\debug\v8client.js" />
-    <Compile Include="routes\debug\v8protocol.js" />
     <Compile Include="public\script\ace\ace.js" />
     <Compile Include="public\script\ace\ext-chromevox.js" />
     <Compile Include="public\script\ace\ext-elastic_tabstops_lite.js" />
@@ -340,6 +336,10 @@
     <Compile Include="public\script\ace\worker-lua.js" />
     <Compile Include="public\script\ace\worker-php.js" />
     <Compile Include="public\script\ace\worker-xquery.js" />
+    <Compile Include="routes\debugger\async-callback-manager.js" />
+    <Compile Include="routes\debugger\v8client.js" />
+    <Compile Include="routes\debugger\v8protocol.js" />
+    <Compile Include="routes\debugger\ws-debug-server.js" />
     <Compile Include="routes\edit.js" />
     <Compile Include="routes\index.js" />
     <Compile Include="routes\login.js" />
@@ -363,7 +363,7 @@
     <Folder Include="api\routes\" />
     <Folder Include="bin\" />
     <Folder Include="api\" />
-    <Folder Include="routes\debug\" />
+    <Folder Include="routes\debugger\" />
     <Folder Include="public\" />
     <Folder Include="public\images\" />
     <Folder Include="public\script\" />
