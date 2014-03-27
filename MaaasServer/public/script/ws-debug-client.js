@@ -15,6 +15,8 @@ function updateDebugging(isDebugging)
     else
     {
         $("#editorPanel").removeClass("debugging").addClass("notdebugging");
+        editor.session.clearBreakpoints();
+        setActiveBreakpoint(-1);
     }
 }
 
@@ -60,12 +62,23 @@ function debugStep(action) // next, in, out
 
 function setBreakpoint(scriptName, line)
 {
-    doSend({ command: "setbreakpoint", scriptName: scriptName, line: line });
+    if (debugging)
+    {
+        doSend({ command: "setbreakpoint", scriptName: scriptName, line: line });
+    }
 }
 
 function clearBreakpoint(scriptName, line)
 {
     doSend({ command: "clearbreakpoint", scriptName: scriptName, line: line });
+}
+
+function loadBreakpoints(scriptName)
+{
+    if (debugging)
+    {
+        doSend({ command: "getbreakpoints", scriptName: scriptName });
+    }
 }
 
 function onOpen(evt) 
@@ -101,15 +114,6 @@ function onMessage(evt)
 
             if (currentScriptPath != event.breakPoint.scriptPath)
             {
-                // !!! If the module being loaded is one of our api\routes modules, then we want to load it from the module
-                //     source loader (/module), which means we need to get the breakpoints for it separately (possibly in
-                //     advance of loading it so we can pass the breakpoints/executionPointer to the module loader).
-                //
-                if (event.breakPoint.scriptPath.lastIndexOf("api\\routes\\") == 0)
-                {
-                    console.log("Really should be loading this from the module loader: " + event.breakPoint.scriptPath);
-                }
-
                 doSend(
                 { 
                     command: "source", 
@@ -130,7 +134,7 @@ function onMessage(evt)
         case "source":
         {
             console.log("[Debug client] Got source, context: " + event.context);
-            loadSource(
+            onBreakpointSource(
             {
                 scriptPath: event.context.scriptPath,
                 source: event.source.source,
@@ -154,6 +158,19 @@ function onMessage(evt)
             if (event.breakpoint.scriptName == currentScriptPath)
             {
                 editor.session.clearBreakpoint(event.breakpoint.line);
+            }
+        }
+        break;
+
+        case "breakpoints":
+        {
+            if (event.scriptName == currentScriptPath)
+            {
+                editor.session.clearBreakpoints();
+                for (var i = 0; i < event.breakpoints.length; i++)
+                {
+                    editor.session.setBreakpoint(event.breakpoints[i].line);
+                }
             }
         }
         break;

@@ -122,6 +122,7 @@ exports.loadModules = function()
 exports.reloadModule = function(moduleName, source) 
 {
     var filename = path.resolve(moduleDir, moduleName);
+    var moduleSource = source || moduleStore.getModuleSource(moduleName);
 
     // Delete from cache to allow us to re-require the module...
     //
@@ -130,7 +131,7 @@ exports.reloadModule = function(moduleName, source)
         delete require.cache[filename];
     }
 
-    loadModule(moduleName, source);
+    loadModule(moduleName, moduleSource);
 }
 
 exports.getModule = function(routePath)

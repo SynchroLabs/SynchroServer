@@ -6,6 +6,24 @@ var editMode = false;
 
 var editor;
 
+// Toastr rules.  http://codeseven.github.io/toastr/
+//
+toastr.options = 
+{
+    closeButton: true,
+    debug: false,
+    positionClass: "toast-bottom-right",
+    onclick: null,
+    showDuration: 300,
+    hideDuration: 1000,
+    timeOut: 5000,
+    extendedTimeOut: 1000,
+    showEasing: "swing",
+    hideEasing: "linear",
+    showMethod: "fadeIn",
+    hideMethod: "fadeOut"
+}
+
 // Here is some code to deal with moving breakpoints on line insert/delete:
 //
 //     https://github.com/MikeRatcliffe/Acebug/blob/master/chrome/content/ace%2B%2B/startup.js
@@ -48,6 +66,11 @@ function loadSource(sourceData)
     {
         $("button#save").hide();
     }
+
+    // Highlight the new active module...
+    //
+    $("div#modules a.active").removeClass("active");
+    $("div#modules a[module='" + currentModule + "']").addClass("active");
 }
 
 
@@ -83,12 +106,10 @@ function initEditPage(page)
         var row = e.getDocumentPosition().row 
         if (e.editor.session.getBreakpoints()[row]) 
         {
-            e.editor.session.clearBreakpoint(row);
             clearBreakpoint(currentScriptPath, row);
         }
         else 
         {
-        	e.editor.session.setBreakpoint(row);
             setBreakpoint(currentScriptPath, row);
         }
         e.stop();
@@ -117,7 +138,7 @@ function setActiveBreakpoint(row) // Use -1 to clear
     }
 }
 
-function loadModule(moduleName)
+function onLoadModule(moduleName)
 {
     var modulePath = 'api\\routes\\' + moduleName;
     $.getJSON("module", { module: moduleName }, function(data)
@@ -130,6 +151,7 @@ function loadModule(moduleName)
             scriptPath: modulePath,
             source: data.source
         });
+        loadBreakpoints(modulePath);
     })
     .fail(function() 
     {
@@ -137,6 +159,31 @@ function loadModule(moduleName)
     });
 
     return false; // To prevent default click behavior
+}
+
+function onBreakpointSource(sourceData)
+{
+    var prefix = "api\\routes\\";
+    if (sourceData.scriptPath.lastIndexOf(prefix) == 0)
+    {
+        sourceData.moduleName = sourceData.scriptPath.substring(prefix.length);
+        console.log("Loading breakpoint source from module loader for module: " + sourceData.moduleName);
+        $.getJSON("module", { module: sourceData.moduleName }, function(data)
+        {
+            // Process JSON response
+            console.log("loadModule " + sourceData.moduleName + ": " + JSON.stringify(data));
+            sourceData.source = data.source;
+            loadSource(sourceData);
+        })
+        .fail(function() 
+        {
+            alert( "loadModule error" );
+        });
+    }
+    else
+    {
+        loadSource(sourceData);
+    }
 }
 
 function doSave() 
@@ -149,7 +196,7 @@ function doSave()
 
     $.post("module", { module: currentModule, source: editor.getValue() }, function(result)
     {
-        alert("Module saved");
+        toastr.success("Module saved and deployed")
     })
     .fail(function() 
     {

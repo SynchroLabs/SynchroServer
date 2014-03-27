@@ -1,12 +1,30 @@
-﻿
-/*
+﻿/*
  * GET edit page.
  */
 
 var maaasModules = require("../api/maaas-modules");
 var moduleStore = maaasModules.getModuleStore();
 
-// Using the ACE editor - http://ace.c9.io/
+var _apiProcessor;
+exports.setApiProcessor = function(apiProcessor)
+{
+    _apiProcessor = apiProcessor;
+}
+
+// Signal the API processor that the module needs to be reloaded (the API itself may be running inproc or as a
+// forked child process, but the API processors reloadModule() entrypoint abstracts us from that).
+//
+// !!! There is a larger order problem here, which is that there may be many API instances running (possibly more
+//     than one in this Node instance, and certainly multiple machine/vm instances would each have one, or more).
+//     We need some kind of notification method to let all API instances know that a module needs hot reloading (pub/sub).
+//
+function reloadModule(moduleName)
+{
+    if (_apiProcessor)
+    {
+        _apiProcessor.reloadModule(moduleName);
+    }
+}
 
 // GET /edit
 exports.edit = function(req, res)
@@ -64,14 +82,7 @@ exports.saveModule = function(req, res)
         result.status = "OK";
         result.message = "Module source saved";
 
-        // !!! Now that the API processor can be run as a forked child process, we need to signal it via a
-        //     message (the maaasModules reference here will not be the same instance as the maaasModules
-        //     used by forked child process, will not have loaded any modules, and will not be able to reload).
-        //     This is a micro version of the macro problem, which is that we need some kind of notification
-        //     method to let all API processors (possible spread across multple machine/vm instances) know that
-        //     a module needs hot reloading.
-        //
-        maaasModules.reloadModule(moduleName, source);
+        reloadModule(moduleName); // !!! Would be nice to get some notification that this worked
     }
     else
     {

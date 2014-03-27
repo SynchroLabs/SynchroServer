@@ -96,6 +96,12 @@ module.exports = function(fork, debugPort)
             {
                 console.log("Process forked child web socket");
                 childProcess.send({cmd: "processWebSocket", request: getRequestDataObject(request), body: body}, socket);
+            },
+
+            reloadModule: function(moduleName)
+            {
+                // !!! Implement -- also need a way to get signalled that it got done.
+                childProcess.send({cmd: "reloadModule", moduleName: moduleName});
             }
         }
     }
@@ -120,6 +126,11 @@ module.exports = function(fork, debugPort)
             {
                 console.log("Process in-proc child web socket");
                 child.processWebSocket(request, socket, body);
+            },
+
+            reloadModule: function(moduleName)
+            {
+                child.reloadModule(moduleName);
             }
         }
     }

@@ -41,6 +41,7 @@
     <Compile Include="api\api.js" />
     <Compile Include="api\cloud-module-store.js" />
     <Compile Include="api\file-module-store.js" />
+    <Compile Include="api\foo.js" />
     <Compile Include="api\maaas-modules.js" />
     <Compile Include="api\maaas.js" />
     <Compile Include="api\objectmon.js" />
@@ -65,7 +66,8 @@
     <Compile Include="api\routes\webview.js" />
     <Compile Include="api\util.js" />
     <Compile Include="app.js" />
-    <Compile Include="routes\debug\debug-server.js" />
+    <Compile Include="routes\debug\async-callback-manager.js" />
+    <Compile Include="routes\debug\ws-debug-server.js" />
     <Compile Include="routes\debug\v8client.js" />
     <Compile Include="routes\debug\v8protocol.js" />
     <Compile Include="public\script\ace\ace.js" />
@@ -341,8 +343,8 @@
     <Compile Include="routes\edit.js" />
     <Compile Include="routes\index.js" />
     <Compile Include="routes\login.js" />
-    <Compile Include="public\script\debugger.js" />
-    <Compile Include="public\script\editpage.js" />
+    <Compile Include="public\script\ws-debug-client.js" />
+    <Compile Include="public\script\sandbox.js" />
     <Content Include="api\resources\tdd.png" />
     <Content Include="bin\iisnode-full-iis7-v0.2.7-x64.msi" />
     <Content Include="package.json" />

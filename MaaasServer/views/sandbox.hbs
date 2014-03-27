@@ -2,40 +2,40 @@
 {{#content "pageStyles" }}
 <style type="text/css">
     #editorPanel {
-        position: absolute;
-        top: 0px;
-        right: 0px;
-        bottom: 0px;
-        left: 260px;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 260px;
     }
     #editor {
-        position: absolute;
-        top: 70px;
-        right: 0px;
-        bottom: 0px;
-        left: 0px;
+    position: absolute;
+    top: 70px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
     }
     .ace_gutter-cell.ace_breakpoint {
-        border-radius: 20px 20px 20px 20px;
-        box-shadow: 0px 0px 1px 1px red inset;
+    border-radius: 20px 20px 20px 20px;
+    box-shadow: 0px 0px 1px 1px red inset;
     }
     .active-breakpoint {
-        background: rgba(255, 50, 50, 0.5);
-        position: absolute;
-        width: 100% !important;
-        left: 0 !important;
+    background: rgba(255, 50, 50, 0.5);
+    position: absolute;
+    width: 100% !important;
+    left: 0 !important;
     }
     button.debug {
-        padding: 2px 8px 2px 2px;
-        line-height: 26px;
+    padding: 2px 8px 2px 2px;
+    line-height: 26px;
     }
     button.debug:before {
-        content: "";
-        float: left;
-        width: 32px;
-        height: 24px;
-        margin: 0 0 0 0;
-        background:url(https://raw.githubusercontent.com/node-inspector/node-inspector/master/front-end/Images/statusbarButtonGlyphs.png) no-repeat;
+    content: "";
+    float: left;
+    width: 32px;
+    height: 24px;
+    margin: 0 0 0 0;
+    background:url(https://raw.githubusercontent.com/node-inspector/node-inspector/master/front-end/Images/statusbarButtonGlyphs.png) no-repeat;
     }
     button#start:before { background-position: -64px -48px; }
     button#stop:before { background-position: -256px 0px; }
@@ -43,17 +43,19 @@
     button#stepin:before { background-position: -64px -72px; }
     button#stepout:before { background-position: -96px -72px; }
     button#stepover:before { background-position: -128px -72px; }
-    
+
     div.debugging div.debug-notdebugging { display: none }
     div.notdebugging div.debug-debugging { display: none }
     button.debug-running:disabled:before { opacity: 0.40 }
 </style>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/css/toastr.min.css"/>
 {{/content}}
 
 {{#content "pageScripts" }}
+<script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/js/toastr.min.js"></script>
 <script src="/script/ace/ace.js" charset="utf-8"></script>
-<script src="/script/editpage.js"></script>
-<script src="/script/debugger.js"></script>
+<script src="/script/sandbox.js"></script>
+<script src="/script/ws-debug-client.js"></script>
 {{/content}}
 
 <div id="optionsPanel" style="position:absolute; top: 0px; width:260px;">
@@ -61,9 +63,9 @@
         <!-- Default panel contents -->
         <div class="panel-heading"><b>Modules:</b></div>
         <!-- List group -->
-        <div class="list-group">
+        <div id="modules" class="list-group">
             {{#each files}}
-            <a href="#"  class="list-group-item" onClick="return loadModule('{{this}}');">{{this}}</a>
+            <a href="#" module="{{this}}" class="list-group-item" onClick="return onLoadModule('{{this}}');">{{this}}</a>
             {{/each}}
         </div>
     </div>

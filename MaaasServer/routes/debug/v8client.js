@@ -101,6 +101,11 @@ Client.prototype._convertFullToRelativePath = function(scriptPath)
     return scriptPath;
 }
 
+Client.prototype._convertRelativeToFullPath = function(scriptPath)
+{
+    return path.resolve(this.appDir, scriptPath);
+}
+
 Client.prototype._addScript = function(script) 
 {
     this.scripts[script.id] = script;
@@ -114,6 +119,9 @@ Client.prototype._addScript = function(script)
 
 Client.prototype._removeScript = function(script) 
 {
+    // Never seen this actually get called (the debugger seems to keep scripts around forever, even scripts
+    // that are verified to unload when not running under the debugger).
+    console.log("[V8] unloading script: " + script.name);
     this.scripts[script.id] = undefined;
 };
 
@@ -506,8 +514,21 @@ Client.prototype.setBreakpoint = function(scriptName, line, cb)
     var self = this;
     cb = cb || function() {};
 
-    var target = state.debugSession.client.scriptIdFromName[scriptName];
-    var args = { type: "scriptId",  target: target, line: line, column: 0 };
+    // var target = state.debugSession.client.scriptIdFromName[scriptName];
+    // var args = { type: "scriptId",  target: target, line: line, column: 0 };
+    //
+    // In the logic above we looked up the script by the relative path name to get the scriptId, then
+    // used that to set the breakpoint (on the specific instance of the script found).  Under the debugger
+    // there is a strange behavior that scripts are never unloaded, so in the case of our hot loading
+    // we can end up with multiple copies of a script loaded, and with this breakpoint method, only
+    // execution of the script with the scriptId found at the time the breakpoint was set will be hit.
+    // By using the script path (below), we are setting breakpoints that will get hit on any instance of
+    // a loaded script with the specified name (in our case, it's always the most recently loaded one,
+    // as that's the only one the Node module loader knows about, but there's no way to tell from the
+    // V8 state which one that is).
+    //
+    var scriptPath = this._convertRelativeToFullPath(scriptName);
+    var args = { type: "script",  target: scriptPath, line: line, column: 0 };
 
     this.reqSetbreakpoint(args, function(err, breakpoint)
     {
@@ -520,8 +541,9 @@ Client.prototype.setBreakpoint = function(scriptName, line, cb)
             var bp = 
             {
                 id: breakpoint.breakpoint,
-                scriptId: target,
-                scriptName: scriptName, 
+                //scriptId: target,
+                scriptName: scriptName,
+                scriptPath: scriptPath, 
                 line: line
             }
             self.breakpoints.push(bp);

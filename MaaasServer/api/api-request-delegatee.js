@@ -161,7 +161,7 @@ function processWebSocket(ws, request)
     return state;
 }
 
-// This web socket request processor is always running in a fiber.
+// This web socket request processor (always running in a fiber)
 //
 function processWebSocketMessage(ws, event, state)
 {
@@ -180,6 +180,14 @@ function processWebSocketMessage(ws, event, state)
         state.newSession = false;
     }
     ws.send(JSON.stringify(responseObject));
+}
+
+// Module reloader (always running in a fiber)
+//
+exports.reloadModule = function(moduleName)
+{
+    console.log("API reloading module: " + moduleName);
+    api.reloadModule(moduleName);
 }
 
 //
@@ -234,6 +242,10 @@ if (!module.parent)
             case "processWebSocket":
                 message.request.socket = handle;
                 exports.processWebSocket(message.request, handle, message.body);
+                break;
+
+            case "reloadModule":
+                wait.launchFiber(exports.reloadModule, message.moduleName); //handle in a fiber
                 break;
         }
     });

@@ -70,8 +70,9 @@ app.post('/module', login.checkAuth, function(req,res){
 
 //var apiProcessor = require("./api/api-request-delegator")(false); // In-proc
 var apiProcessor = require("./api/api-request-delegator")(true, 6969); // Forked sub-process
+edit.setApiProcessor(apiProcessor);
 
-var debugApi = require('./routes/debug/debug-server');
+var debugApi = require('./routes/debug/ws-debug-server');
 
 // Let the API processor handle requests to /api
 //

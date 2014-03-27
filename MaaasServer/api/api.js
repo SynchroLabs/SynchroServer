@@ -17,6 +17,11 @@ catch (err)
     console.log("Error launching fiber to load Maaas modules: " + err);
 }
 
+exports.reloadModule = function(moduleName)
+{
+    maaasModules.reloadModule(moduleName);
+}
+
 function getObjectProperty(obj, propertyPath)
 {
     propertyPath = propertyPath.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
