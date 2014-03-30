@@ -74,8 +74,8 @@
 <div id="editorPanel" class="notdebugging">
     <nav class="navbar navbar-inverse" style="margin-top: 10px; padding-right: 5px; width:100%;" role="navigation">
         <a class="navbar-brand" href="/">Maaas.io</a>
-        <p class="navbar-text" id="module"></p>
-        <button class="btn btn-default navbar-btn" id="save" onClick="doSave();" style="display: none;"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+        <b class="navbar-text" id="module"></b>
+        <button class="btn btn-default navbar-btn" id="save" onClick="doSave();" style="display: inline;"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
         <div class="btn-group  navbar-right debug-notdebugging">
             <button class="btn btn-default navbar-btn debug" id="start" onClick='debugStart();'>Start debugging</button>
         </div>
@@ -91,5 +91,6 @@
 </div>
 
 <script>
+    $('#save').hide();
     initEditPage("#{page}");
 </script>

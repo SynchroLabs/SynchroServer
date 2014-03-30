@@ -35,8 +35,27 @@
             runs on mobile devices without any of your application code running on the device.  Did we just blow your mind?
         </p>
         <p>
-            <a class="btn btn-primary btn-lg" role="button">Learn more &raquo;</a>
+            <a href="#myModal" class="btn btn-primary btn-lg" role="button" data-toggle="modal">Learn more &raquo;</a>
         </p>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="myModal" class="modal  fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h3 id="myModalLabel">Coming soon!</h3>
+            </div>
+            <div class="modal-body">
+                <p>We&apos;re not quite ready to share more details yet.  Please check back.</p>
+                <p>If you really, really want to chat about this now, please contact: <a href="mailto:bob@maaas.io">bob@maaas.io</a></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -51,9 +70,11 @@
                 can customize the layouts for a given device type, screen size, OS, or any combination.  Best of
                 all, you build and deploy the app to your mobile clients ONCE.
             </p>
+            {{!
             <p>
                 <a class="btn btn-default" href="#" role="button">View details &raquo;</a>
             </p>
+            }}
         </div>
         <div class="col-md-4">
             <h2>Build and Run in the Cloud</h2>
@@ -62,9 +83,11 @@
                 deploy to your entire installed base in minutes.  No more distribution hassles or configuration control nightmares.
                 Options to run Maaas.io on the cloud provider of your choice, or on-premise, are also available.
             </p>
+            {{!
             <p>
                 <a class="btn btn-default" href="#" role="button">View details &raquo;</a>
             </p>
+            }}
         </div>
         <div class="col-md-4">
             <h2>Integrated Everything</h2>
@@ -73,9 +96,11 @@
                 management, mobile client app generator, and more, all accessible through a web browser.  Build
                 awesome native mobile apps with no additional tools or software
             </p>
+            {{!
             <p>
                 <a class="btn btn-default" href="#" role="button">View details &raquo;</a>
             </p>
+            }}
         </div>
     </div>
 
