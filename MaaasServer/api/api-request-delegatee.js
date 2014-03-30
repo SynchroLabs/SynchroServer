@@ -4,6 +4,8 @@ var wait = require('wait.for');
 var WebSocket = require('faye-websocket');
 var uuid = require('node-uuid');
 
+var logger = require('log4js').getLogger("api-delegatee");
+
 // When this module is launched as a forked process, it is also loaded inproc by the parent in order to call 
 // postProcessHttpRequest inproc (from the main thread).  Caution must be exercised, and specifically, the api
 // module should only be required by this module for the instance of this module that is going to call into it
@@ -33,10 +35,15 @@ if (module.parent) // Loaded normally (inproc via "require")
 }
 else // Forked child process
 {
+    // Need to reconfigure log4js here (log4js config is at the process level and not inherited)
+    var log4js = require('log4js');
+    // Redirect console.log to log4js, turn off color coding
+    log4js.configure({ appenders: [ { type: "console", layout: { type: "basic" } } ], replaceConsole: true })
+
     childId = process.argv[2];
     exports.init();
 
-    console.log("API child process with id " + childId + " started: " + process.argv[1]); // argv[1] is the filename of this file
+    logger.info("API child process with id " + childId + " started: " + process.argv[1]); // argv[1] is the filename of this file
 
     // Maybe we just hook stdout/stderr when we're running user modules, so we can pipe just that to the debugger.
     //
@@ -97,10 +104,10 @@ var MaaasApiSessionIdHeader = "maaas-api-session-id";
 //
 function processHttpRequest(request, callback)
 {
-    console.log("API Processing http post request");
+    logger.info("API Processing http post request");
 
     var sessionId = request.headers[MaaasApiSessionIdHeader];
-    console.log("API request session ID: " + sessionId);
+    logger.info("API request session ID: " + sessionId);
 
     var newSession = false;
     var session = sessionStore.getSession(sessionId);
@@ -116,7 +123,7 @@ function processHttpRequest(request, callback)
 
     if (newSession)
     {
-        console.log("API - returning new session id: " + session.id);
+        logger.info("API - returning new session id: " + session.id);
         responseObject.NewSessionId = session.id;
     }
 
@@ -143,7 +150,7 @@ exports.postProcessHttpRequest = function(request, response, err, data)
 function processWebSocket(ws, request)
 {
     var sessionId = request.headers[MaaasApiSessionIdHeader];
-    console.log("API request session ID: " + sessionId);
+    logger.info("API request session ID: " + sessionId);
 
     var newSession = false;
     var session = sessionStore.getSession(sessionId);
@@ -165,9 +172,9 @@ function processWebSocket(ws, request)
 //
 function processWebSocketMessage(ws, event, state)
 {
-    console.log("API - processing websocket request");
+    logger.info("API - processing websocket request");
 
-    console.log('message', event.data);
+    logger.info('message', event.data);
     var requestObject = JSON.parse(event.data);
     var responseObject = apiProcess(state.session, requestObject);
 
@@ -175,7 +182,7 @@ function processWebSocketMessage(ws, event, state)
 
     if (state.newSession)
     {
-        console.log("API - returning new session id: " + state.session.id);
+        logger.info("API - returning new session id: " + state.session.id);
         responseObject.NewSessionId = state.session.id;
         state.newSession = false;
     }
@@ -186,7 +193,7 @@ function processWebSocketMessage(ws, event, state)
 //
 exports.reloadModule = function(moduleName)
 {
-    console.log("API reloading module: " + moduleName);
+    logger.info("API reloading module: " + moduleName);
     api.reloadModule(moduleName);
 }
 
@@ -196,27 +203,27 @@ exports.reloadModule = function(moduleName)
 
 exports.processHttpRequest = function(request, callback)
 {
-    console.log("Launching API http request processor on a fiber...");
+    logger.info("Launching API http request processor on a fiber...");
     wait.launchFiber(processHttpRequest, request, callback); //handle in a fiber
 }
 
 exports.processWebSocket = function(request, socket, body)
 {
     var ws = new WebSocket(request, socket, body);
-    console.log("API processor initialized WebSocket");
+    logger.info("API processor initialized WebSocket");
 
     var state = processWebSocket(ws, request);
 
     ws.on('message', function(event) 
     {
-        console.log("API got WebSocket message: " + event.data);
-        console.log("Launching API web socket request processor on a fiber...");
+        logger.info("API got WebSocket message: " + event.data);
+        logger.info("Launching API web socket request processor on a fiber...");
         wait.launchFiber(processWebSocketMessage, ws, event, state); //handle in a fiber
     });
 
     ws.on('close', function(event) 
     {
-        console.log('API WebSocket close', event.code, event.reason);
+        logger.info('API WebSocket close', event.code, event.reason);
         ws = null;
     });
 }
@@ -240,6 +247,7 @@ if (!module.parent)
                 break;
 
             case "processWebSocket":
+                logger.info("Got process web socket message with socket: " + handle);
                 message.request.socket = handle;
                 exports.processWebSocket(message.request, handle, message.body);
                 break;

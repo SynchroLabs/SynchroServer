@@ -33,6 +33,8 @@ var inherits = util.inherits;
 var natives = process.binding('natives');
 var Protocol = require('./v8protocol');
 
+var logger = require('log4js').getLogger("dbg-v8-cli");
+
 var NO_FRAME = -1;
 
 module.exports = Client;
@@ -44,8 +46,21 @@ function Client()
     this._reqCallbacks = [];
     var socket = this;
 
-    // Path of Node app - even when launched from another process (supervisor, pm2, forever, mocha, etc)
-    this.appDir = path.dirname(Object.keys(require.cache)[0]);
+    // Path of Node app - originally tried:
+    //
+    //     this.appDir = path.dirname(Object.keys(require.cache)[0]);
+    //
+    // as advised at: http://stackoverflow.com/questions/18620270/get-application-full-path-in-node-js
+    // to get the app path even when launched from another process (supervisor, pm2, forever, mocha, etc).
+    // Unfortunately, with iisnode, this returned the iisnode directory (where its own wrapper, interceptor.js,
+    // runs from).  Not also that under iisnode the process.mainModule.filename also points to interceptor.js, and
+    // not our own main module.  On the plus side, iisnode does fix up the process args so that argv[1] will have
+    // the full path of our actual main node module, so we're going to use that for now (works from Node.exe on 
+    // the command line, debugging from VS, and under Azure).  This may or may not work reliably under other
+    //  process runners.
+    //
+    this.appDir = path.dirname(process.argv[1]);
+    logger.info("v8 resolved app root path as: " + this.appDir);
 
     this.currentFrame = NO_FRAME;
     this.currentSourceLine = -1;
@@ -121,7 +136,7 @@ Client.prototype._removeScript = function(script)
 {
     // Never seen this actually get called (the debugger seems to keep scripts around forever, even scripts
     // that are verified to unload when not running under the debugger).
-    console.log("[V8] unloading script: " + script.name);
+    logger.info("[V8] unloading script: " + script.name);
     this.scripts[script.id] = undefined;
 };
 
@@ -142,7 +157,7 @@ Client.prototype._handleBreak = function(r)
     this.currentScript = r.body.script && r.body.script.name;
 
     // Update watched values
-    console.log("Processing " + this.watches.length + " watches");
+    logger.info("Processing " + this.watches.length + " watches");
     this.updateWatches(this.currentFrame, function(err, resolvedWatches) 
     {
         // This can't return err (just populates watch value with "<error>" on error).
@@ -171,8 +186,10 @@ Client.prototype._onResponse = function(res)
     if (res.headers.Type == 'connect') 
     {
         // Request a list of scripts for our own storage.
+        logger.info("Got connect, requesting scripts");
         self.reqScripts(function() 
         {
+            logger.info("Collected scripts, sending 'ready'");
             self.emit('ready', res);
         });
         handled = true;
@@ -472,7 +489,11 @@ Client.prototype.reqScripts = function(cb)
     var self = this;
     cb = cb || function() {};
 
-    this.req({ command: 'scripts', arguments: {'includeSource': true} } , function(err, scripts) 
+    // includeSource used to be "true" (catastrophic performance degradation on Azure due to small packet
+    // size, needs to be fixed in v8protocol module).  For now we turn includeSource off.
+    //
+    logger.info("reqScripts - includeSource: false");
+    this.req({ command: 'scripts', arguments: {'includeSource': false} } , function(err, scripts) 
     {
         if (err)
         {
@@ -763,7 +784,7 @@ Client.prototype.mirrorObject = function(handle, depth, cb)
 //
 Client.prototype.resolveFrame = function(frame, cb)
 {
-    console.log("Frame[" + frame.index + "]");
+    logger.debug("Frame[" + frame.index + "]");
 
     var self = this;
 
@@ -969,7 +990,7 @@ Client.prototype.updateWatches = function(frame, cb)
         {
             resolvedWatches.forEach(function(resolvedWatch) 
             {
-                console.log('Watch[' + resolvedWatch.id + ']: ' + resolvedWatch.watch + ' = ' + JSON.stringify(resolvedWatch.value));
+                logger.debug('Watch[' + resolvedWatch.id + ']: ' + resolvedWatch.watch + ' = ' + JSON.stringify(resolvedWatch.value));
             });
 
             cb(null, resolvedWatches);

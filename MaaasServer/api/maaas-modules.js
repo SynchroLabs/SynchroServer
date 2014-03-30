@@ -5,6 +5,8 @@
 var path = require('path');
 var Module = require('module');
 
+var logger = require('log4js').getLogger("maaas-modules");
+
 // This is where we keep the dictionary of pending modules, where the index is the filename (full path) 
 // of the module to be loaded, and the value is the module source.
 //
@@ -76,8 +78,8 @@ Module._extensions['.js'] = (function(original)
 
 // -----------------------------------------------------------
 
-var moduleStore = require("./file-module-store");
-//var moduleStore = require("./cloud-module-store");
+//var moduleStore = require("./file-module-store");
+var moduleStore = require("./cloud-module-store");
 
 exports.getModuleStore = function()
 {
@@ -103,7 +105,7 @@ function loadModule(moduleName, source)
     popModuleSource(filename); // Should get popped in module load, this is just in case module was cached (and not loaded/popped)
 
     var routePath = path.basename(moduleName, path.extname(moduleName));
-    console.log("Found route processor for: " + routePath);
+    logger.info("Found and loaded route processor for: " + routePath);
     routes[routePath] = maaasModule;
     maaasModule.View["path"] = routePath;
 }

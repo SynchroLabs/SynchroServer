@@ -41,7 +41,6 @@
     <Compile Include="api\api.js" />
     <Compile Include="api\cloud-module-store.js" />
     <Compile Include="api\file-module-store.js" />
-    <Compile Include="api\foo.js" />
     <Compile Include="api\maaas-modules.js" />
     <Compile Include="api\maaas.js" />
     <Compile Include="api\objectmon.js" />
@@ -354,6 +353,7 @@
     <Content Include="views\index.hbs" />
     <Content Include="views\layouts\default.hbs" />
     <Content Include="views\login.hbs" />
+    <Content Include="views\partials\test.hbs" />
     <Content Include="views\sandbox.hbs" />
     <Content Include="Web.Debug.config" />
     <Content Include="Web.Release.config" />

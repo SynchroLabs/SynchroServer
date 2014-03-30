@@ -12,6 +12,13 @@ var wait = require('wait.for');
 
 var WebSocket = require('faye-websocket');
 
+var log4js = require('log4js');
+// Redirect console.log to log4js, turn off color coding
+log4js.configure({ appenders: [ { type: "console", layout: { type: "basic" } } ], replaceConsole: true })
+
+var logger = log4js.getLogger("app");
+logger.info("Maaas.io server loading...");
+
 var app = express();
 
 var MemoryStore = express.session.MemoryStore;
@@ -37,7 +44,7 @@ app.use(express.cookieParser());
 // is my guess) - for now we just omit expiration...
 app.use(express.cookieSession({ store: sessionStore, secret: 'sdf89f89fd7sdf7sdf', cookie: { maxAge: false, httpOnly: true } }));
 app.use(express.favicon());
-app.use(express.logger('dev'));
+app.use(log4js.connectLogger(logger, { level: 'auto' })); //app.use(express.logger('dev'));
 app.use(express.query());
 app.use(express.json());
 app.use(express.urlencoded());
@@ -72,7 +79,7 @@ app.post('/module', login.checkAuth, function(req,res){
 var apiProcessor = require("./api/api-request-delegator")(true, 6969); // Forked sub-process
 edit.setApiProcessor(apiProcessor);
 
-var debugApi = require('./routes/debug/ws-debug-server');
+var debugApi = require('./routes/debugger/ws-debug-server');
 
 // Let the API processor handle requests to /api
 //
@@ -118,11 +125,11 @@ server.on('upgrade', function(request, socket, body)
         }
         else
         {
-            console.log("ERROR - No such websocket endpoint: " + path);
+            logger.info("ERROR - No such websocket endpoint: " + path);
         }
     }
 });
 
 server.listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port') + ", node version: " + process.version);
+    logger.info('Express server listening on port ' + app.get('port') + ", node version: " + process.version);
 });

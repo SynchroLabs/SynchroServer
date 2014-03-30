@@ -7,8 +7,7 @@
 //
 // Visual diff app using objectDiff - http://nv.github.io/objectDiff.js/
 //
-
-console.log("Running objectMonitor");
+var logger = require('log4js').getLogger("objectmon");
 
 var objectDiff = require("objectdiff");
 
@@ -63,14 +62,14 @@ function logChange(changeType, path, value)
     {
         msg += " vith value: " + value;
     }
-    console.log(msg);
+    logger.debug(msg);
 }
 
 exports.getChangeList = function(basePath, originalObject, newObject)
 {
     // Doing "own properties" prevents inspection of prototype functions (among other things)
     var diffs = objectDiff.diffOwnProperties(originalObject, newObject);
-    console.log("Diffs: ", JSON.stringify(diffs, null, 4));
+    logger.debug("Diffs: ", JSON.stringify(diffs, null, 4));
 
     var changes = [];
     recordChanges(basePath, diffs, function (changeType, path, value)
@@ -109,7 +108,7 @@ state.colorNames.unshift({ color: "greenish" });
 state.user.password = "testpass";
 
 theChanges = getChangeList("state", originalState, state);
-console.log("Changes: ", JSON.stringify(theChanges, null, 4));
+logger.info("Changes: ", JSON.stringify(theChanges, null, 4));
 */
 
 // For primitive changes...

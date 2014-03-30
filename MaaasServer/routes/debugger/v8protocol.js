@@ -22,13 +22,7 @@
 // RDD - originally derived from code in Node.js internal _debugger module
 //       https://github.com/joyent/node/blob/master/lib/_debugger.js
 //
-
-var util = require('util');
-var path = require('path');
-var vm = require('vm');
-var repl = require('repl');
-var inherits = util.inherits;
-var spawn = require('child_process').spawn;
+var logger = require('log4js').getLogger("dbg-v8-pro");
 
 module.exports = Protocol;
 function Protocol() 
@@ -43,12 +37,26 @@ Protocol.prototype._newRes = function(raw)
     this.state = 'headers';
     this.reqSeq = 1;
     this.execute('');
+    this.chunkCount = 0;
 };
+
+// !!! This needs work.  Header buffer plus array of body buffers, which get join()ed at the end should
+//     be a big improvement.
+//
+// When getting a large response body, for example, "scripts" with includeSource, there can be a very
+// large number of body chunks.  In my example (260 scripts with total body size of 5Mb), the response was
+// received in approximately 650 chunks on my local Node instance and took 700ms.  However, on Azure the 
+// response was received in 65,000+ chunks and took 119 seconds.  My theory is that the appending string
+// builder is at fault here.
+//
 
 Protocol.prototype.execute = function(d) 
 {
     var res = this.res;
     res.raw += d;
+
+    //logger.debug("Got chunk " + this.chunkCount + " of length: " + d.length + " bytes");
+    this.chunkCount += 1;
 
     switch (this.state) 
     {
@@ -88,6 +96,8 @@ Protocol.prototype.execute = function(d)
                 res.body = buf.slice(this.bodyStartByteIndex, this.bodyStartByteIndex + this.contentLength).toString('utf8');
                 // JSON parse body?
                 res.body = res.body.length ? JSON.parse(res.body) : {};
+
+                logger.debug("Got response to command: " + res.body.command + " with length: " + this.contentLength + " bytes in " + this.chunkCount + " chunks");
 
                 // Done!
                 this.onResponse(res);

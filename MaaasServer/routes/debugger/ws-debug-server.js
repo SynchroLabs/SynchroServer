@@ -9,6 +9,8 @@ var wait = require('wait.for');
 var v8Client = require('./v8client');
 var path = require('path');
 
+var logger = require('log4js').getLogger("dbg-server");
+
 function sendResponse(ws, responseObject)
 {
     ws.send(JSON.stringify(responseObject));
@@ -21,24 +23,25 @@ function sendResponse(ws, responseObject)
 
 function DebugSession(ws, port)
 {
-    console.log("Firing up debugger client, connecting to port: " + port);
+    logger.info("Firing up debugger client, connecting to port: " + port);
 
     this.client = new v8Client();
     this.client.connect(port);
 
     this.client.reqVersion(function(err, version) {
-       console.log("DEBUGGER: Remote debugger version: " + version);
+       logger.info("Remote debugger version: " + version);
     });
 
     this.client.watch("viewModel");
 
     this.client.on("ready", function() 
     {
-        console.log("DEBUGGER: Got ready");
+        logger.info("Got ready");
         sendResponse(ws, { event: "ready" });
+        logger.info("Found " + Object.keys(this.scripts).length + " scripts");
         for (var key in this.scripts)
         {
-            console.log("Found script: " + this.scripts[key].name + " (" + this.scripts[key].lineCount + " lines)");
+            //logger.info("Found script: " + this.scripts[key].name + " (" + this.scripts[key].lineCount + " lines)");
         }
     });
 
@@ -57,7 +60,7 @@ function DebugSession(ws, port)
     {
         var self = this;
 
-        console.log("DEBUGGER: Got break at: " + response.body.script.name + " - line: " + response.body.sourceLine);
+        logger.info("Got break at: " + response.body.script.name + " - line: " + response.body.sourceLine);
         var breakData = 
         {
             frameIndex: 0,
@@ -73,7 +76,7 @@ function DebugSession(ws, port)
         /*
         this.fullTrace(function (err, data)
         {
-            console.log("Stacktrace contained " + data.frames.length + " frames");
+            logger.info("Stacktrace contained " + data.frames.length + " frames");
             data.frames.forEach(function(frame) 
             {
                 var frameData = 
@@ -89,7 +92,7 @@ function DebugSession(ws, port)
                     funcName: (frame.func.name !== "") ? frame.func.name : frame.func.inferredName
                 }
 
-                console.log("Frame[" + frameData.frameIndex + "]: " + frameData.funcName);
+                logger.info("Frame[" + frameData.frameIndex + "]: " + frameData.funcName);
 
                 // The current resolve frame resolves all arguments and locals, mirroring the objects up to a specified number of levels deep.
                 // This is probably not a viable long term solution for sending this over the wire to the browser, because this can produce some
@@ -101,11 +104,11 @@ function DebugSession(ws, port)
                 {
                     frame.arguments.forEach(function(argument)
                     {
-                        console.log("  Argument[frame:" + frame.index + "]: " + argument.name); // + " = " + JSON.stringify(argument.value));
+                        logger.info("  Argument[frame:" + frame.index + "]: " + argument.name); // + " = " + JSON.stringify(argument.value));
                     }); 
                     frame.locals.forEach(function(local)
                     {
-                        console.log("  Local[frame:" + frame.index + "]: " + local.name); // + " = " + JSON.stringify(local.value));
+                        logger.info("  Local[frame:" + frame.index + "]: " + local.name); // + " = " + JSON.stringify(local.value));
                     }); 
                 });
             });
@@ -115,7 +118,7 @@ function DebugSession(ws, port)
 
     this.client.on("end", function() 
     {
-        console.log("DEBUGGER: Got end");
+        logger.info("Got end");
         sendResponse(ws, { event: "end" });
     });
 
@@ -157,7 +160,7 @@ function processWebSocketMessage(ws, event, state)
     //
          
     var requestObject = JSON.parse(event.data);
-    console.log("Processing debug API command: " + requestObject.command);
+    logger.info("Processing debug API command: " + requestObject.command);
     switch (requestObject.command)
     {
         case "connect":
@@ -170,7 +173,7 @@ function processWebSocketMessage(ws, event, state)
         {
             state.debugSession.client.reqVersion(function(err, version) 
             {
-                console.log("DEBUGGER: Remote debugger version: " + version);
+                logger.info("Remote debugger version: " + version);
                 sendResponse(ws, { event: "version", version: version });
             });
         }
@@ -180,7 +183,7 @@ function processWebSocketMessage(ws, event, state)
         {
             state.debugSession.client.reqContinue(function() 
             {
-                console.log("DEBUGGER: continued");
+                logger.info("continued");
                 sendResponse(ws, { event: "continued" });
             });
         }
@@ -194,7 +197,7 @@ function processWebSocketMessage(ws, event, state)
                 // You get another break after the step, so not clear you need any kind of onComplete 
                 // response to the client command...
                 //
-                console.log("DEBUGGER: step completed");
+                logger.info("step completed");
                 sendResponse(ws, { event: "stepped" });
             });
         }
@@ -207,7 +210,7 @@ function processWebSocketMessage(ws, event, state)
             //
             state.debugSession.client.reqSource(requestObject.frame, null, null, function(err, source) 
             {
-                console.log("DEBUGGER: got source for frame " + requestObject.frame);
+                logger.info("got source for frame " + requestObject.frame);
                 if (requestObject.scriptPath)
                 {
                     source.breakpoints = state.debugSession.client.listBreakpoints(requestObject.scriptPath);
@@ -221,7 +224,7 @@ function processWebSocketMessage(ws, event, state)
         {
             state.debugSession.client.setBreakpoint(requestObject.scriptName, requestObject.line, function(err, breakpoint) 
             {
-                console.log("DEBUGGER: breakpoint set: " + JSON.stringify(breakpoint));
+                logger.info("breakpoint set: " + JSON.stringify(breakpoint));
                 sendResponse(ws, { event: "breakpoint-set", breakpoint: breakpoint });
             });
         }
@@ -231,7 +234,7 @@ function processWebSocketMessage(ws, event, state)
         {
             state.debugSession.client.clearBreakpoint(requestObject.scriptName, requestObject.line, function(err, breakpoint) 
             {
-                console.log("DEBUGGER: breakpoint cleared: " + JSON.stringify(breakpoint));
+                logger.info("breakpoint cleared: " + JSON.stringify(breakpoint));
                 sendResponse(ws, { event: "breakpoint-cleared", breakpoint: breakpoint });
             });
         }
@@ -239,7 +242,7 @@ function processWebSocketMessage(ws, event, state)
 
         case "getbreakpoints":
         {
-            console.log("DEBUGGER: getting breakpoints for script: " + requestObject.scriptName);
+            logger.info("getting breakpoints for script: " + requestObject.scriptName);
             var breakpoints = state.debugSession.client.listBreakpoints(requestObject.scriptName);
             sendResponse(ws, { event: "breakpoints", scriptName: requestObject.scriptName, breakpoints: breakpoints });
         }
@@ -249,7 +252,7 @@ function processWebSocketMessage(ws, event, state)
         {
             state.debugSession.close(function() 
             {
-                console.log("DEBUGGER: closed");
+                logger.info("closed");
                 sendResponse(ws, { event: "closed" });
                 ws.end();
                 state.debugSession = null;
@@ -262,19 +265,19 @@ function processWebSocketMessage(ws, event, state)
 exports.processWebSocket = function(request, socket, body)
 {
     var ws = new WebSocket(request, socket, body);
-    console.log("Debug API initialized WebSocket");
+    logger.info("Debug API initialized WebSocket");
 
     state = {};
 
     ws.on('message', function(event) 
     {
-        console.log("Debug API got WebSocket message: " + event.data);
+        logger.info("Debug API got WebSocket message: " + event.data);
         wait.launchFiber(processWebSocketMessage, ws, event, state); //handle in a fiber
     });
 
     ws.on('close', function(event) 
     {
-        console.log('Debug API WebSocket close', event.code, event.reason);
+        logger.info('Debug API WebSocket close', event.code, event.reason);
         if (state.debugSession)
         {
             state.debugSession.close();

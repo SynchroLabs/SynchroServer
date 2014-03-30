@@ -1,6 +1,7 @@
 ﻿/*
  * GET edit page.
  */
+var logger = require('log4js').getLogger("web-edit");
 
 var maaasModules = require("../api/maaas-modules");
 var moduleStore = maaasModules.getModuleStore();
@@ -49,7 +50,7 @@ exports.edit = function(req, res)
 // GET /module
 exports.loadModule = function(req, res)
 {
-    console.log("Load module");
+    logger.info("Load module");
     var result = { };
 
     if (req.query["module"])
@@ -69,7 +70,7 @@ exports.loadModule = function(req, res)
 // POST /module
 exports.saveModule = function(req, res)
 {
-    console.log("Save module");
+    logger.info("Save module");
     var result = { };
 
     if (req.body["module"] && req.body["source"])

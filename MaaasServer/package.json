@@ -15,6 +15,7 @@
     "node-uuid": "~1.4.1",
     "wait.for": "~0.6.3",
     "azure": "^0.8.1",
-    "express-hbs": "^0.7.9"
+    "express-hbs": "^0.7.9",
+    "log4js": "^0.6.12"
   }
 }

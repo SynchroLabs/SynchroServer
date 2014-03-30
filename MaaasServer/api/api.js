@@ -3,18 +3,20 @@
 var objectMonitor = require('./objectmon');
 var util = require('./util');
 
+var logger = require('log4js').getLogger("maaas-api");
+
 // Load the Maaas modules asynchronously...
 //
 var maaasModules = require('./maaas-modules');
 var wait = require('wait.for');
 try
 {
-    console.log("Launching fiber to load Maaas modules...");
+    logger.info("Launching fiber to load Maaas modules...");
     wait.launchFiber(maaasModules.loadModules); // Load modules in a fiber - keep node spinning on async module load operations
 }
 catch (err)
 {
-    console.log("Error launching fiber to load Maaas modules: " + err);
+    logger.info("Error launching fiber to load Maaas modules: " + err);
 }
 
 exports.reloadModule = function(moduleName)
@@ -66,7 +68,7 @@ function setObjectProperty(obj, propertyPath, value)
     
     if (obj)
     {
-        console.log("Updating bound item for property: " + propertyPath);
+        logger.info("Updating bound item for property: " + propertyPath);
         obj[last] = value;
         return obj[last];
     }
@@ -201,7 +203,7 @@ function processObject(session, obj)
 
 function getFilteredView(session, view)
 {
-    console.log("Applying filter to view");
+    logger.info("Applying filter to view");
     return processObject(session, lodash.cloneDeep(view));
 }
 
@@ -219,11 +221,11 @@ exports.navigateToView = function(context, route, params)
     var routeModule = maaasModules.getModule(route);
     if (routeModule)
     {
-        console.log("Found route module for " + route);
+        logger.info("Found route module for " + route);
         context.session.ViewModel = {};
         if (routeModule.InitializeViewModel)
         {
-            console.log("Initializing view model (on nav)");
+            logger.info("Initializing view model (on nav)");
             context.session.ViewModel = routeModule.InitializeViewModel(context, context.session, params);
         }
 
@@ -244,14 +246,14 @@ exports.process = function(session, requestObject)
         response: { control: "response", Path: requestObject.Path }
     };
 
-    console.log("Processing path " + context.request.Path);
+    logger.info("Processing path " + context.request.Path);
 
 	var routeModule = maaasModules.getModule(context.request.Path);
     if (routeModule)
     {
         var viewModelAfterUpdate = null;
 
-        console.log("Found route module for " + context.request.Path);
+        logger.info("Found route module for " + context.request.Path);
         
         // Store device metrics in session if provided
         //
@@ -262,7 +264,7 @@ exports.process = function(session, requestObject)
 
         if (context.request.ViewModelDeltas)
         {
-            console.log("ViewModel before deltas: " + context.session.ViewModel);
+            logger.info("ViewModel before deltas: " + context.session.ViewModel);
 
             // Record the current state of view model so we can diff it after apply the changes from the client,
             // and use that diff to see if there were any changes, so that we can then pass them to the OnChange
@@ -273,7 +275,7 @@ exports.process = function(session, requestObject)
             // Now apply the changes from the client...
             for (var i = 0; i < context.request.ViewModelDeltas.length; i++) 
             {
-                console.log("View Model change from client - path: " + context.request.ViewModelDeltas[i].path + ", value: " + context.request.ViewModelDeltas[i].value);
+                logger.info("View Model change from client - path: " + context.request.ViewModelDeltas[i].path + ", value: " + context.request.ViewModelDeltas[i].value);
                 setObjectProperty(session.ViewModel, context.request.ViewModelDeltas[i].path, context.request.ViewModelDeltas[i].value);
             }
             
@@ -291,7 +293,7 @@ exports.process = function(session, requestObject)
 
 		if (requestObject.Command)
         {
-            console.log("Running command: " + context.request.Command);
+            logger.info("Running command: " + context.request.Command);
 
             // If no view model updates happened on the client, we need to record the state of the
             // view model now, before we run any commands, so we can diff it after...
@@ -325,7 +327,7 @@ exports.process = function(session, requestObject)
             context.session.ViewModel = {};
             if (routeModule.InitializeViewModel)
             {
-                console.log("Initializing view model");
+                logger.info("Initializing view model");
                 context.session.ViewModel = routeModule.InitializeViewModel(context, context.session);
             }
 

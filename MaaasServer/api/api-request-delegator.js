@@ -9,6 +9,8 @@
 //     processHttpRequest(request, response);
 //     processWebSocket(request, socket, body);
 //     
+var logger = require('log4js').getLogger("api-delegator");
+
 module.exports = function(fork, debugPort)
 {
     var child = require("./api-request-delegatee");
@@ -26,13 +28,12 @@ module.exports = function(fork, debugPort)
 
         var childProcess = require('child_process').fork(__dirname + '/api-request-delegatee.js', args, options);
 
-        childProcess.stdout.on('data', function(data) {
-            console.log("[API]" + data.toString()); 
-        });
-
-        childProcess.stderr.on('data', function(data) {
-            console.log("[API]" + data.toString()); 
-        });
+        // Supposedly when silent == false the child "inherits" the main process stdout/stderr, but in practice
+        // I see no console/log output over stdout when I run that way.  Running with silent == true and piping
+        // the child streams seems to work fine.
+        //
+        childProcess.stdout.pipe(process.stdout);
+        childProcess.stderr.pipe(process.stderr);
 
         // This mechanism is supposed to put the child process into debug mode, but doesn't seem to work.
         // This would be particularly useful if there was a way to talk to the child process debugger without
@@ -71,7 +72,7 @@ module.exports = function(fork, debugPort)
         {
             // Look up the pending request info bound to this id, call the child module to process it, and remove the pending request
             //
-            console.log("Processing pending request id: " + message.id);
+            logger.info("Processing pending request id: " + message.id);
             var pendingRequest = pendingRequests[message.id];
             delete pendingRequests[message.id];
             child.postProcessHttpRequest(pendingRequest.request, pendingRequest.response, message.err, message.data);
@@ -83,7 +84,7 @@ module.exports = function(fork, debugPort)
 
             processHttpRequest : function(request, response)
             {
-                console.log("Process forked child http request");
+                logger.info("Process forked child http request");
 
                 // Record the request/response in pendingRequests, then post a message to the child process with the request
                 //
@@ -94,13 +95,14 @@ module.exports = function(fork, debugPort)
 
             processWebSocket: function(request, socket, body)
             {
-                console.log("Process forked child web socket");
+                logger.info("Process forked child web socket");
                 childProcess.send({cmd: "processWebSocket", request: getRequestDataObject(request), body: body}, socket);
             },
 
             reloadModule: function(moduleName)
             {
-                // !!! Implement -- also need a way to get signalled that it got done.
+                // !!! Also need a way to get signalled that it got done?
+                logger.info("Notify child process to reload module: " + moduleName);
                 childProcess.send({cmd: "reloadModule", moduleName: moduleName});
             }
         }
@@ -115,7 +117,7 @@ module.exports = function(fork, debugPort)
 
             processHttpRequest : function(request, response)
             {
-                console.log("Process in-proc child http request");
+                logger.info("Process in-proc child http request");
                 child.processHttpRequest(request, function(err, data)
                 {
                     child.postProcessHttpRequest(request, response, err, data);
@@ -124,7 +126,7 @@ module.exports = function(fork, debugPort)
 
             processWebSocket: function(request, socket, body)
             {
-                console.log("Process in-proc child web socket");
+                logger.info("Process in-proc child web socket");
                 child.processWebSocket(request, socket, body);
             },
 
