@@ -15,6 +15,20 @@
     bottom: 0px;
     left: 0px;
     }
+    .debugging #editor {
+    bottom: 210px;
+    }
+    #debuggerContext {
+    position: absolute;
+    height: 200px;
+    right: 0px;
+    bottom: -20px;
+    left: 0px;
+    display: none;
+    }
+    .debugging #debuggerContext {
+    display: block;
+    }
     .ace_gutter-cell.ace_breakpoint {
     border-radius: 20px 20px 20px 20px;
     box-shadow: 0px 0px 1px 1px red inset;
@@ -88,9 +102,85 @@
         </div>
     </nav>
     <div id="editor"></div>
+
+    <div id="debuggerContext" class="panel panel-default" style="overflow: auto;">
+        <div class="panel-heading">
+        <ul class="nav nav-pills" id="debuggerTabsNav">
+            <li class="active"><a href="#stack">Call Stack</a></li>
+            <li><a href="#arguments">Arguments</a></li>
+            <li><a href="#locals">Locals</a></li>
+            <li><a href="#watches">Watches</a></li>
+            <li><a href="#console">Console</a></li>
+        </ul>
+        </div>
+        <!-- Content -->
+        <div class="tab-content">
+            <div class="tab-pane active" id="stack">
+                <table class="table ">
+                    <thead>
+                    <tr>
+                        <th style="width: 1%;">&nbsp;</th>
+                        <th>Call</th>
+                    </tr>
+                    </thead>
+                    <tbody id="stackTable">
+                    </tbody>
+                </table>                
+            </div>
+            <div class="tab-pane" id="arguments">
+                <table class="table ">
+                    <thead>
+                    <tr>
+                        <th>Argument Name</th>
+                        <th>Value</th>
+                    </tr>
+                    </thead>
+                    <tbody id="argumentsTable">
+                    </tbody>
+                </table>                
+            </div>
+            <div class="tab-pane" id="locals">
+                <table class="table ">
+                    <thead>
+                    <tr>
+                        <th>Local Name</th>
+                        <th>Value</th>
+                    </tr>
+                    </thead>
+                    <tbody id="localsTable">
+                    </tbody>
+                </table>                
+            </div>
+            <div class="tab-pane" id="watches">
+                <table class="table ">
+                    <thead>
+                    <tr>
+                        <th>Watch Name</th>
+                        <th>Value</th>
+                    </tr>
+                    </thead>
+                    <tbody id="watchesTable">
+                    <tr>
+                        <td>viewModel</td>
+                        <td>{ foo: "bar" }</td>
+                    </tr>
+                    <tr>
+                        <td>test</td>
+                        <td>13</td>
+                    </tr>
+                    </tbody>
+                </table>                
+            </div>
+            <div class="tab-pane" id="console">Console</div>
+        </div>
+    </div>
 </div>
 
 <script>
     $('#save').hide();
+    $('#debuggerTabsNav a').click(function (e) {
+        e.preventDefault()
+        $(this).tab('show')
+    });
     initEditPage("#{page}");
 </script>

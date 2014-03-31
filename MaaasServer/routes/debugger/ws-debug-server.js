@@ -69,11 +69,10 @@ function DebugSession(ws, port)
             scriptPath: response.body.script.name,
             lineCount: response.body.script.lineCount,
             sourceLine: response.body.sourceLine,
-            sourceColumn: response.body.sourceColumn
+            sourceColumn: response.body.sourceColumn,
+            frames: []
         }
-
-        sendResponse(ws, { event: "break", breakPoint: breakData });
-        /*
+        
         this.fullTrace(function (err, data)
         {
             logger.info("Stacktrace contained " + data.frames.length + " frames");
@@ -84,36 +83,21 @@ function DebugSession(ws, port)
                     frameIndex: frame.index,
                     scriptId: frame.script.id,
                     scriptName: path.basename(frame.script.name),
-                    scriptPath: convertFullToRelativePath(frame.script.name),
+                    scriptPath: frame.script.name,
                     lineCount: frame.script.lineCount,
                     isNative: frame.script.isNative,
                     sourceLine: frame.line,
                     sourceColumn: frame.column,
-                    funcName: (frame.func.name !== "") ? frame.func.name : frame.func.inferredName
+                    funcName: (frame.func.name !== "") ? frame.func.name : frame.func.inferredName,
+                    arguments: frame.arguments, // [] name, value.display
+                    locals: frame.locals,       // [] name, value.display
+                    watches: frame.watches      // [] id, watch, value
                 }
-
-                logger.info("Frame[" + frameData.frameIndex + "]: " + frameData.funcName);
-
-                // The current resolve frame resolves all arguments and locals, mirroring the objects up to a specified number of levels deep.
-                // This is probably not a viable long term solution for sending this over the wire to the browser, because this can produce some
-                // monster serialized JSON objects.  A better solution is probably to resolve the value and mirror a single level of properties,
-                // and then provide an API to resolve a specific object reference (optionally recursively) - so when the user attemts to drill into
-                // a value, the browser can request the details it needs at that time.
-                //
-                self.resolveFrame(frame, function() // !!! Just do this for frame 0, and do it on the server...
-                {
-                    frame.arguments.forEach(function(argument)
-                    {
-                        logger.info("  Argument[frame:" + frame.index + "]: " + argument.name); // + " = " + JSON.stringify(argument.value));
-                    }); 
-                    frame.locals.forEach(function(local)
-                    {
-                        logger.info("  Local[frame:" + frame.index + "]: " + local.name); // + " = " + JSON.stringify(local.value));
-                    }); 
-                });
+                breakData.frames.push(frameData);
             });
+
+            sendResponse(ws, { event: "break", breakPoint: breakData });
         });
-        */
     });
 
     this.client.on("end", function() 

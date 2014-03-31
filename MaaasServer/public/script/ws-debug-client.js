@@ -27,6 +27,7 @@ function updateRunning(isRunning)
     {
         $(".debug-running").prop('disabled', true);
         setActiveBreakpoint(-1);
+        $("#stackTable").empty();
     }
     else
     {
@@ -111,6 +112,27 @@ function onMessage(evt)
         case "break":
         {
             console.log("[Debug client] Got breakpoint at: " + event.breakPoint.scriptName + " line: " + event.breakPoint.sourceLine);
+
+            $("#stackTable").empty();
+            for (var i = 0; i < event.breakPoint.frames.length; i++)
+            {
+                var frame = event.breakPoint.frames[i];
+                $('#stackTable').append('<tr><td></td><td>' + frame.funcName + ' [' + frame.scriptName + ':' + frame.sourceLine + ']</td></tr>');
+            }
+
+            var currentFrame = event.breakPoint.frames[0];
+
+            $("#argumentsTable").empty();
+            for (var i = 0; i < currentFrame.arguments.length; i++)
+            {
+                $('#argumentsTable').append('<tr><td>' + currentFrame.arguments[i].name + '</td><td>' + JSON.stringify(currentFrame.arguments[i].display) + '</td></tr>');
+            }
+
+            $("#localsTable").empty();
+            for (var i = 0; i < currentFrame.locals.length; i++)
+            {
+                $('#localsTable').append('<tr><td>' + currentFrame.locals[i].name + '</td><td>' + JSON.stringify(currentFrame.locals[i].display) + '</td></tr>');
+            }
 
             if (currentScriptPath != event.breakPoint.scriptPath)
             {

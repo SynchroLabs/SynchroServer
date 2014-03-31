@@ -709,6 +709,7 @@ Client.prototype.mirrorObject = function(handle, depth, cb)
                 if (value) 
                 {
                     mirrorValue = value.value ? value.value : value.text;
+                    // value.text is like: "#<Object>" - I'd rather have "{}" or "[]" as appropriate
                 }
                 else 
                 {
@@ -721,7 +722,7 @@ Client.prototype.mirrorObject = function(handle, depth, cb)
                     return;
                 }
 
-                keyValues[i] = { name: prop.name, value: mirrorValue };
+                keyValues[i] = { name: prop.name, value: mirrorValue }; 
                 if (value && value.handle && depth > 0) 
                 {
                     waiting++;
@@ -782,6 +783,44 @@ Client.prototype.mirrorObject = function(handle, depth, cb)
 // Resolve all arguments and locals for the specified frame, and mirror their contents.  Also resolve watches
 // in the context of the specified frame and attached them as "watches".
 //
+// A reference looks like this:
+//
+//      name: "someVariable"
+//      value : 
+//      {
+//          ref: 5,
+//          type: "object",
+//          className: "Object"
+//      }
+//
+// When resolved via resLookup you get back a "resolved" value, like this for a simple value:
+//
+//      {
+//          handle: 5,
+//          type: "string",
+//          value: "hello",
+//          length: 5,
+//          text: "hello"
+//      }
+//
+// Or like this for an object (note the list of properties, each of which include a reference, which in turn needs to be looked up):
+//
+//      {
+//          handle: 5,
+//          type: "object",
+//          className: "Object",
+//          text: "#<Object>"
+//          properties: []
+//              name: "someOther",
+//              propertyType: 1,
+//              ref: 6
+//      }
+//
+//
+
+// Look up all script references, including arguments and locals, for the provided stack frame.  Resolve watches relative
+// to the provided stack frame and attach them to the frame (similar to fullTrace, but only for the specified frame).
+//
 Client.prototype.resolveFrame = function(frame, cb)
 {
     logger.debug("Frame[" + frame.index + "]");
@@ -800,6 +839,10 @@ Client.prototype.resolveFrame = function(frame, cb)
         refs.push(local.value.ref);
     }); 
 
+    refs.push(frame.script.ref);
+    refs.push(frame.func.ref);
+    refs.push(frame.receiver.ref);
+
     // Resolve the references (handles) to values
     //
     self.reqLookup(refs, function(err, res) 
@@ -809,34 +852,38 @@ Client.prototype.resolveFrame = function(frame, cb)
             return cb(err);
         }
 
-        resolvedEntities = [];
+        valuesToMirror = [];
 
         frame.arguments.forEach(function(argument)
         {
             argument.value = res[argument.value.ref];
-            resolvedEntities.push(argument);
+            valuesToMirror.push(argument);
         }); 
 
         frame.locals.forEach(function(local)
         {
             local.value = res[local.value.ref];
-            resolvedEntities.push(local);
+            valuesToMirror.push(local);
         });
 
-        var waiting = resolvedEntities.length;
+        frame.script = res[frame.script.ref];
+        frame.func = res[frame.func.ref];
+        frame.receiver = res[frame.receiver.ref];
+
+        var waiting = valuesToMirror.length;
         if (!waiting) 
         {
             waiting = 1;
             wait();
         }
 
-        // Construct local objects ("mirror" objects)
-        //
-        resolvedEntities.forEach(function(resolvedEntity) 
+        valuesToMirror.forEach(function(resolvedEntity) 
         {
-            self.mirrorObject(resolvedEntity.value, 3, function(err, mirror)
+            // Create a very thin object representation of the value (if the caller needs more, the'll have to resLookup themselves).
+            //
+            self.mirrorObject(resolvedEntity.value, 1, function(err, mirror)
             {
-                resolvedEntity.value = mirror;
+                resolvedEntity.display = mirror;
                 wait();
             });
         });
@@ -845,8 +892,8 @@ Client.prototype.resolveFrame = function(frame, cb)
         {
             if (--waiting === 0) 
             {
-                // Done updating arguments and locals (if any), now let's update the watches for the specified frame and
-                // attach them to the frame.
+                // Done looking up all of the stack frame references (including arguments and locals, if any), now let's 
+                // update the watches for this frame and attach them to the frame.
                 //
                 self.updateWatches(frame, function(err, resolvedWatches)
                 {
@@ -863,6 +910,9 @@ Client.prototype.resolveFrame = function(frame, cb)
     });
 }
 
+// Look up all script references, including arguments and locals, for each stack frame.  Resolve watches relative
+// to the base (zero) frame.
+//
 Client.prototype.fullTrace = function(cb) 
 {
     var self = this;
@@ -901,6 +951,20 @@ Client.prototype.fullTrace = function(cb)
             //   sourceLineText: '  debugger;',
             //   scopes: [ { type: 1, index: 0 }, { type: 0, index: 1 } ],
             //   text: '#00 blah() /home/ryan/projects/node/test-debug.js l...' }
+
+            // Collect arguments and locals references
+            //
+            frame.arguments.forEach(function(argument)
+            {
+                refs.push(argument.value.ref);
+            }); 
+            frame.locals.forEach(function(local)
+            {
+                refs.push(local.value.ref);
+            }); 
+
+            // Collect other references
+            //
             refs.push(frame.script.ref);
             refs.push(frame.func.ref);
             refs.push(frame.receiver.ref);
@@ -913,15 +977,66 @@ Client.prototype.fullTrace = function(cb)
                 return cb(err);
             }
 
+            valuesToMirror = [];
+
             for (var i = 0; i < trace.frames.length; i++) 
             {
                 var frame = trace.frames[i];
+
+                frame.arguments.forEach(function(argument)
+                {
+                    argument.value = res[argument.value.ref];
+                    valuesToMirror.push(argument);
+                }); 
+
+                frame.locals.forEach(function(local)
+                {
+                    local.value = res[local.value.ref];
+                    valuesToMirror.push(local);
+                });
+
                 frame.script = res[frame.script.ref];
                 frame.func = res[frame.func.ref];
                 frame.receiver = res[frame.receiver.ref];
             }
 
-            cb(null, trace);
+            var waiting = valuesToMirror.length;
+            if (!waiting) 
+            {
+                waiting = 1;
+                wait();
+            }
+
+            valuesToMirror.forEach(function(resolvedEntity) 
+            {
+                // Create a very thin object representation of the value (if the caller needs more, the'll have to resLookup themselves).
+                //
+                self.mirrorObject(resolvedEntity.value, 1, function(err, mirror)
+                {
+                    resolvedEntity.display = mirror;
+                    wait();
+                });
+            });
+
+            function wait() 
+            {
+                if (--waiting === 0) 
+                {
+                    // Done looking up all of the stack frame references (including arguments and locals, if any), now let's 
+                    // update the watches for active frame and attach them to the frame.
+                    //
+                    self.updateWatches(trace.frames[0], function(err, resolvedWatches)
+                    {
+                        if (err)
+                        {
+                            cb(err);
+                        }
+
+                        trace.frames[0].watches = resolvedWatches;
+                        cb(null, trace);
+                    });
+                }
+            }
         });
     });
 };
