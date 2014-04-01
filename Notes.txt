@@ -23,6 +23,10 @@ Team support (track who made which changes, deployments, etc)
 
 Revision history / revert
 
+Metrics/analytics
+
+Logging system
+
 MAAAS clients tied to app (with resource)
     Optionally specify branch (so one client app can run "production", one can run "staging", etc)
     App spec - app{branch} - branch defaults to "production"
@@ -63,3 +67,11 @@ http://nodejs.org/api/debugger.html
 https://github.com/joyent/node/blob/master/lib/_debugger.js
 https://github.com/joyent/node/blob/master/deps/v8/src/d8.js
 https://github.com/sidorares/node-cli-debugger
+
+To Do
+---------
+Disable editing/saving of non-user modules
+Allow edit/save of user modules during debug?
+Move breakpoints on edit?
+Manage/store breakpoints so they can be set when not debugging, remembered between debug page visits (store in persistent session?)
+Module "New" and "Delete" ("new" content should come from default template)
