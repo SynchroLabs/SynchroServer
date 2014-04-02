@@ -78,8 +78,8 @@ Module._extensions['.js'] = (function(original)
 
 // -----------------------------------------------------------
 
-//var moduleStore = require("./file-module-store");
-var moduleStore = require("./cloud-module-store");
+var moduleStore = require("./file-module-store");
+//var moduleStore = require("./cloud-module-store");
 
 exports.getModuleStore = function()
 {

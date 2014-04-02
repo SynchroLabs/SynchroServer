@@ -10,13 +10,15 @@ function updateDebugging(isDebugging)
     debugging = isDebugging;
     if (debugging)
     {
-        $("#editorPanel").removeClass("notdebugging").addClass("debugging");    
+        $("#editorPanel").removeClass("notdebugging").addClass("debugging");
+        editor.resize(); // Editor resizes itself on window size events, but not when container changes abs size via CSS, so we force resize.   
     }
     else
     {
         $("#editorPanel").removeClass("debugging").addClass("notdebugging");
         editor.session.clearBreakpoints();
         setActiveBreakpoint(-1);
+        editor.resize();    
     }
 }
 
