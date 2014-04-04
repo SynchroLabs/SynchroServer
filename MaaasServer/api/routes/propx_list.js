@@ -12,7 +12,7 @@ exports.View =
     [
         { control: "text", value: "Found {properties} listings in {location}", fontsize: 12 },
 
-        { control: "listview", select: "None", height: 300, maxheight: 300, width: 350, binding: { items: "properties", onItemClick: { command: "propertySelected", property: "{$data}" } }, itemTemplate:
+        { control: "listview", select: "None", height: 560, maxheight: 560, width: 350, binding: { items: "properties", onItemClick: { command: "propertySelected", property: "{$data}" } }, itemTemplate:
             { control: "stackpanel", orientation: "Horizontal", padding: 5, contents: [
                 { control: "image", resource: "{img_url}" },
                 { control: "stackpanel", orientation: "Vertical", padding: 5, contents: [
@@ -34,16 +34,12 @@ function getProperties(callback)
     };
 
     var req = http.request(options, function(res) {
-        console.log('STATUS: ' + res.statusCode);
-        console.log('HEADERS: ' + JSON.stringify(res.headers));
         var body = "";
         res.setEncoding('utf8');
         res.on('data', function(chunk) {
-            console.log('BODY CHUNK (' + chunk.length + " bytes)");
             body += chunk;
         });
         res.on('end', function() {
-            console.log('END CHUNK (' + body.length + " bytes)");
             var propList = JSON.parse(body);
             callback(null, propList);
         });
@@ -63,29 +59,22 @@ exports.InitializeViewModel = function(context, session, params)
     {
         location: "None",
         properties: [],
-    }
-
-    if (params)
-    {
-        viewModel.searchTerm = params.searchTerm;
+        searchTerm: params && params.searchTerm
     }
 
     var props = maaas.waitFor(getProperties);
 
     console.log("Got " + props.response.listings.length + " listings");
-
     viewModel.location = props.response.locations[0].title;
 
-    for (var i = 0; i < props.response.listings.length; i++) 
-    {        
-        var listing = props.response.listings[i];
+    props.response.listings.forEach(function(listing){
         viewModel.properties.push({
             guid: listing.guid,
             title: listing.title,
             price_formatted: listing.price_formatted, 
             img_url: listing.img_url
         });
-    }
+    });
 
     return viewModel;
 }

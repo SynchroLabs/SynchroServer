@@ -13,12 +13,11 @@ exports.View =
         { control: "text", value: "Password", fontsize: 12, margin: { bottom: 0 } },
         { control: "password", binding: "password", width: 200 },
         { control: "stackpanel", orientation: "Horizontal", margin: { top: 10 }, contents: [
-            { control: "button", caption: "Login", width: 100, binding: "login" },
-            { control: "button", caption: "Cancel", width: 100, binding: "cancel" },
+            { control: "button", caption: "Login", width: 125, binding: "login" },
+            { control: "button", caption: "Cancel", width: 125, binding: "cancel" },
         ] },
         { control: "toggle", binding: "showPassword", header: "Show Password", onLabel: "Showing", offLabel: "Hiding", fontsize: 12 },
-        { control: "text", value: "Current entered password: {password}", fontsize: 12, visibility: "{showPassword}" },
-        { control: "toggle", binding: "showPassword", header: "Show Password2", onLabel: "Showing", offLabel: "Hiding", fontsize: 12 },
+        { control: "text", value: "Entered password: {password}", fontsize: 12, visibility: "{showPassword}" },
     ]
 }
 

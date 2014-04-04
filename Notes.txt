@@ -35,7 +35,7 @@ Client builder
     Provide platform resources - app name, icon, etc.
     Specify capabilities (location, photo library, etc)
     Produce build images for download (signed by MAAAS or prepared for signing by customer)
-    Pre-build test client (auth to MAAAS, welcome page, enter app spec, remembers app specs, choose previously entered app spec)
+    Pre-built test client (auth to MAAAS, welcome page, enter app spec, remembers app specs, choose previously entered app spec)
 
 Persistent sessions
     Redis, Azure cache+table
