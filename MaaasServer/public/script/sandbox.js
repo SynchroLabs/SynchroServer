@@ -24,8 +24,9 @@ toastr.options =
     hideMethod: "fadeOut"
 }
 
-// Here is some code to deal with moving breakpoints on line insert/delete:
+// Here is some a discussion and some code to deal with moving breakpoints on line insert/delete:
 //
+//     https://groups.google.com/forum/#!msg/ace-discuss/sfGv4tRWZdY/ca1LuolbLnAJ
 //     https://github.com/MikeRatcliffe/Acebug/blob/master/chrome/content/ace%2B%2B/startup.js
 //
 

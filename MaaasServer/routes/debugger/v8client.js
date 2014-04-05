@@ -25,6 +25,9 @@
 
 // V8 debugging API documented here: https://code.google.com/p/v8/wiki/DebuggerProtocol
 //
+// See also: https://github.com/joyent/node/blob/master/deps/v8/src/d8.js
+//           https://github.com/sidorares/node-cli-debugger
+//
 
 var util = require('util');
 var path = require('path');

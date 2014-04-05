@@ -2,7 +2,8 @@
 //
 var wait = require('wait.for');
 var WebSocket = require('faye-websocket');
-var uuid = require('node-uuid');
+
+var sessionStore = require('./session-store').getSessionStore();
 
 var logger = require('log4js').getLogger("api-delegatee");
 
@@ -57,45 +58,6 @@ else // Forked child process
     })(process.stdout.write);
     */
 }
-
-// !!! World's worst session store.  Fix this.  As a first step, these APIs should all be async (since they'll presumably
-//     be async when they're talking to a real store).
-//
-// Note: This is the session store for Maaas clients calling the Maaas API, and is not related to any web session store
-//       for the admin/development web site.
-//
-function SessionStore()
-{
-    var sessions = {};
-
-    this.createSession = function()
-    {
-        var newSessionId = uuid.v4();
-        sessions[newSessionId] = { id: newSessionId };
-        return sessions[newSessionId];
-    };
-
-    this.getSession = function(sessionId)
-    {
-        if (sessionId)
-        {
-            return sessions[sessionId];
-        }
-        return null;
-    };
-
-    this.putSession = function(session)
-    {
-        sessions[session.id] = session;
-    };
-
-    this.deleteSession = function(sessionId)
-    {
-        delete sessions[sessionId];
-    };
-}
-
-var sessionStore = new SessionStore();
 
 var MaaasApiSessionIdHeader = "maaas-api-session-id";
 
