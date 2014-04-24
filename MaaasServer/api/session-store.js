@@ -28,6 +28,10 @@ exports.getSessionStore = function()
 
     this.putSession = function(session)
     {
+        // If the session put might be expensive, we could use objectmon to diff the current session with the potentially
+        // updated version (if doing a read of the stored session, plus the compare, and the occasional write is actually
+        // faster than just always doing a write).
+        //
         sessions[session.id] = session;
     };
 

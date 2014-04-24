@@ -3,3 +3,5 @@ Mobile Application As A Service (MAAAS) - Server
 =================================================
 
 Most of this content is now at: https://github.com/BobDickinson/MaaasServer/wiki/Server-ToDo
+
+Could use an auto-complete sample (demonstrate various levels of edit control notification, fast turnaround)

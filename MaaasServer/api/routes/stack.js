@@ -36,9 +36,9 @@ exports.View =
         ] },
 
         { control: "border", border: "Gray", borderThickness: "5", contents: [
-            { control: "stackpanel", background: "Red", padding: "{padding}", orientation: "{orientation}", alignContentH: "{alignContentH}", alignContentV: "{alignContentV}", contents: [
-                { control: "button", caption: "Button", width: 125, margin: "{margin}" },
-                { control: "button", caption: "Tall and Fat", height: 150, width: 250 },
+            { control: "stackpanel", background: "Red", padding: "{padding}", orientation: "{orientation}", contents: [
+                { control: "button", caption: "Button", width: 125, margin: "{margin}", horizontalAlignment: "{alignContentH}", verticalAlignment: "{alignContentV}" },
+                { control: "button", caption: "Tall and Fat", height: 150, width: 250, margin: 0 },
             ] },
         ] },
     ]

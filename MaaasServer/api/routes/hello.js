@@ -9,12 +9,12 @@ exports.View =
     elements:
     [
         { control: "stackpanel", orientation: "Horizontal", contents: [
-            { control: "text", value: "First name:", fontsize: 12, margin: { top: 10, right: 10 } },
-            { control: "edit", fontsize: 12, binding: "firstName" },
+            { control: "text", value: "First name:", fontsize: 12, width: 200, textAlignment: "Right", margin: { top: 10, right: 10 } },
+            { control: "edit", fontsize: 12, width: 200, binding: "firstName" },
         ] },
         { control: "stackpanel", orientation: "Horizontal", contents: [
-            { control: "text", value: "Last name:", fontsize: 12, margin: { top: 10, right: 10 } },
-            { control: "edit", fontsize: 12, binding: "lastName" },
+            { control: "text", value: "Last name:", fontsize: 12, width: 200, textAlignment: "Right", margin: { top: 10, right: 10 } },
+            { control: "edit", fontsize: 12, width: 200, binding: "lastName" },
         ] },
 
         { control: "text", value: "Hello {firstName} {lastName}", fontsize: 12 },

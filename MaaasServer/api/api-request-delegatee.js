@@ -75,6 +75,24 @@ function processHttpRequest(request, callback)
     var session = sessionStore.getSession(sessionId);
     if (!session)
     {
+        if (sessionId)
+        {
+            // If the client sent a session ID, but the server could not find that session, then we
+            // have a problem (with the dev session store this happens when the server is restarted
+            // during a client session - when we have persistent sessions, this should never happen).
+            //
+            // Since we have no way of synchronizing the client and server (we have no idea what version
+            // of the ViewModel the client has or the server used to have), we cannot execute a command.
+            // By clearing out the command, if there is one, we will effectively be forcing a silent
+            // reload of the current page.
+            //
+            if (request.body.Command)
+            {
+                logger.info("Session matching client session ID could not be found, clearing command and forcing page reload");
+                request.body.Command = null;
+            }
+        }
+        logger.info("Creating new session");
         session = sessionStore.createSession();
         newSession = true;
     }
@@ -85,7 +103,7 @@ function processHttpRequest(request, callback)
 
     if (newSession)
     {
-        logger.info("API - returning new session id: " + session.id);
+        logger.info("Returning new session id: " + session.id);
         responseObject.NewSessionId = session.id;
     }
 

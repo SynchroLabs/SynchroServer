@@ -10,17 +10,19 @@ exports.View =
     onBack: "exit",
     elements: 
     [
-        { control: "text", value: "Found {properties} listings in {location}", fontsize: 12 },
+        { control: "stackpanel", width: "*", height: "*", contents: [
+            { control: "text", value: "Found {properties} listings in {location}", fontsize: 12 },
 
-        { control: "listview", select: "None", height: 560, maxheight: 560, width: 350, binding: { items: "properties", onItemClick: { command: "propertySelected", property: "{$data}" } }, itemTemplate:
-            { control: "stackpanel", orientation: "Horizontal", padding: 5, contents: [
-                { control: "image", resource: "{img_url}" },
-                { control: "stackpanel", orientation: "Vertical", padding: 5, contents: [
-                    { control: "text", value: "{title}" },
-                    { control: "text", value: "Price: {price_formatted}" },
+            { control: "listview", select: "None", height: "*", width: 460, margin: { bottom: 0 }, binding: { items: "properties", onItemClick: { command: "propertySelected", property: "{$data}" } }, itemTemplate:
+                { control: "stackpanel", orientation: "Horizontal", padding: { top: 5, bottom: 5 }, contents: [
+                    { control: "image", resource: "{img_url}", height: 90, width: 120 },
+                    { control: "stackpanel", orientation: "Vertical", padding: { left: 5 }, contents: [
+                        { control: "text", value: "{price_formatted}", font: { bold: true, size: 10 } },
+                        { control: "text", value: "{title}", fontsize: 8 },
+                    ] },
                 ] },
-            ] },
-        },
+            },
+        ] },
     ]
 }
 
@@ -71,8 +73,11 @@ exports.InitializeViewModel = function(context, session, params)
         viewModel.properties.push({
             guid: listing.guid,
             title: listing.title,
+            summary: listing.summary,
             price_formatted: listing.price_formatted, 
-            img_url: listing.img_url
+            img_url: listing.img_url,
+            beds: listing.bedroom_number,
+            baths: listing.bathroom_number
         });
     });
 

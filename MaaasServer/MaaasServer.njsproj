@@ -46,7 +46,11 @@
     <Compile Include="api\objectmon.js" />
     <Compile Include="api\routes\binding.js" />
     <Compile Include="api\routes\device.js" />
+    <Compile Include="api\routes\fill.js" />
+    <Compile Include="api\routes\flex.js" />
+    <Compile Include="api\routes\flexflex.js" />
     <Compile Include="api\routes\font.js" />
+    <Compile Include="api\routes\image.js" />
     <Compile Include="api\routes\listclick.js" />
     <Compile Include="api\routes\picker.js" />
     <Compile Include="api\routes\propx_detail.js" />
@@ -62,7 +66,10 @@
     <Compile Include="api\routes\login.js" />
     <Compile Include="api\routes\menu.js" />
     <Compile Include="api\routes\sandbox.js" />
+    <Compile Include="api\routes\textflow.js" />
     <Compile Include="api\routes\webview.js" />
+    <Compile Include="api\routes\wrap.js" />
+    <Compile Include="api\session-store.js" />
     <Compile Include="api\util.js" />
     <Compile Include="app.js" />
     <Compile Include="public\script\ace\ace.js" />

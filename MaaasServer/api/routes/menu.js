@@ -7,25 +7,45 @@ exports.View =
     title: "Maaas.io Menu",
     elements: 
     [
-        { control: "border", border: "Red", borderThickness: 10, cornerRadius: 15, padding: 30, background: "Blue", contents: [
-            { control: "image", width: 150, height: 150, resource: "http://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash3/c23.23.285.285/s160x160/943786_10201215910308278_1343091684_n.jpg" },
-        ] },
-        { control: "button", caption: "PropertyCross", binding: { command: "goToView", view: "propx_main" } },
-        { control: "button", caption: "Hello World", binding: { command: "goToView", view: "hello" } },
-        { control: "button", caption: "Device", binding: { command: "goToView", view: "device" } },
-        { control: "button", caption: "Login Sample", binding: { command: "goToView", view: "login" } },
-        { control: "button", caption: "Click Counter Sample", binding: { command: "goToView", view: "counter" } },
-        { control: "button", caption: "List Sample", binding: { command: "goToView", view: "list" } },
-        { control: "button", caption: "List Click", binding: { command: "goToView", view: "listclick" } },
-        { control: "button", caption: "Contacts", binding: { command: "goToView", view: "listview" } },
-        { control: "button", caption: "StackPanel", binding: { command: "goToView", view: "stack" } },
-        { control: "button", caption: "Border", binding: { command: "goToView", view: "layout" } },
-        { control: "button", caption: "Font", binding: { command: "goToView", view: "font" } },
-        { control: "button", caption: "Binding", binding: { command: "goToView", view: "binding" } },
-        { control: "button", caption: "Picker", binding: { command: "goToView", view: "picker" } },
-        { control: "button", caption: "Webview", binding: { command: "goToView", view: "webview" } },
-        { control: "button", caption: "Sandbox", binding: { command: "goToView", view: "sandbox" } },
+        { control: "stackpanel", width: "*", contents: [
+            { control: "border", border: "Red", horizontalAlignment: "Center", borderThickness: 10, cornerRadius: 15, padding: { top: 15, bottom: 15, left: 50, right: 50 }, margin: { top: 10, bottom: 25 }, background: "Blue", contents: [
+                { control: "image", width: 150, height: 150, resource: maaas.getResourceUrl("cloud_system_256.png") },
+            ]
+            },
+            { control: "button", caption: "{caption}", binding: { foreach: "pages", command: "goToView", view: "{view}" } },
+        ] }
     ]
+}
+
+exports.InitializeViewModel = function (context, session)
+{
+    var viewModel =
+    {
+        pages: [
+            { caption: "Hello World", view: "hello" },
+            { caption: "Login Sample", view: "login" },
+            { caption: "Click Counter Sample", view: "counter" },
+            { caption: "PropertyCross", view: "propx_main" },
+            { caption: "Device", view: "device" },
+            { caption: "List Sample", view: "list" },
+            { caption: "List Click", view: "listclick" },
+            { caption: "Contacts", view: "listview" },
+            { caption: "StackPanel", view: "stack" },
+            { caption: "WrapPanel", view: "wrap" },
+            { caption: "Border", view: "layout" },
+            { caption: "Fill", view: "fill" },
+            { caption: "Flex", view: "flex" },
+            { caption: "Flex 2", view: "flexflex" },
+            { caption: "Text Flow", view: "textflow" },
+            { caption: "Image", view: "image" },
+            { caption: "Font", view: "font" },
+            { caption: "Binding", view: "binding" },
+            { caption: "Picker", view: "picker" },
+            { caption: "Webview", view: "webview" },
+            { caption: "Sandbox", view: "sandbox" },
+        ]
+    }
+    return viewModel;
 }
 
 exports.Commands = 
