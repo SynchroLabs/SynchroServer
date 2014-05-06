@@ -1,7 +1,5 @@
 ﻿// Property Cross list page
 //
-var maaas = require('../maaas');
-
 var http = require('http');
 
 exports.View =
@@ -64,7 +62,7 @@ exports.InitializeViewModel = function(context, session, params)
         searchTerm: params && params.searchTerm
     }
 
-    var props = maaas.waitFor(getProperties);
+    var props = Maaas.waitFor(getProperties);
 
     console.log("Got " + props.response.listings.length + " listings");
     viewModel.location = props.response.locations[0].title;
@@ -89,10 +87,10 @@ exports.Commands =
     propertySelected: function(context, session, viewModel, params)
     {
         console.log("Property selected: " + params.property.title);
-        return maaas.navigateToView(context, "propx_detail", { property: params.property });
+        return Maaas.navigateToView(context, "propx_detail", { property: params.property });
     },
     exit: function(context)
     {
-        return maaas.navigateToView(context, "propx_main");
+        return Maaas.navigateToView(context, "propx_main");
     },
 }

@@ -3,8 +3,6 @@
 var wait = require('wait.for');
 var WebSocket = require('faye-websocket');
 
-var sessionStore = require('./session-store').getSessionStore();
-
 var logger = require('log4js').getLogger("api-delegatee");
 
 // When this module is launched as a forked process, it is also loaded inproc by the parent in order to call 
@@ -18,10 +16,28 @@ var logger = require('log4js').getLogger("api-delegatee");
 // code below.
 //
 var api;
-exports.init = function()
+var sessionStore;
+
+exports.init = function(params)
 {
-    api = require('./api'); 
+    logger.info("Initializing API processor");
+
+    sessionStore = require(params.sessionStoreSpec.requirePath)(params.sessionStoreSpec.params);
+
+    var moduleStore = require(params.moduleStoreSpec.requirePath)(params.moduleStoreSpec.params);
+    var resourceResolver = require(params.resourceResolverSpec.requirePath)(params.resourceResolverSpec.params);
+
+    var moduleManager = require('./maaas-modules')(moduleStore, resourceResolver);
+
+    var ApiProcessor = require('./api');
+
+    api = new ApiProcessor(moduleManager);
+
+    logger.info("Initialized api processor: " + api);
+
+    // api = require('./api')(moduleManager);
 }
+
 function apiProcess(session, body)
 {
     return api.process(session, body);
@@ -29,22 +45,19 @@ function apiProcess(session, body)
 
 // This module may be loaded normally or as a forked process, or both...
 //
-var childId = null;
 if (module.parent) // Loaded normally (inproc via "require")
 {
-    childId = "inproc";
 }
 else // Forked child process
-{
+{    
     // Need to reconfigure log4js here (log4js config is at the process level and not inherited)
     var log4js = require('log4js');
     // Redirect console.log to log4js, turn off color coding
     log4js.configure({ appenders: [ { type: "console", layout: { type: "basic" } } ], replaceConsole: true })
 
-    childId = process.argv[2];
-    exports.init();
+    logger.info("Forked API child process started started: " + process.argv[1]); // argv[1] is the filename of this file
 
-    logger.info("API child process with id " + childId + " started: " + process.argv[1]); // argv[1] is the filename of this file
+    exports.init(JSON.parse(process.argv[2]));
 
     // Maybe we just hook stdout/stderr when we're running user modules, so we can pipe just that to the debugger.
     //

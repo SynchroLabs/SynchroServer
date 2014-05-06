@@ -11,14 +11,21 @@
 //     
 var logger = require('log4js').getLogger("api-delegator");
 
-module.exports = function(fork, debugPort)
+module.exports = function(sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, fork, debugPort)
 {
     var child = require("./api-request-delegatee");
+
+    var params = 
+    {
+        sessionStoreSpec: sessionStoreSpec,
+        moduleStoreSpec: moduleStoreSpec,
+        resourceResolverSpec: resourceResolverSpec
+    }
 
     var childProcessor = null;
     if (fork)
     {
-        var args = ['1']; // Child id (argv[2] in child process)
+        var args = [JSON.stringify(params)]; // argv[2] in child process
         var options = {};
         if (debugPort)
         {
@@ -26,7 +33,15 @@ module.exports = function(fork, debugPort)
             options['silent'] = true;
         }
 
+        logger.info("Launching child process...");
+
         var childProcess = require('child_process').fork(__dirname + '/api-request-delegatee.js', args, options);
+
+        if (!childProcess)
+        {
+            logger.info("Child process fork failed!");
+            return null;
+        }
 
         // Supposedly when silent == false the child "inherits" the main process stdout/stderr, but in practice
         // I see no console/log output over stdout when I run that way.  Running with silent == true and piping
@@ -80,6 +95,10 @@ module.exports = function(fork, debugPort)
 
         childProcessor =
         {
+            sessionStoreSpec: sessionStoreSpec,
+            moduleStoreSpec: moduleStoreSpec,
+            isForked: true,
+            isDebug: debugPort > 0,
             debugPort: debugPort,
 
             processHttpRequest : function(request, response)
@@ -109,11 +128,15 @@ module.exports = function(fork, debugPort)
     }
     else
     {
-        child.init();
+        child.init(params);
 
         childProcessor =
         {
-            debugPort: null,
+            sessionStoreSpec: sessionStoreSpec,
+            moduleStoreSpec: moduleStoreSpec,
+            isForked: false,
+            isDebug: false,
+            debugPort: 0,
 
             processHttpRequest : function(request, response)
             {

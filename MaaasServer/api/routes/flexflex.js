@@ -1,7 +1,5 @@
 ﻿// Flex 2 page
 //
-var maaas = require('../maaas');
-
 exports.View =
 {
     title: "Flex 2",
@@ -34,6 +32,6 @@ exports.Commands =
 {
     exit: function (context) 
     {
-        return maaas.navigateToView(context, "menu");
+        return Maaas.navigateToView(context, "menu");
     },
 }

@@ -75,9 +75,52 @@ app.post('/module', login.checkAuth, function(req,res){
     wait.launchFiber(edit.saveModule, req, res); //handle in a fiber, keep node spinning
 });
 
-//var apiProcessor = require("./api/api-request-delegator")(false); // In-proc
-var apiProcessor = require("./api/api-request-delegator")(true, 6969); // Forked sub-process
+// Create API processor
+//
+var apiManager = require('./api')(6969);
+
+var sessionStoreSpec = 
+{ 
+    requirePath: path.resolve('./api/session-store'), 
+    params: {}
+}
+
+var moduleStoreSpec = 
+{
+    requirePath: path.resolve('./api/file-module-store'),
+    params:
+    {
+        moduleDirectory: path.resolve(__dirname, "api/routes")
+    }
+
+    /*
+    requirePath: path.resolve('./api/cloud-module-store'),
+    params: 
+    {
+        storageAccount: "maaas",
+        storageAccessKey: "xGXFkejKx3FeaGaX6Akx4C2owNO2eXXqLmVUk5T1CZ1qPYJ4E+3wMpOl+OVPpmnm4awHBHnZ5U6Cc0gHHwzmQQ==",
+        containerName: "maaas-modules"
+    }
+    */
+}
+
+var resourceResolverSpec = 
+{ 
+    requirePath: path.resolve('./api/resource-resolver'), 
+    params: 
+    {
+        prefix: "https://maaas.blob.core.windows.net/resources/"
+    }
+}
+
+var bFork = true;  // Run API processor forked or in-proc
+var bDebug = true; // Enable debugging of API processor (only valid if running forked)
+
+var apiProcessor = apiManager.createApiProcessor(sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, bFork, bDebug);
+
 edit.setApiProcessor(apiProcessor);
+//
+// ---------------------------------------
 
 var debugApi = require('./routes/debugger/ws-debug-server');
 
@@ -87,7 +130,6 @@ app.all('/api', function(request, response)
 {
     apiProcessor.processHttpRequest(request, response);
 });
-app.use('/api/resources', express.static(path.join(__dirname, 'api/resources')));
 
 var server = http.createServer(app);
 

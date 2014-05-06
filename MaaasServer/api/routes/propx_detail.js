@@ -1,7 +1,5 @@
 ﻿// Property Cross list page
 //
-var maaas = require('../maaas');
-
 exports.View =
 {
     title: "Property Details",
@@ -31,6 +29,6 @@ exports.Commands =
 {
     exit: function(context)
     {
-        return maaas.navigateToView(context, "propx_list");
+        return Maaas.navigateToView(context, "propx_list");
     },
 }

@@ -6,39 +6,44 @@
 //
 var uuid = require('node-uuid');
 
-exports.getSessionStore = function()
+module.exports = function(params)
 {
+    // Process params into locals
+    
     var sessions = {};
 
-    this.createSession = function()
+    var sessionStore = 
     {
-        var newSessionId = uuid.v4();
-        sessions[newSessionId] = { id: newSessionId };
-        return sessions[newSessionId];
-    };
-
-    this.getSession = function(sessionId)
-    {
-        if (sessionId)
+        createSession: function()
         {
-            return sessions[sessionId];
+            var newSessionId = uuid.v4();
+            sessions[newSessionId] = { id: newSessionId };
+            return sessions[newSessionId];
+        },
+
+        getSession: function(sessionId)
+        {
+            if (sessionId)
+            {
+                return sessions[sessionId];
+            }
+            return null;
+        },
+
+        putSession: function(session)
+        {
+            // If the session put might be expensive, we could use objectmon to diff the current session with the potentially
+            // updated version (if doing a read of the stored session, plus the compare, and the occasional write is actually
+            // faster than just always doing a write).
+            //
+            sessions[session.id] = session;
+        },
+
+        deleteSession: function(sessionId)
+        {
+            delete sessions[sessionId];
         }
-        return null;
-    };
+    }
 
-    this.putSession = function(session)
-    {
-        // If the session put might be expensive, we could use objectmon to diff the current session with the potentially
-        // updated version (if doing a read of the stored session, plus the compare, and the occasional write is actually
-        // faster than just always doing a write).
-        //
-        sessions[session.id] = session;
-    };
-
-    this.deleteSession = function(sessionId)
-    {
-        delete sessions[sessionId];
-    };
-
-    return this;
+    return sessionStore;
 }

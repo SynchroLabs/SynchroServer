@@ -87,7 +87,7 @@ function loadBreakpoints(scriptName)
 function onOpen(evt) 
 { 
     console.log("CONNECTED"); 
-    doSend({ command: "connect", port: 6969}); 
+    doSend({ command: "connect", port: 6969}); // !!! Parameterize this!
 }  
 
 function onClose(evt) 

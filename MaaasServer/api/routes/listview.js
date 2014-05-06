@@ -2,8 +2,6 @@
 //
 //var contactImgUrl = "https://maaas.blob.core.windows.net/resources/user.png";
 
-var maaas = require('../maaas');
-
 exports.View =
 {
     title: "Contacts example",
@@ -23,7 +21,7 @@ exports.View =
                 { control: "text", value: "Your Contacts", fontsize: 12 },
                 { control: "listview", select: "Multiple", height: 300, maxheight: 300, width: 300, binding: { items: "contacts", selection: "selectedContacts" }, itemTemplate:
                     { control: "stackpanel", orientation: "Horizontal", padding: 5, contents: [
-                        { control: "image", resource: maaas.getResourceUrl("user.png"), height: 50, width: 50 },
+                        { control: "image", resource: Maaas.getResourceUrl("user.png"), height: 50, width: 50 },
                         { control: "stackpanel", orientation: "Vertical", contents: [
                             { control: "text", value: "{first}" },
                             { control: "text", value: "{last}" },
@@ -88,6 +86,6 @@ exports.Commands =
     },
     exit: function(context)
     {
-        return maaas.navigateToView(context, "menu");
+        return Maaas.navigateToView(context, "menu");
     },
 }

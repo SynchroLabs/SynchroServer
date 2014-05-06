@@ -1,24 +1,31 @@
 ﻿// This module contains the MAAAS API that is exposed to pages/screens
 //
-var maaasApi = require('./api');
 var wait = require('wait.for');
 
-exports.getResourceUrl = function(resource)
+module.exports = function(apiProcessor, resourceResolver)
 {
-    return "https://maaas.blob.core.windows.net/resources/" + resource;
-}
+	var maaas = 
+	{
+		getResourceUrl: function(resource)
+		{
+		    return resourceResolver.getResourceUrl(resource);
+		},
 
-exports.navigateToView = function(context, route, params)
-{
-    maaasApi.navigateToView(context, route, params);
-}
+		navigateToView: function(context, route, params)
+		{
+		    apiProcessor.navigateToView(context, route, params);
+		},
 
-exports.showMessage = function(context, messageBox)
-{
-    maaasApi.showMessage(context, messageBox);
-}
+		showMessage: function(context, messageBox)
+		{
+		    apiProcessor.showMessage(context, messageBox);
+		},
 
-exports.waitFor = function()
-{
-    return wait.for.apply(this, arguments);
+		waitFor: function()
+		{
+		    return wait.for.apply(this, arguments);
+		}
+	}
+
+	return maaas;
 }

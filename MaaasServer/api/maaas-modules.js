@@ -7,14 +7,15 @@ var Module = require('module');
 
 var logger = require('log4js').getLogger("maaas-modules");
 
+
 // This is where we keep the dictionary of pending modules, where the index is the filename (full path) 
 // of the module to be loaded, and the value is the module source.
 //
 var pendingModules = { };
 
-function pushModuleSource(filename, source)
+function pushModuleSource(filename, source, maaasSupportModule)
 {
-    pendingModules[filename] = source;
+    pendingModules[filename] = { source: source, maaasSupportModule: maaasSupportModule };
 }
 
 function popModuleSource(filename)
@@ -64,10 +65,22 @@ Module._extensions['.js'] = (function(original)
 {
     return function(module, filename) 
     {
-        var content = popModuleSource(filename);
-        if (content)
+        var moduleSource = popModuleSource(filename);
+        if (moduleSource)
         {
-            module._compile(content, filename);
+            // When a module is loaded by Node, it is wrapped in this function:
+            //
+            //    (function (exports, require, module, __filename, __dirname) { -- your module code goes here --    
+            //    });
+            //
+            // This happens as part of NativeModule.wrap() - see: https://github.com/joyent/node/blob/master/src/node.js
+            //
+            // Below we take advantage of this to jam in the Maaas module reference.  It is tempting to add a newline, 
+            // but that would interfere with the line numbering of the file, which is important for debugging/breakpoints.
+            //
+            module.maaasSupportModule = moduleSource.maaasSupportModule;
+            var source = " var Maaas = module.maaasSupportModule; " + moduleSource.source;
+            module._compile(source, filename);
         }
         else
         {
@@ -78,65 +91,70 @@ Module._extensions['.js'] = (function(original)
 
 // -----------------------------------------------------------
 
-var moduleStore = require("./file-module-store");
-//var moduleStore = require("./cloud-module-store");
-
-exports.getModuleStore = function()
-{
-    return moduleStore;
-}
-
-// This is the route dictionary (routePath: module)
-//
-var routes = {};
-
 // This is the directory (under the current directory of this module) where we pretend the module files are
 var moduleSubDir = "routes"; 
 
 // This is the full path to the directory where we pretend the module files area
 var moduleDir = path.resolve(__dirname, moduleSubDir); 
 
-function loadModule(moduleName, source)
+module.exports = function(moduleStore, resourceResolver)
 {
-    var filename = path.resolve(moduleDir, moduleName);
-
-    pushModuleSource(filename, source);
-    var maaasModule = require(filename);
-    popModuleSource(filename); // Should get popped in module load, this is just in case module was cached (and not loaded/popped)
-
-    var routePath = path.basename(moduleName, path.extname(moduleName));
-    logger.info("Found and loaded route processor for: " + routePath);
-    routes[routePath] = maaasModule;
-    maaasModule.View["path"] = routePath;
-}
-
-exports.loadModules = function()
-{
-    var moduleNames = moduleStore.listModules();
-    for (var i = 0; i < moduleNames.length; i++) 
-    {
-        var moduleName = moduleNames[i];
-        var source = moduleStore.getModuleSource(moduleName);
-        loadModule(moduleName, source);
-    }
-}
-
-exports.reloadModule = function(moduleName, source) 
-{
-    var filename = path.resolve(moduleDir, moduleName);
-    var moduleSource = source || moduleStore.getModuleSource(moduleName);
-
-    // Delete from cache to allow us to re-require the module...
+    // This is the route dictionary (routePath: module)
     //
-    if (require.cache[filename])
+    var routes = {};
+
+    var maaasSupportModule;
+
+    function loadModule(moduleName, source)
     {
-        delete require.cache[filename];
+        var filename = path.resolve(moduleDir, moduleName);
+
+        logger.info("Pushing source for module: " + moduleName + " with Maaas support module: " + maaasSupportModule);
+        pushModuleSource(filename, source, maaasSupportModule);
+        var maaasModule = require(filename);
+        popModuleSource(filename); // Should get popped in module load, this is just in case module was cached (and not loaded/popped)
+
+        var routePath = path.basename(moduleName, path.extname(moduleName));
+        logger.info("Found and loaded route processor for: " + routePath);
+        routes[routePath] = maaasModule;
+        maaasModule.View["path"] = routePath;
     }
 
-    loadModule(moduleName, moduleSource);
-}
+    var moduleManager = 
+    { 
+        loadModules: function(apiProcessor)
+        {
+            maaasSupportModule = require('./maaas')(apiProcessor, resourceResolver);
 
-exports.getModule = function(routePath)
-{
-    return routes[routePath];
+            var moduleNames = moduleStore.listModules();
+            for (var i = 0; i < moduleNames.length; i++) 
+            {
+                var moduleName = moduleNames[i];
+                var source = moduleStore.getModuleSource(moduleName);
+                loadModule(moduleName, source);
+            }
+        },
+
+        reloadModule: function(moduleName, source) 
+        {
+            var filename = path.resolve(moduleDir, moduleName);
+            var moduleSource = source || moduleStore.getModuleSource(moduleName);
+
+            // Delete from cache to allow us to re-require the module...
+            //
+            if (require.cache[filename])
+            {
+                delete require.cache[filename];
+            }
+
+            loadModule(moduleName, moduleSource);
+        },
+
+        getModule: function(routePath)
+        {
+            return routes[routePath];
+        }
+    }
+
+    return moduleManager;
 }

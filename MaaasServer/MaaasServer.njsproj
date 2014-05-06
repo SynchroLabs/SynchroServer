@@ -41,9 +41,11 @@
     <Compile Include="api\api.js" />
     <Compile Include="api\cloud-module-store.js" />
     <Compile Include="api\file-module-store.js" />
+    <Compile Include="api\index.js" />
     <Compile Include="api\maaas-modules.js" />
     <Compile Include="api\maaas.js" />
     <Compile Include="api\objectmon.js" />
+    <Compile Include="api\resource-resolver.js" />
     <Compile Include="api\routes\binding.js" />
     <Compile Include="api\routes\device.js" />
     <Compile Include="api\routes\fill.js" />
@@ -351,7 +353,7 @@
     <Compile Include="routes\login.js" />
     <Compile Include="public\script\ws-debug-client.js" />
     <Compile Include="public\script\sandbox.js" />
-    <Content Include="api\resources\tdd.png" />
+    <Content Include="api\package.json" />
     <Content Include="bin\iisnode-full-iis7-v0.2.7-x64.msi" />
     <Content Include="package.json" />
     <Content Include="public\stylesheets\style.css" />
@@ -366,7 +368,6 @@
     <Content Include="Web.Release.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="api\resources\" />
     <Folder Include="api\routes\" />
     <Folder Include="bin\" />
     <Folder Include="api\" />

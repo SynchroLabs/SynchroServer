@@ -1,7 +1,5 @@
 // Counter page
 //
-var maaas = require('../maaas');
-
 var fontStyle = 
 {
     normal: { color: "Green", isBold: false },
@@ -77,6 +75,6 @@ exports.Commands =
     },
     exit: function(context)
     {
-        return maaas.navigateToView(context, "menu");
+        return Maaas.navigateToView(context, "menu");
     },
 }

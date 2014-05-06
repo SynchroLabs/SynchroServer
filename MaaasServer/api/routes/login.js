@@ -1,7 +1,5 @@
 // Login page
 //
-var maaas = require('../maaas');
-
 exports.View =
 {
     title: "Login",
@@ -49,19 +47,19 @@ exports.Commands =
                     { label: "Cancel" },
                 ]
             }
-            return maaas.showMessage(context, messageBox);
+            return Maaas.showMessage(context, messageBox);
         }
         else
         {
-            return maaas.showMessage(context, { message: "Sorry, you failed!" });
+            return Maaas.showMessage(context, { message: "Sorry, you failed!" });
         }
     },
     success: function(context)
     {
-        return maaas.navigateToView(context, "counter");
+        return Maaas.navigateToView(context, "counter");
     },
     cancel: function(context)
     {
-        return maaas.navigateToView(context, "menu");
+        return Maaas.navigateToView(context, "menu");
     },
 }

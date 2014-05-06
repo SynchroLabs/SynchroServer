@@ -1,7 +1,5 @@
 ﻿// Wrappanel page
 //
-var maaas = require('../maaas');
-
 exports.View =
 {
     title: "WrapPanel",
@@ -49,6 +47,6 @@ exports.Commands =
     },
     exit: function (context)
     {
-        return maaas.navigateToView(context, "menu");
+        return Maaas.navigateToView(context, "menu");
     },
 }

@@ -5,24 +5,7 @@ var util = require('./util');
 
 var logger = require('log4js').getLogger("maaas-api");
 
-// Load the Maaas modules asynchronously...
-//
-var maaasModules = require('./maaas-modules');
 var wait = require('wait.for');
-try
-{
-    logger.info("Launching fiber to load Maaas modules...");
-    wait.launchFiber(maaasModules.loadModules); // Load modules in a fiber - keep node spinning on async module load operations
-}
-catch (err)
-{
-    logger.info("Error launching fiber to load Maaas modules: " + err);
-}
-
-exports.reloadModule = function(moduleName)
-{
-    maaasModules.reloadModule(moduleName);
-}
 
 function getObjectProperty(obj, propertyPath)
 {
@@ -207,7 +190,31 @@ function getFilteredView(session, view)
     return processObject(session, lodash.cloneDeep(view));
 }
 
-exports.showMessage = function(context, messageBox)
+// Public API
+//
+var MaaasApi = function(moduleManager)
+{
+    this.moduleManager = moduleManager;
+
+    // Load the Maaas modules asynchronously...
+    //
+    try
+    {
+        logger.info("Launching fiber to load Maaas modules...");
+        wait.launchFiber(this.moduleManager.loadModules, this); // Load modules in a fiber - keep node spinning on async module load operations
+    }
+    catch (err)
+    {
+        logger.info("Error launching fiber to load Maaas modules: " + err);
+    }
+}
+
+MaaasApi.prototype.reloadModule = function(moduleName)
+{
+    this.moduleManager.reloadModule(this, moduleName);
+}
+
+MaaasApi.prototype.showMessage = function(context, messageBox)
 {
     context.response.MessageBox = messageBox;
 }
@@ -216,9 +223,9 @@ exports.showMessage = function(context, messageBox)
 // route - the route to the new view
 // params - option dictionary of params, if provided is passed to InitializeViewModel
 //
-exports.navigateToView = function(context, route, params)
+MaaasApi.prototype.navigateToView = function(context, route, params)
 {
-    var routeModule = maaasModules.getModule(route);
+    var routeModule = this.moduleManager.getModule(route);
     if (routeModule)
     {
         logger.info("Found route module for " + route);
@@ -237,7 +244,7 @@ exports.navigateToView = function(context, route, params)
 
 // Takes a Maaas request object and returns a Maaas response object
 //
-exports.process = function(session, requestObject)
+MaaasApi.prototype.process = function(session, requestObject)
 {
     var context = 
     {
@@ -248,7 +255,7 @@ exports.process = function(session, requestObject)
 
     logger.info("Processing path " + context.request.Path);
 
-	var routeModule = maaasModules.getModule(context.request.Path);
+	var routeModule = this.moduleManager.getModule(context.request.Path);
     if (routeModule)
     {
         var viewModelAfterUpdate = null;
@@ -342,3 +349,5 @@ exports.process = function(session, requestObject)
 
     return context.response;
 }
+
+module.exports = MaaasApi;

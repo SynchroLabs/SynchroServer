@@ -1,7 +1,5 @@
 ﻿// Image scaling page
 //
-var maaas = require('../maaas');
-
 exports.View =
 {
     title: "Image",
@@ -13,7 +11,7 @@ exports.View =
             { control: "slider", minimum: 10, maximum: 400, binding: "size", width: 300 },
             ]
         },
-        { control: "image", resource: maaas.getResourceUrl("user.png"), height: "{size}", width: "{size}" },
+        { control: "image", resource: Maaas.getResourceUrl("user.png"), height: "{size}", width: "{size}" },
     ]
 }
 
@@ -30,6 +28,6 @@ exports.Commands =
 {
     exit: function (context)
     {
-        return maaas.navigateToView(context, "menu");
+        return Maaas.navigateToView(context, "menu");
     },
 }

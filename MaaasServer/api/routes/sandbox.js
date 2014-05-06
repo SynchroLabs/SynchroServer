@@ -1,8 +1,6 @@
 ﻿// Sandbox page
 //
-var maaas = require('../maaas');
-
-var tddLogo = "resources/tdd.png";
+var userImage =  Maaas.getResourceUrl("user.png");
 var profileImage = "http://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash3/c23.23.285.285/s160x160/943786_10201215910308278_1343091684_n.jpg";
 
 exports.View =
@@ -37,17 +35,17 @@ exports.Commands =
 {
     switchImages: function(context, session, viewModel)
     {
-        if (viewModel.image == tddLogo)
+        if (viewModel.image == userImage)
         {
             viewModel.image = profileImage;
         }
         else
         {
-            viewModel.image = tddLogo;
+            viewModel.image = userImage;
         }
     },
     exit: function(context)
     {
-        return maaas.navigateToView(context, "menu");
+        return Maaas.navigateToView(context, "menu");
     },
 }

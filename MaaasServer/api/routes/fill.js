@@ -1,7 +1,5 @@
 ﻿// Fill layout page
 //
-var maaas = require('../maaas');
-
 exports.View =
 {
     title: "Fill",
@@ -21,7 +19,8 @@ exports.InitializeViewModel = function (context, session) {
 
 exports.Commands =
 {
-    exit: function (context) {
-        return maaas.navigateToView(context, "menu");
+    exit: function (context) 
+    {
+        return Maaas.navigateToView(context, "menu");
     },
 }

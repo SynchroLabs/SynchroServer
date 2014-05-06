@@ -1,7 +1,5 @@
 ﻿// Property Cross main page
 //
-var maaas = require('../maaas');
-
 exports.View =
 {
     title: "PropertyCross",
@@ -59,22 +57,22 @@ exports.Commands =
 {
     search: function(context, session, viewModel)
     {
-        return maaas.navigateToView(context, "propx_list", { searchTerm: viewModel.search });
+        return Maaas.navigateToView(context, "propx_list", { searchTerm: viewModel.search });
     },
     location: function(context, session, viewModel)
     {
-        return maaas.navigateToView(context, "propx_list");
+        return Maaas.navigateToView(context, "propx_list");
     },
     previousSearch: function(context, session, viewModel, params)
     {
-        return maaas.navigateToView(context, "propx_list", { searchTerm: params.searchTerm });
+        return Maaas.navigateToView(context, "propx_list", { searchTerm: params.searchTerm });
     },
     favs: function(context, session, viewModel)
     {
-        return maaas.navigateToView(context, "propx_favs");
+        return Maaas.navigateToView(context, "propx_favs");
     },
     exit: function(context)
     {
-        return maaas.navigateToView(context, "menu");
+        return Maaas.navigateToView(context, "menu");
     },
 }

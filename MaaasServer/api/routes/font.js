@@ -1,7 +1,5 @@
 ﻿// Font page
 //
-var maaas = require('../maaas');
-
 exports.View =
 {
     title: "Font",
@@ -57,6 +55,6 @@ exports.Commands =
 
     exit: function(context)
     {
-        return maaas.navigateToView(context, "menu");
+        return Maaas.navigateToView(context, "menu");
     },
 }

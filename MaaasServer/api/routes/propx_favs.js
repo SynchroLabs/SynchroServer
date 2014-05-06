@@ -1,7 +1,5 @@
 ﻿// Property Cross list page
 //
-var maaas = require('../maaas');
-
 exports.View =
 {
     title: "Favorites",
@@ -27,6 +25,6 @@ exports.Commands =
     },
     exit: function(context)
     {
-        return maaas.navigateToView(context, "propx_main");
+        return Maaas.navigateToView(context, "propx_main");
     },
 }
