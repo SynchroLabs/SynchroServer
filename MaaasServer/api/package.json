@@ -1,7 +1,0 @@
-{
-  "name": "maaas",
-  "version": "0.0.0",
-  "description": "Mobile Application As A Service - server",
-  "main": "index.js",
-  "author": "Bob Dickinson <bob@maaas.io> (http://maaas.io/)"
-}

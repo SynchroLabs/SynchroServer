@@ -77,36 +77,36 @@ app.post('/module', login.checkAuth, function(req,res){
 
 // Create API processor
 //
-var apiManager = require('./api')(6969);
+var apiManager = require('./maaas-api')(6969);
 
 var sessionStoreSpec = 
 { 
-    requirePath: path.resolve('./api/session-store'), 
+    requirePath: path.resolve('./maaas-api/session-store'), 
     params: {}
 }
 
 var moduleStoreSpec = 
 {
-    requirePath: path.resolve('./api/file-module-store'),
+    /*
+    requirePath: path.resolve('./maaas-api/file-module-store'),
     params:
     {
-        moduleDirectory: path.resolve(__dirname, "api/routes")
+        moduleDirectory: path.resolve(__dirname, "maaas-samples")
     }
+    */
 
-    /*
-    requirePath: path.resolve('./api/cloud-module-store'),
+    requirePath: path.resolve('./maaas-azure/azure-module-store'),
     params: 
     {
         storageAccount: "maaas",
         storageAccessKey: "xGXFkejKx3FeaGaX6Akx4C2owNO2eXXqLmVUk5T1CZ1qPYJ4E+3wMpOl+OVPpmnm4awHBHnZ5U6Cc0gHHwzmQQ==",
         containerName: "maaas-modules"
     }
-    */
 }
 
 var resourceResolverSpec = 
 { 
-    requirePath: path.resolve('./api/resource-resolver'), 
+    requirePath: path.resolve('./maaas-api/resource-resolver'), 
     params: 
     {
         prefix: "https://maaas.blob.core.windows.net/resources/"

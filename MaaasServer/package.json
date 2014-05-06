@@ -9,12 +9,8 @@
   },
   "dependencies": {
     "express": "~3.4.8",
-    "objectdiff": "~1.1.0",
     "faye-websocket": "~0.7.0",
-    "lodash": "~2.4.1",
-    "node-uuid": "~1.4.1",
     "wait.for": "~0.6.3",
-    "azure": "^0.8.1",
     "express-hbs": "^0.7.9",
     "log4js": "^0.6.12"
   }

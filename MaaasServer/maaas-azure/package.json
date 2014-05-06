@@ -1,0 +1,9 @@
+{
+  "name": "maaas-azure",
+  "version": "0.0.0",
+  "description": "Mobile Application As A Service - Azure support",
+  "author": "Bob Dickinson <bob@maaas.io> (http://maaas.io/)",
+  "dependencies": {
+    "azure": "^0.9.7"
+  }
+}
