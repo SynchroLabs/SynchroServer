@@ -77,37 +77,43 @@ app.post('/module', login.checkAuth, function(req,res){
 
 // Create API processor
 //
-var apiManager = require('./maaas-api')(6969);
+var maaasApi = require('./maaas-api');
+
+var apiManager = maaasApi.createApiProcessorManager(6969);
 
 var sessionStoreSpec = 
 { 
-    requirePath: path.resolve('./maaas-api/session-store'), 
-    params: {}
+    packageRequirePath: path.resolve('./maaas-api'), 
+    serviceName: 'MemorySessionStore',
+    serviceConfiguration: {}
 }
 
 var moduleStoreSpec = 
 {
-    /*
-    requirePath: path.resolve('./maaas-api/file-module-store'),
-    params:
+    packageRequirePath: path.resolve('./maaas-api'), 
+    serviceName: 'FileModuleStore',
+    serviceConfiguration: 
     {
         moduleDirectory: path.resolve(__dirname, "maaas-samples")
     }
-    */
 
-    requirePath: path.resolve('./maaas-azure/azure-module-store'),
-    params: 
+    /*
+    packageRequirePath: path.resolve('./maaas-azure'), 
+    serviceName: 'AzureModuleStore',
+    serviceConfiguration: 
     {
         storageAccount: "maaas",
         storageAccessKey: "xGXFkejKx3FeaGaX6Akx4C2owNO2eXXqLmVUk5T1CZ1qPYJ4E+3wMpOl+OVPpmnm4awHBHnZ5U6Cc0gHHwzmQQ==",
         containerName: "maaas-modules"
     }
+    */
 }
 
 var resourceResolverSpec = 
 { 
-    requirePath: path.resolve('./maaas-api/resource-resolver'), 
-    params: 
+    packageRequirePath: path.resolve('./maaas-api'), 
+    serviceName: 'ResourceResolver',
+    serviceConfiguration: 
     {
         prefix: "https://maaas.blob.core.windows.net/resources/"
     }

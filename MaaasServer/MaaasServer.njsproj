@@ -37,13 +37,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="app.js" />
-    <Compile Include="maaas-api\api-request-delegatee.js" />
-    <Compile Include="maaas-api\api-request-delegator.js" />
-    <Compile Include="maaas-api\api.js" />
-    <Compile Include="maaas-api\file-module-store.js" />
+    <Compile Include="maaas-api\lib\api-request-delegatee.js" />
+    <Compile Include="maaas-api\lib\api-request-delegator.js" />
+    <Compile Include="maaas-api\lib\api.js" />
+    <Compile Include="maaas-api\lib\file-module-store.js" />
     <Compile Include="maaas-api\index.js" />
-    <Compile Include="maaas-api\maaas-modules.js" />
-    <Compile Include="maaas-api\maaas.js" />
+    <Compile Include="maaas-api\lib\maaas-modules.js" />
+    <Compile Include="maaas-api\lib\maaas.js" />
     <Compile Include="maaas-api\node_modules\lodash\dist\lodash.compat.js" />
     <Compile Include="maaas-api\node_modules\lodash\dist\lodash.compat.min.js" />
     <Compile Include="maaas-api\node_modules\lodash\dist\lodash.js" />
@@ -56,10 +56,10 @@
     <Compile Include="maaas-api\node_modules\node-uuid\test\test.js" />
     <Compile Include="maaas-api\node_modules\node-uuid\uuid.js" />
     <Compile Include="maaas-api\node_modules\objectdiff\objectDiff.js" />
-    <Compile Include="maaas-api\objectmon.js" />
-    <Compile Include="maaas-api\resource-resolver.js" />
-    <Compile Include="maaas-api\session-store.js" />
-    <Compile Include="maaas-api\util.js" />
+    <Compile Include="maaas-api\lib\objectmon.js" />
+    <Compile Include="maaas-api\lib\resource-resolver.js" />
+    <Compile Include="maaas-api\lib\session-store.js" />
+    <Compile Include="maaas-api\lib\util.js" />
     <Compile Include="maaas-aws\node_modules\aws-sdk\lib\aws.js" />
     <Compile Include="maaas-aws\node_modules\aws-sdk\lib\browser.js" />
     <Compile Include="maaas-aws\node_modules\aws-sdk\lib\config.js" />
@@ -168,7 +168,7 @@
     <Compile Include="maaas-aws\node_modules\aws-sdk\node_modules\xmlbuilder\lib\index.js" />
     <Compile Include="maaas-aws\node_modules\aws-sdk\node_modules\xmlbuilder\lib\XMLBuilder.js" />
     <Compile Include="maaas-aws\node_modules\aws-sdk\node_modules\xmlbuilder\lib\XMLFragment.js" />
-    <Compile Include="maaas-azure\azure-module-store.js" />
+    <Compile Include="maaas-azure\lib\azure-module-store.js" />
     <Compile Include="maaas-azure\node_modules\azure\examples\samples\blobuploaddownloadsample.js" />
     <Compile Include="maaas-azure\node_modules\azure\examples\samples\continuationsample.js" />
     <Compile Include="maaas-azure\node_modules\azure\examples\samples\leaseblobsample.js" />
@@ -1709,6 +1709,7 @@
   <ItemGroup>
     <Folder Include="bin\" />
     <Folder Include="maaas-api\" />
+    <Folder Include="maaas-api\lib\" />
     <Folder Include="maaas-api\node_modules\" />
     <Folder Include="maaas-api\node_modules\lodash\" />
     <Folder Include="maaas-api\node_modules\lodash\dist\" />
@@ -1716,6 +1717,7 @@
     <Folder Include="maaas-api\node_modules\node-uuid\benchmark\" />
     <Folder Include="maaas-api\node_modules\node-uuid\test\" />
     <Folder Include="maaas-api\node_modules\objectdiff\" />
+    <Folder Include="maaas-aws\lib\" />
     <Folder Include="maaas-aws\node_modules\" />
     <Folder Include="maaas-aws\node_modules\aws-sdk\" />
     <Folder Include="maaas-aws\node_modules\aws-sdk\lib\" />
@@ -1744,6 +1746,7 @@
     <Folder Include="maaas-aws\node_modules\aws-sdk\node_modules\xmlbuilder\lib\" />
     <Folder Include="maaas-aws\node_modules\aws-sdk\scripts\" />
     <Folder Include="maaas-azure\" />
+    <Folder Include="maaas-azure\lib\" />
     <Folder Include="maaas-azure\node_modules\" />
     <Folder Include="maaas-azure\node_modules\azure\" />
     <Folder Include="maaas-azure\node_modules\azure\examples\" />

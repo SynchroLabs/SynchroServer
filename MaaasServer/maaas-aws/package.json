@@ -2,6 +2,7 @@
   "name": "maaas-aws",
   "version": "0.0.0",
   "description": "Mobile Application As A Service - Amazon AWS support",
+  "main": "index.js",  
   "author": "Bob Dickinson <bob@maaas.io> (http://maaas.io/)",
   "dependencies": {
     "aws-sdk": "^2.0.0-rc.15"

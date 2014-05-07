@@ -1,5 +1,6 @@
 ﻿// API request delegatee - process API requests
 //
+var maaasApi = require('../index'); // !!! Should probably be 'maaas-api' (if maaas-api installed as module in node_modules)
 var wait = require('wait.for');
 var WebSocket = require('faye-websocket');
 
@@ -22,20 +23,15 @@ exports.init = function(params)
 {
     logger.info("Initializing API processor");
 
-    sessionStore = require(params.sessionStoreSpec.requirePath)(params.sessionStoreSpec.params);
+    sessionStore = maaasApi.createServiceFromSpec(params.sessionStoreSpec);
 
-    var moduleStore = require(params.moduleStoreSpec.requirePath)(params.moduleStoreSpec.params);
-    var resourceResolver = require(params.resourceResolverSpec.requirePath)(params.resourceResolverSpec.params);
+    var moduleStore = maaasApi.createServiceFromSpec(params.moduleStoreSpec);
+    var resourceResolver = maaasApi.createServiceFromSpec(params.resourceResolverSpec);
 
     var moduleManager = require('./maaas-modules')(moduleStore, resourceResolver);
 
     var ApiProcessor = require('./api');
-
     api = new ApiProcessor(moduleManager);
-
-    logger.info("Initialized api processor: " + api);
-
-    // api = require('./api')(moduleManager);
 }
 
 function apiProcess(session, body)

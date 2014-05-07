@@ -1,6 +1,7 @@
 ﻿/*
  * GET edit page.
  */
+var maaasApi = require('../maaas-api'); // !!! Should probably be 'maaas-api' (if maaas-api installed as module in node_modules)
 var logger = require('log4js').getLogger("web-edit");
 
 var _apiProcessor;
@@ -9,12 +10,7 @@ var moduleStore;
 exports.setApiProcessor = function(apiProcessor)
 {
     _apiProcessor = apiProcessor;
-
-    // We're going to create a module store via spec, using the same module store spec that the API processor
-    // used.  Note that this will not be the same module store object (the API processor may be in a forked
-    // child process, so we can't share objects).
-    //
-    moduleStore = require(_apiProcessor.moduleStoreSpec.requirePath)(_apiProcessor.moduleStoreSpec.params);
+    moduleStore = maaasApi.createServiceFromSpec(_apiProcessor.moduleStoreSpec);
 }
 
 // Signal the API processor that the module needs to be reloaded (the API itself may be running inproc or as a
