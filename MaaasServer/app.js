@@ -2,8 +2,6 @@
  * Module dependencies.
  */
 var express = require('express');
-var routes = require('./routes');
-var edit = require('./routes/edit');
 var login = require('./routes/login');
 var http = require('http');
 var path = require('path');
@@ -23,6 +21,11 @@ var app = express();
 
 var MemoryStore = express.session.MemoryStore;
 var sessionStore = new MemoryStore();
+
+var MaaasStudio = require('./maaas-studio');
+var maaasStudioUrlPrefix = '/studio';
+
+var maaasStudio = new MaaasStudio(maaasStudioUrlPrefix);
 
 // all environments
 app.set('port', process.env.PORT || 1337);
@@ -51,29 +54,20 @@ app.use(express.urlencoded());
 app.use(express.methodOverride());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
+maaasStudio.addMiddleware(app);
 
 // development only
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
+maaasStudio.addRoutes(app, login.checkAuth);
+
 app.get('/', function(req, res) {
     res.render('index');
 });
 app.all('/login', login.login);
 app.get('/logout', login.logout);
-
-// We need to process /sandbox and /module (get and put) on a fiber, since they use wait.for to do async processing...
-//
-app.get('/sandbox', login.checkAuth, function(req,res){
-    wait.launchFiber(edit.edit, req, res); //handle in a fiber, keep node spinning
-});
-app.get('/module', login.checkAuth, function(req,res){
-    wait.launchFiber(edit.loadModule, req, res); //handle in a fiber, keep node spinning
-});
-app.post('/module', login.checkAuth, function(req,res){
-    wait.launchFiber(edit.saveModule, req, res); //handle in a fiber, keep node spinning
-});
 
 // Create API processor
 //
@@ -124,11 +118,10 @@ var bDebug = true; // Enable debugging of API processor (only valid if running f
 
 var apiProcessor = apiManager.createApiProcessor(sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, bFork, bDebug);
 
-edit.setApiProcessor(apiProcessor);
+maaasStudio.setApiProcessor(apiProcessor);
+
 //
 // ---------------------------------------
-
-var debugApi = require('./routes/debugger/ws-debug-server');
 
 // Let the API processor handle requests to /api
 //
@@ -176,9 +169,9 @@ server.on('upgrade', function(request, socket, body)
         {
             apiProcessor.processWebSocket(request, socket, body);
         }
-        else if (path === "/debug") // !!! Web session auth (maybe inside websocket processor - to get/use session)
+        else if (path === maaasStudioUrlPrefix) // !!! Web session auth (maybe inside websocket processor - to get/use session)
         {
-            debugApi.processWebSocket(request, socket, body);
+            maaasStudio.processWebSocket(request, socket, body);
         }
         else
         {

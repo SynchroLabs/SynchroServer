@@ -4,5 +4,6 @@
   "description": "Mobile Application As A Service - Development environment",
   "author": "Bob Dickinson <bob@maaas.io> (http://maaas.io/)",
   "dependencies": {
+    "express-hbs": "^0.7.9"
   }
 }
