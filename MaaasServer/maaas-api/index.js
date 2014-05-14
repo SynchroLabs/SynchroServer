@@ -4,7 +4,7 @@ var logger = require('log4js').getLogger("maaas-api");
 
 // For the Maaas "services" (session store, module store, and resource resolver), since the API processor
 // may be a forked process we cannot pass these services as modules or live objects (since those can't be
-// sent as process creation parameters or via IPC).  The forked process needs  to load these services itself.  
+// sent as process creation parameters or via IPC).  The forked process needs to load these services itself.  
 // To accomodate this, we indicate these services by specification, which looks like this:
 //
 //    var serviceSpec = 

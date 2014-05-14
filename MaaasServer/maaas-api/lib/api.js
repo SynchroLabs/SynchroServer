@@ -194,19 +194,32 @@ function getFilteredView(session, view)
 //
 var MaaasApi = function(moduleManager)
 {
+    this.appDefinition = null;
     this.moduleManager = moduleManager;
 
     // Load the Maaas modules asynchronously...
     //
     try
     {
-        logger.info("Launching fiber to load Maaas modules...");
-        wait.launchFiber(this.moduleManager.loadModules, this); // Load modules in a fiber - keep node spinning on async module load operations
+        logger.info("Launching fiber to load Maaas app...");
+        wait.launchFiber(this.moduleManager.loadModules, this, this.onLoadComplete.bind(this)); // Load modules in a fiber - keep node spinning on async module load operations
     }
     catch (err)
     {
-        logger.info("Error launching fiber to load Maaas modules: " + err);
+        logger.info("Error launching fiber to load Maaas app: " + err);
     }
+}
+
+MaaasApi.prototype.onLoadComplete = function(err, appDefinition)
+{
+    this.appDefinition = appDefinition;
+    logger.info("Maaas app load complete for: " + this.appDefinition.name + " - " + this.appDefinition.description);
+}
+
+MaaasApi.prototype.getAppDefinition = function()
+{
+    logger.info("Sending appDefinition: " + this.appDefinition);
+    return this.appDefinition;
 }
 
 MaaasApi.prototype.reloadModule = function(moduleName)

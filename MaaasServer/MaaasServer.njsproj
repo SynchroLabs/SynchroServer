@@ -1922,6 +1922,7 @@
     <Content Include="maaas-azure\node_modules\azure\README.md" />
     <Content Include="maaas-azure\node_modules\azure\scripts\updatePackageVersions.ps1" />
     <Content Include="maaas-azure\package.json" />
+    <Content Include="maaas-samples\maaas.json" />
     <Content Include="maaas-studio\node_modules\express-hbs\.editorconfig" />
     <Content Include="maaas-studio\node_modules\express-hbs\.jsbeautifyrc" />
     <Content Include="maaas-studio\node_modules\express-hbs\.npmignore" />

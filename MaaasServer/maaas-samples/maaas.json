@@ -1,0 +1,7 @@
+{
+  "name": "maaas-samples",
+  "version": "0.0.0",
+  "description": "MAAAS API Samples",
+  "mainPage": "menu",
+  "author": "Bob Dickinson <bob@maaas.io> (http://maaas.io/)"
+}

@@ -121,9 +121,11 @@ module.exports = function(moduleStore, resourceResolver)
     }
 
     var moduleManager = 
-    { 
-        loadModules: function(apiProcessor)
+    {
+        loadModules: function(apiProcessor, cb)
         {
+            cb = cb || function() {};
+
             maaasSupportModule = require('./maaas')(apiProcessor, resourceResolver);
 
             var moduleNames = moduleStore.listModules();
@@ -133,6 +135,9 @@ module.exports = function(moduleStore, resourceResolver)
                 var source = moduleStore.getModuleSource(moduleName);
                 loadModule(moduleName, source);
             }
+
+            var appDefinition = moduleStore.getAppDefinition();
+            cb(null, appDefinition);
         },
 
         reloadModule: function(moduleName, source) 

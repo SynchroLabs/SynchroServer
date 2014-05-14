@@ -1,6 +1,7 @@
 // This is the cloud-based module store.  It works with modules in the "maaas-modules" container of the Azure
 // storage "maaas".
 //
+var path = require('path');
 var azure = require('azure');
 var wait = require('wait.for');
 
@@ -66,6 +67,12 @@ module.exports = function(params)
 
     var moduleStore = 
     {
+        getAppDefinition: function()
+        {
+            var content = wait.for(getBlobText, "maaas.json");
+            return JSON.parse(content);
+        },
+
         listModules: function()
         {
             var modules = [];
@@ -73,7 +80,10 @@ module.exports = function(params)
             var blobs = wait.for(listBlobs);
             for (var i = 0; i < blobs.length; i++) 
             {
-                modules.push(blobs[i].name);
+                if (path.extname(blobs[i].name) === ".js") 
+                {
+                    modules.push(blobs[i].name);
+                }
             }
 
             return modules;

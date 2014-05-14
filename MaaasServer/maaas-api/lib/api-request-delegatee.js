@@ -77,6 +77,16 @@ function processHttpRequest(request, callback)
 {
     logger.info("API Processing http post request");
 
+    // See if this is an AppDefinition request and process appropriately (it doesn't want/need session state)
+    //
+    if (request.body.Mode === "AppDefinition")
+    {
+        var appDefinition = api.getAppDefinition();
+        logger.info("AppDefinition requested: " + appDefinition);
+        callback(null, appDefinition);
+        return;
+    }
+
     var sessionId = request.headers[MaaasApiSessionIdHeader];
     logger.info("API request session ID: " + sessionId);
 
@@ -159,12 +169,22 @@ function processWebSocket(ws, request)
 
 // This web socket request processor (always running in a fiber)
 //
-function processWebSocketMessage(ws, event, state)
+function processWebSocketMessage(ws, requestObject, state)
 {
     logger.info("API - processing websocket request");
 
-    logger.info('message', event.data);
-    var requestObject = JSON.parse(event.data);
+    logger.info('message - Mode: ', requestObject.Mode);
+
+    // See if this is an AppDefinition request and process appropriately
+    //
+    if (requestObject.Mode === "AppDefinition")
+    {
+        var appDefinition = api.getAppDefinition();
+        logger.info("AppDefinition requested: " + appDefinition);
+        ws.send(JSON.stringify(appDefinition));
+        return;
+    }
+
     var responseObject = apiProcess(state.session, requestObject);
 
     sessionStore.putSession(state.session);
@@ -201,12 +221,23 @@ exports.processWebSocket = function(request, socket, body)
     var ws = new WebSocket(request, socket, body);
     logger.info("API processor initialized WebSocket");
 
-    var state = processWebSocket(ws, request);
+    var state = null;
 
     ws.on('message', function(event) 
-    {
+    {        
         logger.info("API got WebSocket message: " + event.data);
         logger.info("Launching API web socket request processor on a fiber...");
+
+        var requestObject = JSON.parse(event.data);
+
+        if ((state == null) && (event.data.Mode === "AppDefinition"))
+        {
+            // Establish the WebSocket "state" (session binding) if it hasn't been set yet and this
+            // is not the AppDefinition request, which is session-less.
+            //
+            state = processWebSocket(ws, request);
+        }
+
         wait.launchFiber(processWebSocketMessage, ws, event, state); //handle in a fiber
     });
 

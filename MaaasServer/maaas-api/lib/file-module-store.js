@@ -9,6 +9,13 @@ module.exports = function(params)
 
     var moduleStore = 
     {
+        getAppDefinition: function()
+        {
+            var appDefinitionPath = path.resolve(moduleDir, "maaas.json");
+            var content = fs.readFileSync(appDefinitionPath, 'utf8');
+            return JSON.parse(content);
+        },
+
         listModules: function()
         {
             var modules = [];
@@ -16,7 +23,10 @@ module.exports = function(params)
             var files = fs.readdirSync(moduleDir);
             for (var i = 0; i < files.length; i++) 
             {
-                modules.push(files[i]);
+                if (path.extname(files[i]) === ".js") 
+                {
+                    modules.push(files[i]);
+                }
             }
 
             return modules;
