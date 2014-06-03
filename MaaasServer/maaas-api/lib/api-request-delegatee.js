@@ -1,4 +1,4 @@
-﻿// API request delegatee - process API requests
+// API request delegatee - process API requests
 //
 var maaasApi = require('../index'); // !!! Should probably be 'maaas-api' (if maaas-api installed as module in node_modules)
 var wait = require('wait.for');
@@ -238,7 +238,7 @@ exports.processWebSocket = function(request, socket, body)
             state = processWebSocket(ws, request);
         }
 
-        wait.launchFiber(processWebSocketMessage, ws, event, state); //handle in a fiber
+        wait.launchFiber(processWebSocketMessage, ws, requestObject, state); //handle in a fiber
     });
 
     ws.on('close', function(event) 
