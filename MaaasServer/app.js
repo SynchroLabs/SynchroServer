@@ -69,66 +69,84 @@ app.get('/', function(req, res) {
 app.all('/login', login.login);
 app.get('/logout', login.logout);
 
+
 // Create API processor
 //
 var maaasApi = require('./maaas-api');
 
-var apiManager = maaasApi.createApiProcessorManager(6969);
+var baseDebugPort = 6969;
+var apiManager = maaasApi.createApiProcessorManager(baseDebugPort);
 
-var sessionStoreSpec = 
-{ 
-    packageRequirePath: path.resolve('./maaas-api'), 
-    serviceName: 'MemorySessionStore',
-    serviceConfiguration: {}
-}
-
-var moduleStoreSpec = 
+function createApiProcessor(apiManager, directory)
 {
-    packageRequirePath: path.resolve('./maaas-api'), 
-    serviceName: 'FileModuleStore',
-    serviceConfiguration: 
-    {
-        moduleDirectory: path.resolve(__dirname, "maaas-samples")
+    var sessionStoreSpec = 
+    { 
+        packageRequirePath: path.resolve('./maaas-api'), 
+        serviceName: 'MemorySessionStore',
+        serviceConfiguration: {}
     }
 
-    /*
-    packageRequirePath: path.resolve('./maaas-azure'), 
-    serviceName: 'AzureModuleStore',
-    serviceConfiguration: 
+    var moduleStoreSpec = 
     {
-        storageAccount: "maaas",
-        storageAccessKey: "xGXFkejKx3FeaGaX6Akx4C2owNO2eXXqLmVUk5T1CZ1qPYJ4E+3wMpOl+OVPpmnm4awHBHnZ5U6Cc0gHHwzmQQ==",
-        containerName: "maaas-modules"
+        /*
+        packageRequirePath: path.resolve('./maaas-api'), 
+        serviceName: 'FileModuleStore',
+        serviceConfiguration: 
+        {
+            moduleDirectory: path.resolve(__dirname, path.join("maaas-samples", directory))
+        }
+        */
+
+        
+        packageRequirePath: path.resolve('./maaas-azure'), 
+        serviceName: 'AzureModuleStore',
+        serviceConfiguration: 
+        {
+            storageAccount: "maaas",
+            storageAccessKey: "xGXFkejKx3FeaGaX6Akx4C2owNO2eXXqLmVUk5T1CZ1qPYJ4E+3wMpOl+OVPpmnm4awHBHnZ5U6Cc0gHHwzmQQ==",
+            containerName: directory
+        }
     }
-    */
+
+    var resourceResolverSpec = 
+    { 
+        packageRequirePath: path.resolve('./maaas-api'), 
+        serviceName: 'ResourceResolver',
+        serviceConfiguration: 
+        {
+            prefix: "https://maaas.blob.core.windows.net/resources/"
+        }
+    }
+
+    var bFork = true;  // Run API processor forked or in-proc
+    var bDebug = true; // Enable debugging of API processor (only valid if running forked)
+
+    var apiProcessor = apiManager.createApiProcessor(sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, bFork, bDebug);
+
+    return apiProcessor;
 }
 
-var resourceResolverSpec = 
-{ 
-    packageRequirePath: path.resolve('./maaas-api'), 
-    serviceName: 'ResourceResolver',
-    serviceConfiguration: 
-    {
-        prefix: "https://maaas.blob.core.windows.net/resources/"
-    }
-}
+var samplesApiProcessor = createApiProcessor(apiManager, "maaas-samples");
+var propxApiProcessor = createApiProcessor(apiManager, "maaas-propx");
 
-var bFork = true;  // Run API processor forked or in-proc
-var bDebug = true; // Enable debugging of API processor (only valid if running forked)
-
-var apiProcessor = apiManager.createApiProcessor(sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, bFork, bDebug);
-
-maaasStudio.setApiProcessor(apiProcessor);
+maaasStudio.addApiProcessor("samples", samplesApiProcessor);
+maaasStudio.addApiProcessor("propx", propxApiProcessor);
 
 //
 // ---------------------------------------
 
-// Let the API processor handle requests to /api
+// Let the API processor handle requests to /api 
 //
-app.all('/api', function(request, response) 
+app.all('/api/samples', function(request, response) 
 {
-    apiProcessor.processHttpRequest(request, response);
+    samplesApiProcessor.processHttpRequest(request, response);
 });
+
+app.all('/api/propx', function(request, response) 
+{
+    propxApiProcessor.processHttpRequest(request, response);
+});
+
 
 var server = http.createServer(app);
 
@@ -165,9 +183,13 @@ server.on('upgrade', function(request, socket, body)
     if (isWebSocket(request)) // was: if (WebSocket.isWebSocket(request))
     {
         var path = url.parse(request.url).pathname; 
-        if (path === "/api")
+        if (path === "/api/samples")
         {
-            apiProcessor.processWebSocket(request, socket, body);
+            samplesApiProcessor.processWebSocket(request, socket, body);
+        }
+        else if (path === "/api/propx")
+        {
+            propxApiProcessor.processWebSocket(request, socket, body);
         }
         else if (path === maaasStudioUrlPrefix) // !!! Web session auth (maybe inside websocket processor - to get/use session)
         {

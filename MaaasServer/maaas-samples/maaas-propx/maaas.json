@@ -1,0 +1,7 @@
+{
+  "name": "maaas-propx",
+  "version": "0.0.0",
+  "description": "MAAAS Property Cross",
+  "mainPage": "propx_main",
+  "author": "Bob Dickinson <bob@maaas.io> (http://maaas.io/)"
+}

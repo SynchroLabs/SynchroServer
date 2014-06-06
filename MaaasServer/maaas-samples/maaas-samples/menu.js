@@ -23,7 +23,6 @@ exports.InitializeViewModel = function (context, session)
             { caption: "Hello World", view: "hello" },
             { caption: "Login Sample", view: "login" },
             { caption: "Click Counter Sample", view: "counter" },
-            { caption: "PropertyCross", view: "propx_main" },
             { caption: "Device", view: "device" },
             { caption: "List Sample", view: "list" },
             { caption: "List Click", view: "listclick" },

@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "PropertyCross",
-    onBack: "exit",
     elements: 
     [
         { control: "stackpanel", width: "*", height: "*", contents: [
@@ -70,9 +69,5 @@ exports.Commands =
     favs: function(context, session, viewModel)
     {
         return Maaas.navigateToView(context, "propx_favs");
-    },
-    exit: function(context)
-    {
-        return Maaas.navigateToView(context, "menu");
-    },
+    }
 }

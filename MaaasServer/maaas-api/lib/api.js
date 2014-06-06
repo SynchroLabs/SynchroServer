@@ -224,7 +224,7 @@ MaaasApi.prototype.getAppDefinition = function()
 
 MaaasApi.prototype.reloadModule = function(moduleName)
 {
-    this.moduleManager.reloadModule(this, moduleName);
+    this.moduleManager.reloadModule(moduleName);
 }
 
 MaaasApi.prototype.showMessage = function(context, messageBox)

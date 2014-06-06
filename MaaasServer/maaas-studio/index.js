@@ -26,6 +26,7 @@ var debugApi = require('./lib/ws-debug-server');
 var MaaasStudio = function(basePath)
 {
 	this.basePath = basePath;
+	this.apiProcessors = [];
 };
 
 // Called before the Express router or any routes are added to the app.  This is a good time to add any
@@ -44,26 +45,39 @@ MaaasStudio.prototype.addRoutes = function(expressApp, checkAuth)
 
 	// We need to process /sandbox and /module (get and put) on a fiber, since they use wait.for to do async processing...
 	//
-	expressApp.get(this.basePath + '/sandbox', checkAuth, function(req,res)
+	expressApp.get(this.basePath + '/:appName/sandbox', checkAuth, function(req,res)
 	{
-	    wait.launchFiber(edit.edit, self, req, res); //handle in a fiber, keep node spinning
+	    wait.launchFiber(edit.edit, self, req.params.appName, req, res); //handle in a fiber, keep node spinning
 	});
 
-	expressApp.get(this.basePath + '/module', checkAuth, function(req,res)
+	expressApp.get(this.basePath + '/:appName/module', checkAuth, function(req,res)
 	{
-	    wait.launchFiber(edit.loadModule, self, req, res); //handle in a fiber, keep node spinning
+	    wait.launchFiber(edit.loadModule, self, req.params.appName, req, res); //handle in a fiber, keep node spinning
 	});
 
-	expressApp.post(this.basePath + '/module', checkAuth, function(req,res)
+	expressApp.post(this.basePath + '/:appName/module', checkAuth, function(req,res)
 	{
-	    wait.launchFiber(edit.saveModule, self, req, res); //handle in a fiber, keep node spinning
+	    wait.launchFiber(edit.saveModule, self, req.params.appName, req, res); //handle in a fiber, keep node spinning
 	});
 }
 
-MaaasStudio.prototype.setApiProcessor = function(apiProcessor)
+MaaasStudio.prototype.addApiProcessor = function(appName, apiProcessor)
 {
-    this.apiProcessor = apiProcessor;
-    this.moduleStore = maaasApi.createServiceFromSpec(apiProcessor.moduleStoreSpec);
+	this.apiProcessors[appName] = 
+	{
+		apiProcessor: apiProcessor,
+		moduleStore: maaasApi.createServiceFromSpec(apiProcessor.moduleStoreSpec)
+	}
+}
+
+MaaasStudio.prototype.getApiProcessor = function(appName)
+{
+	return this.apiProcessors[appName].apiProcessor;
+}
+
+MaaasStudio.prototype.getModuleStore = function(appName)
+{
+	return this.apiProcessors[appName].moduleStore;
 }
 
 MaaasStudio.prototype.render = function(templateName, locals, res)

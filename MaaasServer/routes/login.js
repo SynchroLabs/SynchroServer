@@ -7,7 +7,7 @@ exports.login = function(req, res, message)
         if (post.email == 'bob.dickinson@gmail.com' && post.password == 'Password69') 
         {
             req.session.user_id = post.email;
-            var nextPage = "/sandbox"; // default
+            var nextPage = "/studio/samples/sandbox"; // default
             if (req.session.nextPage)
             {
                 nextPage = req.session.nextPage;

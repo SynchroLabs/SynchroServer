@@ -4,8 +4,11 @@
 var logger = require('log4js').getLogger("web-edit");
 
 // GET /edit
-exports.edit = function(maaasStudio, req, res)
+exports.edit = function(maaasStudio, appName, req, res)
 {
+    var apiProcessor = maaasStudio.getApiProcessor(appName);
+    var moduleStore = maaasStudio.getModuleStore(appName);
+
     var page = null;
     var code = "";
     if (req.query["page"])
@@ -15,19 +18,21 @@ exports.edit = function(maaasStudio, req, res)
 
     if (page)
     {
-        code = maaasStudio.moduleStore.getModuleSource(page);
+        code = moduleStore.getModuleSource(page);
     }
 
-    var files = maaasStudio.moduleStore.listModules();
+    var files = moduleStore.listModules();
 
-    var debugPort = maaasStudio.apiProcessor.debugPort;
+    var debugPort = apiProcessor.debugPort;
 
     maaasStudio.render('sandbox', { title: 'Mobile Application As A Service (MAAAS)', code: code, page: page, files: files, debugPort: debugPort }, res);
 };
 
 // GET /module
-exports.loadModule = function(maaasStudio, req, res)
+exports.loadModule = function(maaasStudio, appName, req, res)
 {
+    var moduleStore = maaasStudio.getModuleStore(appName);
+
     logger.info("Load module");
     var result = { };
 
@@ -35,7 +40,7 @@ exports.loadModule = function(maaasStudio, req, res)
     {
         result.status = "OK";
         result.message = "Module source found";
-        result.source = maaasStudio.moduleStore.getModuleSource(req.query["module"]);
+        result.source = moduleStore.getModuleSource(req.query["module"]);
     }
     else
     {
@@ -46,8 +51,11 @@ exports.loadModule = function(maaasStudio, req, res)
 };
 
 // POST /module
-exports.saveModule = function(maaasStudio, req, res)
+exports.saveModule = function(maaasStudio, appName, req, res)
 {
+    var apiProcessor = maaasStudio.getApiProcessor(appName);
+    var moduleStore = maaasStudio.getModuleStore(appName);
+
     logger.info("Save module");
     var result = { };
 
@@ -56,12 +64,12 @@ exports.saveModule = function(maaasStudio, req, res)
         var moduleName = req.body["module"];
         var source = req.body["source"];
 
-        var putResult = maaasStudio.moduleStore.putModuleSource(moduleName, source);
+        var putResult = moduleStore.putModuleSource(moduleName, source);
 
         result.status = "OK";
         result.message = "Module source saved";
 
-        maaasStudio.apiProcessor.reloadModule(moduleName); // !!! Would be nice to get some notification that this worked
+        apiProcessor.reloadModule(moduleName); // !!! Would be nice to get some notification that this worked
     }
     else
     {

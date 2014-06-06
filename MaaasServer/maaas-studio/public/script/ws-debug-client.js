@@ -40,7 +40,12 @@ function updateRunning(isRunning)
 
 function debugStart(port) 
 { 
-    var path = window.location.pathname.substr(0, window.location.pathname.lastIndexOf('/'));
+    var pathParts = window.location.pathname.split('/');
+    pathParts.pop(); // remote "page" part (e.g. "sandbox")
+    pathParts.pop(); // remove appName part (e.g. "samples")
+    var path = pathParts.join('/');
+
+    //var path = window.location.pathname.substr(0, window.location.pathname.lastIndexOf('/'));
     debugPort = port;
     console.log("Starting debug on path: " + path + " and port: " + port);
 

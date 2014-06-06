@@ -8,7 +8,7 @@
 
 # Build results
 
-[Dd]ebug/*
+[Dd]ebug/
 [Rr]elease/
 x64/
 build/
@@ -17,9 +17,6 @@ build/
 
 # Enable "build/" folder in the NuGet Packages folder since NuGet packages use it for MSBuild targets
 !packages/*/build/
-
-# Enable "debug" package inside connect/express
-!node_modules/*/debug/
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
@@ -161,5 +158,12 @@ $RECYCLE.BIN/
 # RDD - iisnode log files (not sure why they get sprayed into the project
 /MaaasServer/iisnode
 
+# RDD - Enable "debug" package inside connect/express
+!node_modules/*/debug/
+
 # RDD - We want to check in the pre-built binaries for the "fibers" node_module
 !/MaaasServer/node_modules/wait.for/node_modules/fibers/bin
+
+# RDD - Sublime editor 
+*.sublime-project
+*.sublime-workspace
