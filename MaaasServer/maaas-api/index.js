@@ -31,9 +31,11 @@ exports.createApiProcessorManager = function(baseDebugPort)
     logger.info("Getting API manager with base debug port: " + baseDebugPort);
     var currentDebugPort = baseDebugPort;
 
+    var apiProcessors = {};
+
     var apiManager =
     {
-		createApiProcessor: function(sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, runForked, enableDebug)
+		createApiProcessor: function(appPath, sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, runForked, enableDebug)
     	{
             var debugPort = 0; // No debugging
             if (enableDebug)
@@ -42,8 +44,68 @@ exports.createApiProcessorManager = function(baseDebugPort)
             }
 
             logger.info("Creating managed API processor, debug port is: " + debugPort);
-            return apiProcessor = require("./lib/api-request-delegator")(sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, runForked, debugPort);
-    	}
+            var apiProcessor = require("./lib/api-request-delegator")(sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, runForked, debugPort);
+            apiProcessors[appPath] = apiProcessor;
+            return apiProcessor;
+    	},
+
+        getApiProcessor: function(appPath)
+        {
+            return apiProcessors[appPath];
+        },
+
+        getModuleStore: function(appPath)
+        {
+            // The apiProcessor has a module store in its process, but there are cases where the main Node / web process (particularly when serving the
+            // the web site for the Maaas "studio" application) needs a module store using the same configuration information...
+            //
+            var apiProcessor = apiProcessors[appPath];
+            if (apiProcessor)
+            {
+                if (apiProcessor.moduleStore == null)
+                {
+                    // This first time we check, there won't be a moduleStore, so we create it...
+                    //
+                    apiProcessor.moduleStore = exports.createServiceFromSpec(apiProcessor.moduleStoreSpec)
+                }
+
+                return apiProcessor.moduleStore;
+            }
+
+            // !!! BAD - No api processor for appName 
+            return null;
+        },
+
+        getApiProcessors: function()
+        {
+            return apiProcessors;
+        },
+
+        processHttpRequest: function(appPath, request, response)
+        {
+            var apiProcessor = apiProcessors[appPath];
+            if (apiProcessor)
+            {
+                apiProcessor.processHttpRequest(request, response);
+            }
+            else
+            {
+                // !!! BAD - No apiProcessor found at appPath
+            }
+        },
+
+        processWebSocket: function(appPath, request, socket, body)
+        {
+            var apiProcessor = apiProcessors[appPath];
+            if (apiProcessor)
+            {
+                apiProcessor.processWebSocket(request, response);
+            }
+            else
+            {
+                // !!! BAD - No apiProcessor found at appPath
+            }
+        }
     }
 
     return apiManager;

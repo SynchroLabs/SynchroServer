@@ -7,18 +7,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/">Maaas.io</a>
-        </div>
-        <div class="navbar-collapse collapse">
-            <form class="navbar-form navbar-right" role="form" action="/login" method="post">
-                <div class="form-group">
-                    <input type="text" placeholder="Email" class="form-control" name="email">
-                </div>
-                <div class="form-group">
-                    <input type="password" placeholder="Password" class="form-control" name="password">
-                </div>
-                <button type="submit" class="btn btn-success">Sign in</button>
-            </form>
+            <a class="navbar-brand" href="/">Maaas.io API</a>
         </div>
         <!--/.navbar-collapse -->
     </div>
@@ -35,6 +24,17 @@
 </div>
 
 <div class="container">
+
+    <div class="list-group">
+        {{#each applications}}
+        <a href="{{studioPath}}" class="list-group-item">
+            <h4 class="list-group-item-heading">{{appDefinition.name}}</h4>
+            <p class="list-group-item-text">{{appDefinition.description}}</p>
+            <h5 class="list-group-item-text">API Endpoint: <i>{{endpoint}}</i></h5>
+        </a>
+        {{/each}}
+    </div>
+
     <hr>
     <footer>
         <p>&copy; Maaas.io 2014</p>

@@ -17,67 +17,25 @@ log4js.configure({ appenders: [ { type: "console", layout: { type: "basic" } } ]
 var logger = log4js.getLogger("app");
 logger.info("Maaas.io server loading...");
 
-var app = express();
 
-var MemoryStore = express.session.MemoryStore;
-var sessionStore = new MemoryStore();
-
-var MaaasStudio = require('./maaas-studio');
-var maaasStudioUrlPrefix = '/studio';
-
-var maaasStudio = new MaaasStudio(maaasStudioUrlPrefix);
-
-// all environments
-app.set('port', process.env.PORT || 1337);
-
-var hbs = require('express-hbs');
-
-// Use `.hbs` for extensions and find partials in `views/partials`.
-app.engine('hbs', hbs.express3({
-    partialsDir: __dirname + '/views/partials',
-    layoutsDir: __dirname + '/views/layouts',
-    defaultLayout: __dirname + '/views/layouts/default.hbs',
-    contentHelperName: 'content'
-}));
-app.set('view engine', 'hbs');
-app.set('views', __dirname + '/views');
-
-app.use(express.cookieParser());
-// Note: Setting the maxAge value to 60000 (one hour) generates a cookie that .NET does not record (date generation/parsing
-// is my guess) - for now we just omit expiration...
-app.use(express.cookieSession({ store: sessionStore, secret: 'sdf89f89fd7sdf7sdf', cookie: { maxAge: false, httpOnly: true } }));
-app.use(express.favicon());
-app.use(log4js.connectLogger(logger, { level: 'auto' })); //app.use(express.logger('dev'));
-app.use(express.query());
-app.use(express.json());
-app.use(express.urlencoded());
-app.use(express.methodOverride());
-app.use(app.router);
-app.use(express.static(path.join(__dirname, 'public')));
-maaasStudio.addMiddleware(app);
-
-// development only
-if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
-}
-
-maaasStudio.addRoutes(app, login.checkAuth);
-
-app.get('/', function(req, res) {
-    res.render('index');
-});
-app.all('/login', login.login);
-app.get('/logout', login.logout);
-
-
-// Create API processor
+// Create Maaas API processor manager
 //
 var maaasApi = require('./maaas-api');
+var maaasApiUrlPrefix = "/api";
 
 var baseDebugPort = 6969;
 var apiManager = maaasApi.createApiProcessorManager(baseDebugPort);
 
-function createApiProcessor(apiManager, directory)
+// Create Maaas studio
+//
+var MaaasStudio = require('./maaas-studio');
+var maaasStudioUrlPrefix = "/studio";
+
+var maaasStudio = new MaaasStudio(maaasStudioUrlPrefix, apiManager);
+
+// Create the Maaas API processors
+//
+function createApiProcessor(apiManager, appPath, directory)
 {
     var sessionStoreSpec = 
     { 
@@ -121,32 +79,101 @@ function createApiProcessor(apiManager, directory)
     var bFork = true;  // Run API processor forked or in-proc
     var bDebug = true; // Enable debugging of API processor (only valid if running forked)
 
-    var apiProcessor = apiManager.createApiProcessor(sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, bFork, bDebug);
-
-    return apiProcessor;
+    apiManager.createApiProcessor(appPath, sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, bFork, bDebug);
 }
 
-var samplesApiProcessor = createApiProcessor(apiManager, "maaas-samples");
-var propxApiProcessor = createApiProcessor(apiManager, "maaas-propx");
+createApiProcessor(apiManager, "samples", "maaas-samples");
+createApiProcessor(apiManager, "propx", "maaas-propx");
 
-maaasStudio.addApiProcessor("samples", samplesApiProcessor);
-maaasStudio.addApiProcessor("propx", propxApiProcessor);
 
+// Now let's set up the web / api servers...
 //
-// ---------------------------------------
+var app = express();
+
+var MemoryStore = express.session.MemoryStore;
+var sessionStore = new MemoryStore();
+
+// all environments
+app.set('port', process.env.PORT || 1337);
+
+var hbs = require('express-hbs');
+
+// Use `.hbs` for extensions and find partials in `views/partials`.
+app.engine('hbs', hbs.express3({
+    partialsDir: __dirname + '/views/partials',
+    layoutsDir: __dirname + '/views/layouts',
+    defaultLayout: __dirname + '/views/layouts/default.hbs',
+    contentHelperName: 'content'
+}));
+app.set('view engine', 'hbs');
+app.set('views', __dirname + '/views');
+
+app.use(express.cookieParser());
+// Note: Setting the maxAge value to 60000 (one hour) generates a cookie that .NET does not record (date generation/parsing
+// is my guess) - for now we just omit expiration...
+app.use(express.cookieSession({ store: sessionStore, secret: 'sdf89f89fd7sdf7sdf', cookie: { maxAge: false, httpOnly: true } }));
+app.use(express.favicon());
+app.use(log4js.connectLogger(logger, { level: 'auto' })); //app.use(express.logger('dev'));
+app.use(express.query());
+app.use(express.json());
+app.use(express.urlencoded());
+app.use(express.methodOverride());
+app.use(app.router);
+app.use(express.static(path.join(__dirname, 'public')));
+maaasStudio.addMiddleware(app);
+
+// development only
+if ('development' == app.get('env')) {
+  app.use(express.errorHandler());
+}
+
+maaasStudio.addRoutes(app, login.checkAuth);
+
+app.get('/', login.checkAuth, function(request, response) 
+{
+    // Handle in a fiber, keep node spinning
+    //
+    wait.launchFiber(function()
+    {
+        var applications = [];
+
+        var apiProcessors = apiManager.getApiProcessors();
+        for (appPath in apiProcessors)
+        {
+            var apiProcessor = apiManager.getApiProcessor(appPath);
+            logger.info("Found API processor at path '" + appPath + "'");
+
+            var moduleStore = apiManager.getModuleStore(appPath);
+            var appDefinition = moduleStore.getAppDefinition();
+            logger.info("API processor for app named: '" + appDefinition.name + "'"); 
+
+            var studioPath =  maaasStudioUrlPrefix + "/" + appPath + "/sandbox";   
+
+            var host = request.host; 
+            var port = app.get("port");
+            if (port != 80)
+            {
+                host += ":" + port;
+            }
+
+            var endpoint = host + maaasApiUrlPrefix + "/" + appPath;
+
+            applications.push({ appPath: appPath, studioPath: studioPath, endpoint: endpoint, appDefinition: appDefinition })
+        }
+
+        response.render('index', { applications: applications });
+    });
+});
+
+app.all('/login', login.login);
+app.get('/logout', login.logout);
 
 // Let the API processor handle requests to /api 
 //
-app.all('/api/samples', function(request, response) 
+app.all(maaasApiUrlPrefix + '/:appPath', function(request, response) 
 {
-    samplesApiProcessor.processHttpRequest(request, response);
+    apiManager.processHttpRequest(request.params.appPath, request, response);
 });
-
-app.all('/api/propx', function(request, response) 
-{
-    propxApiProcessor.processHttpRequest(request, response);
-});
-
 
 var server = http.createServer(app);
 
@@ -177,19 +204,16 @@ function isWebSocket(request)
 //
 //     This is the main Node/libuv bug: https://github.com/joyent/libuv/issues/480
 //
-
 server.on('upgrade', function(request, socket, body) 
 {
     if (isWebSocket(request)) // was: if (WebSocket.isWebSocket(request))
     {
         var path = url.parse(request.url).pathname; 
-        if (path === "/api/samples")
+
+        if (path.indexOf(maaasApiUrlPrefix + "/") == 0)
         {
-            samplesApiProcessor.processWebSocket(request, socket, body);
-        }
-        else if (path === "/api/propx")
-        {
-            propxApiProcessor.processWebSocket(request, socket, body);
+            var appPath = path.substring(maaasApiUrlPrefix.length + 1);
+            apiManager.processWebSocket(appPath, request, socket, body);
         }
         else if (path === maaasStudioUrlPrefix) // !!! Web session auth (maybe inside websocket processor - to get/use session)
         {

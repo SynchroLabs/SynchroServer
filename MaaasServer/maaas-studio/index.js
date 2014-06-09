@@ -23,10 +23,10 @@ var debugApi = require('./lib/ws-debug-server');
 
 // Constructor
 //
-var MaaasStudio = function(basePath)
+var MaaasStudio = function(basePath, apiManager)
 {
 	this.basePath = basePath;
-	this.apiProcessors = [];
+	this.apiManager = apiManager;
 };
 
 // Called before the Express router or any routes are added to the app.  This is a good time to add any
@@ -61,23 +61,14 @@ MaaasStudio.prototype.addRoutes = function(expressApp, checkAuth)
 	});
 }
 
-MaaasStudio.prototype.addApiProcessor = function(appName, apiProcessor)
-{
-	this.apiProcessors[appName] = 
-	{
-		apiProcessor: apiProcessor,
-		moduleStore: maaasApi.createServiceFromSpec(apiProcessor.moduleStoreSpec)
-	}
-}
-
 MaaasStudio.prototype.getApiProcessor = function(appName)
 {
-	return this.apiProcessors[appName].apiProcessor;
+	return this.apiManager.getApiProcessor(appName);
 }
 
 MaaasStudio.prototype.getModuleStore = function(appName)
 {
-	return this.apiProcessors[appName].moduleStore;
+	return this.apiManager.getModuleStore(appName);
 }
 
 MaaasStudio.prototype.render = function(templateName, locals, res)
