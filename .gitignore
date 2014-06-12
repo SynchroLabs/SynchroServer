@@ -107,7 +107,7 @@ csx
 AppPackages/
 
 # Others
-sql/
+# sql/ - RDD - Not sure what this guy's goal is, but he is blocking legit sql support lib code 
 *.Cache
 ClientBin/
 [Ss]tyle[Cc]op.*
