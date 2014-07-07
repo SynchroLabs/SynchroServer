@@ -5,6 +5,7 @@
   "main": "index.js",
   "author": "Bob Dickinson <bob@maaas.io> (http://maaas.io/)",
   "dependencies": {
-    "azure": "^0.9.7"
+    "azure": "^0.9.7",
+    "node-uuid": "^1.4.1"
   }
 }

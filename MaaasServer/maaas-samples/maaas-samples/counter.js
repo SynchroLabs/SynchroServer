@@ -50,9 +50,12 @@ exports.View =
 
 exports.InitializeViewModel = function(context, session)
 {
+    session.count = session.count || 0; // Initialize if undefined
+    console.log("Initializing count to: " + session.count);
+
     var viewModel =
     {
-        count: 0,
+        count: session.count,
         font: fontStyle.normal,
     }
     return viewModel;
@@ -73,8 +76,10 @@ exports.Commands =
     {
         viewModel.count = 0;
     },
-    exit: function(context)
+    exit: function(context, session, viewModel)
     {
+        session.count = viewModel.count;
+        console.log("Updated session count to: " + session.count);
         return Maaas.navigateToView(context, "menu");
     },
 }

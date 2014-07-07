@@ -87,11 +87,15 @@ function processHttpRequest(request, callback)
         return;
     }
 
+    var session = null;
+    var newSessionCreated = false;
     var sessionId = request.headers[MaaasApiSessionIdHeader];
-    logger.info("API request session ID: " + sessionId);
+    if (sessionId)
+    {
+        logger.info("API request session ID: " + sessionId);
+        session = sessionStore.getSession(sessionId);
+    }
 
-    var newSession = false;
-    var session = sessionStore.getSession(sessionId);
     if (!session)
     {
         if (sessionId)
@@ -113,14 +117,14 @@ function processHttpRequest(request, callback)
         }
         logger.info("Creating new session");
         session = sessionStore.createSession();
-        newSession = true;
+        newSessionCreated = true;
     }
         
     var responseObject = apiProcess(session, request.body);
 
     sessionStore.putSession(session);
 
-    if (newSession)
+    if (newSessionCreated)
     {
         logger.info("Returning new session id: " + session.id);
         responseObject.NewSessionId = session.id;

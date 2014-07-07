@@ -135,6 +135,12 @@ exports.createService = function(serviceName, serviceConfiguration)
         }
         break;
 
+        case "FileSessionStore":
+        {
+            service = require('./lib/file-session-store')(serviceConfiguration);
+        }
+        break;
+
         case "ResourceResolver":
         {
             service = require('./lib/resource-resolver')(serviceConfiguration);

@@ -39,9 +39,27 @@ function createApiProcessor(apiManager, appPath, directory)
 {
     var sessionStoreSpec = 
     { 
+        /*
         packageRequirePath: path.resolve('./maaas-api'), 
         serviceName: 'MemorySessionStore',
         serviceConfiguration: {}
+
+        packageRequirePath: path.resolve('./maaas-api'), 
+        serviceName: 'FileSessionStore',
+        serviceConfiguration: 
+        {
+            sessionStateFile: path.resolve(__dirname, "sessions.json")
+        }
+        */
+
+        packageRequirePath: path.resolve('./maaas-azure'), 
+        serviceName: 'AzureSessionStore',
+        serviceConfiguration: 
+        {
+            storageAccount: "maaas",
+            storageAccessKey: "xGXFkejKx3FeaGaX6Akx4C2owNO2eXXqLmVUk5T1CZ1qPYJ4E+3wMpOl+OVPpmnm4awHBHnZ5U6Cc0gHHwzmQQ==",
+            tableName: "maaasSessions"
+        }
     }
 
     var moduleStoreSpec = 
@@ -54,7 +72,6 @@ function createApiProcessor(apiManager, appPath, directory)
             moduleDirectory: path.resolve(__dirname, path.join("maaas-samples", directory))
         }
         */
-
         
         packageRequirePath: path.resolve('./maaas-azure'), 
         serviceName: 'AzureModuleStore',

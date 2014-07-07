@@ -29,6 +29,13 @@ echo Installing updated nodeiis
 msiexec /i iisnode-full-iis7-v0.2.7-x64.msi /passive
 if %ERRORLEVEL% neq 0 goto error
 
+rem http://wp.sjkp.dk/windows-azure-websites-and-cloud-services-slow-on-first-request/
+rem *** Prevent the IIS app pools from shutting down due to being idle.
+%appcmd% set config -section:applicationPools -applicationPoolDefaults.processModel.idleTimeout:00:00:00
+ 
+rem *** Prevent IIS app pool recycles from recycling on the default schedule of 1740 minutes (29 hours).
+%appcmd% set config -section:applicationPools -applicationPoolDefaults.recycling.periodicRestart.time:00:00:00
+
 echo SUCCESS
 exit /b 0
 

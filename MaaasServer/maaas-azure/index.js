@@ -8,6 +8,12 @@ exports.createService = function(serviceName, serviceConfiguration)
 
     switch (serviceName)
     {
+        case "AzureSessionStore":
+        {
+            service = require('./lib/azure-session-store')(serviceConfiguration);
+        }
+        break;
+
         case "AzureModuleStore":
         {
             service = require('./lib/azure-module-store')(serviceConfiguration);

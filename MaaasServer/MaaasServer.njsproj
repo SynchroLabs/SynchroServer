@@ -42,6 +42,7 @@
     <Compile Include="maaas-api\lib\api.js" />
     <Compile Include="maaas-api\lib\file-module-store.js" />
     <Compile Include="maaas-api\index.js" />
+    <Compile Include="maaas-api\lib\file-session-store.js" />
     <Compile Include="maaas-api\lib\maaas-modules.js" />
     <Compile Include="maaas-api\lib\maaas.js" />
     <Compile Include="maaas-api\node_modules\lodash\dist\lodash.compat.js" />
@@ -170,6 +171,7 @@
     <Compile Include="maaas-aws\node_modules\aws-sdk\node_modules\xmlbuilder\lib\XMLFragment.js" />
     <Compile Include="maaas-azure\index.js" />
     <Compile Include="maaas-azure\lib\azure-module-store.js" />
+    <Compile Include="maaas-azure\lib\azure-session-store.js" />
     <Compile Include="maaas-azure\node_modules\azure\examples\samples\blobuploaddownloadsample.js" />
     <Compile Include="maaas-azure\node_modules\azure\examples\samples\continuationsample.js" />
     <Compile Include="maaas-azure\node_modules\azure\examples\samples\leaseblobsample.js" />
@@ -909,6 +911,10 @@
     <Compile Include="maaas-azure\node_modules\azure\scripts\unit.js" />
     <Compile Include="maaas-azure\node_modules\azure\scripts\update.js" />
     <Compile Include="maaas-azure\node_modules\azure\tasks\hydra-tasks.js" />
+    <Compile Include="maaas-azure\node_modules\node-uuid\benchmark\benchmark.js" />
+    <Compile Include="maaas-azure\node_modules\node-uuid\test\compare_v1.js" />
+    <Compile Include="maaas-azure\node_modules\node-uuid\test\test.js" />
+    <Compile Include="maaas-azure\node_modules\node-uuid\uuid.js" />
     <Compile Include="maaas-samples\maaas-propx\propx_detail.js" />
     <Compile Include="maaas-samples\maaas-propx\propx_favs.js" />
     <Compile Include="maaas-samples\maaas-propx\propx_list.js" />
@@ -2407,6 +2413,16 @@
     <Content Include="maaas-azure\node_modules\azure\packages.config" />
     <Content Include="maaas-azure\node_modules\azure\README.md" />
     <Content Include="maaas-azure\node_modules\azure\scripts\updatePackageVersions.ps1" />
+    <Content Include="maaas-azure\node_modules\node-uuid\.npmignore" />
+    <Content Include="maaas-azure\node_modules\node-uuid\benchmark\bench.gnu" />
+    <Content Include="maaas-azure\node_modules\node-uuid\benchmark\bench.sh" />
+    <Content Include="maaas-azure\node_modules\node-uuid\benchmark\benchmark-native.c" />
+    <Content Include="maaas-azure\node_modules\node-uuid\benchmark\README.md" />
+    <Content Include="maaas-azure\node_modules\node-uuid\component.json" />
+    <Content Include="maaas-azure\node_modules\node-uuid\LICENSE.md" />
+    <Content Include="maaas-azure\node_modules\node-uuid\package.json" />
+    <Content Include="maaas-azure\node_modules\node-uuid\README.md" />
+    <Content Include="maaas-azure\node_modules\node-uuid\test\test.html" />
     <Content Include="maaas-azure\package.json" />
     <Content Include="maaas-samples\maaas-propx\maaas.json" />
     <Content Include="maaas-samples\maaas-samples\maaas.json" />
@@ -3354,6 +3370,9 @@
     <Folder Include="maaas-azure\node_modules\azure\node_modules\wns\test\nock\" />
     <Folder Include="maaas-azure\node_modules\azure\scripts\" />
     <Folder Include="maaas-azure\node_modules\azure\tasks\" />
+    <Folder Include="maaas-azure\node_modules\node-uuid\" />
+    <Folder Include="maaas-azure\node_modules\node-uuid\benchmark\" />
+    <Folder Include="maaas-azure\node_modules\node-uuid\test\" />
     <Folder Include="maaas-samples\" />
     <Folder Include="maaas-aws\" />
     <Folder Include="maaas-samples\maaas-propx\" />
