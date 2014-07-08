@@ -6,7 +6,7 @@
 var logger = require('log4js').getLogger("maaas-azure-session");
 
 var uuid = require('node-uuid');
-var azure = require('azure');
+var azure = require('azure-storage');
 var wait = require('wait.for');
 
 module.exports = function(params)
@@ -36,11 +36,13 @@ module.exports = function(params)
 
     function entityFromSession(session)
     {
+        var eg = azure.TableUtilities.entityGenerator;
+
         var entity = 
         {
-            PartitionKey: partitionKey,
-            RowKey: session.id,
-            Session: JSON.stringify(session)            
+            PartitionKey: eg.String(partitionKey),
+            RowKey: eg.String(session.id),
+            Session: eg.String(JSON.stringify(session))
         }
 
         return entity;
@@ -48,7 +50,8 @@ module.exports = function(params)
 
     function sessionFromEntity(entity)
     {
-        return JSON.parse(entity.Session);
+        logger.info("entity session: " + entity.Session._);
+        return JSON.parse(entity.Session._);
     }
 
     function createSessionAzure(callback)
@@ -89,7 +92,7 @@ module.exports = function(params)
         logger.info("Azure session get starting");
         var startTime = timerStart();
 
-        tableService.queryEntity(tableName, partitionKey, sessionId, function (error, entity, response) 
+        tableService.retrieveEntity(tableName, partitionKey, sessionId, function (error, entity, response) 
         {
             if (!error)
             {

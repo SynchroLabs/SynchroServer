@@ -6,6 +6,7 @@
   "author": "Bob Dickinson <bob@maaas.io> (http://maaas.io/)",
   "dependencies": {
     "azure": "^0.9.7",
-    "node-uuid": "^1.4.1"
+    "node-uuid": "^1.4.1",
+    "azure-storage": "^0.2.1"
   }
 }
