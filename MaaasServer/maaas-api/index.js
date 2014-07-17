@@ -141,6 +141,12 @@ exports.createService = function(serviceName, serviceConfiguration)
         }
         break;
 
+        case "RedisSessionStore":
+        {
+            service = require('./lib/redis-session-store')(serviceConfiguration);
+        }
+        break;
+
         case "ResourceResolver":
         {
             service = require('./lib/resource-resolver')(serviceConfiguration);

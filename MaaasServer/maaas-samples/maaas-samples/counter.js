@@ -48,6 +48,12 @@ exports.View =
     ]
 }
 
+exports.InitializeView = function(context, session, viewModel, view)
+{
+    view.elements[0].value = "The count: {count}";
+    return view;
+}
+
 exports.InitializeViewModel = function(context, session)
 {
     session.count = session.count || 0; // Initialize if undefined

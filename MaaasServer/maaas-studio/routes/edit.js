@@ -25,7 +25,7 @@ exports.edit = function(maaasStudio, appName, req, res)
 
     var debugPort = apiProcessor.debugPort;
 
-    maaasStudio.render('sandbox', { title: 'Mobile Application As A Service (MAAAS)', code: code, page: page, files: files, debugPort: debugPort }, res);
+    maaasStudio.render('sandbox', { title: 'Synchro', code: code, page: page, files: files, debugPort: debugPort }, res);
 };
 
 // GET /module

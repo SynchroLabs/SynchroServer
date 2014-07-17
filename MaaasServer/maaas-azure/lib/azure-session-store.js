@@ -19,6 +19,19 @@ module.exports = function(params)
     
     var tableService = azure.createTableService(storageAccount, storageAccessKey);
 
+    function timerStart()
+    {
+        return process.hrtime();
+    }
+
+    function timerDiff(timeStart)
+    {
+        var diff = process.hrtime(timeStart);
+        var millis = (diff[0] * 1000) + (diff[1] / 1000000);
+
+        return millis;
+    }
+    
     // !!! Probably want to make sure this completes before we party too hard on the table with subsequent operations.
     //
     tableService.createTableIfNotExists(tableName, function(error, result, response)
@@ -72,19 +85,6 @@ module.exports = function(params)
                 callback(error);
             }
         });
-    }
-
-    function timerStart()
-    {
-        return process.hrtime();
-    }
-
-    function timerDiff(timeStart)
-    {
-        var diff = process.hrtime(timeStart);
-        var millis = (diff[0] * 1000) + (diff[1] / 1000000);
-
-        return millis;
     }
 
     function getSessionAzure(sessionId, callback)

@@ -50,37 +50,47 @@ function createApiProcessor(apiManager, appPath, directory)
         {
             sessionStateFile: path.resolve(__dirname, "sessions.json")
         }
-        */
 
         packageRequirePath: path.resolve('./maaas-azure'), 
         serviceName: 'AzureSessionStore',
         serviceConfiguration: 
         {
-            storageAccount: "maaas",
-            storageAccessKey: "xGXFkejKx3FeaGaX6Akx4C2owNO2eXXqLmVUk5T1CZ1qPYJ4E+3wMpOl+OVPpmnm4awHBHnZ5U6Cc0gHHwzmQQ==",
+            storageAccount: "synchroncus",
+            storageAccessKey: "KqhUhHFkjOFDWI3mFG9AiGO8H0OWPaYPmRHf9vUqiKsp5nPFFGjX8gmFmJ1E3lbg9m02K76UrFfaxLU/JKWrxg==",
             tableName: "maaasSessions"
+        }
+        */
+
+        packageRequirePath: path.resolve('./maaas-api'), 
+        serviceName: 'RedisSessionStore',
+        serviceConfiguration: 
+        {
+            //host: "192.168.1.168",
+            host: "synchroapi.redis.cache.windows.net",
+            port: 6379,
+            password: "7YTzfcTk9PHyiJdY62q6SRabTiGa9EFMaZgo7KzPUrc=" // Redis Primary Key synchroapi
         }
     }
 
     var moduleStoreSpec = 
     {
-        /*
         packageRequirePath: path.resolve('./maaas-api'), 
         serviceName: 'FileModuleStore',
         serviceConfiguration: 
         {
             moduleDirectory: path.resolve(__dirname, path.join("maaas-samples", directory))
         }
-        */
         
+        /*        
         packageRequirePath: path.resolve('./maaas-azure'), 
         serviceName: 'AzureModuleStore',
         serviceConfiguration: 
         {
-            storageAccount: "maaas",
-            storageAccessKey: "xGXFkejKx3FeaGaX6Akx4C2owNO2eXXqLmVUk5T1CZ1qPYJ4E+3wMpOl+OVPpmnm4awHBHnZ5U6Cc0gHHwzmQQ==",
+            storageAccount: "synchroncus",
+            storageAccessKey: "KqhUhHFkjOFDWI3mFG9AiGO8H0OWPaYPmRHf9vUqiKsp5nPFFGjX8gmFmJ1E3lbg9m02K76UrFfaxLU/JKWrxg==",
             containerName: directory
         }
+       */
     }
 
     var resourceResolverSpec = 
@@ -89,7 +99,7 @@ function createApiProcessor(apiManager, appPath, directory)
         serviceName: 'ResourceResolver',
         serviceConfiguration: 
         {
-            prefix: "https://maaas.blob.core.windows.net/resources/"
+            prefix: "https://synchroncus.blob.core.windows.net/resources/"
         }
     }
 

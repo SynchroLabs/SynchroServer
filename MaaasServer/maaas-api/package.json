@@ -7,6 +7,7 @@
   "dependencies": {
     "objectdiff": "^1.1.0",
     "lodash": "^2.4.1",
-    "node-uuid": "^1.4.1"
+    "node-uuid": "^1.4.1",
+    "redis": "^0.10.3"
   }
 }

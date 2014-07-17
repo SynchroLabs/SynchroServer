@@ -9,14 +9,14 @@
     <AzureEnableRemoteDesktop>True</AzureEnableRemoteDesktop>
     <AzureEnableWebDeploy>True</AzureEnableWebDeploy>
     <AzureFallbackToDeleteAndRecreateIfUpgradeFails>False</AzureFallbackToDeleteAndRecreateIfUpgradeFails>
-    <AzureHostedServiceLabel>maaas</AzureHostedServiceLabel>
-    <AzureHostedServiceName>maaas</AzureHostedServiceName>
+    <AzureHostedServiceLabel>synchroapincus</AzureHostedServiceLabel>
+    <AzureHostedServiceName>synchroapincus</AzureHostedServiceName>
     <AzureEnableIntelliTrace>False</AzureEnableIntelliTrace>
     <AzureEnableProfiling>False</AzureEnableProfiling>
     <AzureServiceConfiguration>Cloud</AzureServiceConfiguration>
     <AzureSolutionConfiguration>Release</AzureSolutionConfiguration>
-    <AzureStorageAccountLabel>maaas</AzureStorageAccountLabel>
-    <AzureStorageAccountName>maaas</AzureStorageAccountName>
+    <AzureStorageAccountLabel>synchroncus</AzureStorageAccountLabel>
+    <AzureStorageAccountName>synchroncus</AzureStorageAccountName>
     <AzureAppendTimestampToDeploymentLabel>True</AzureAppendTimestampToDeploymentLabel>
     <EnableRemoteDebugger>True</EnableRemoteDebugger>
     <RemoteDebuggerConnectorCertificateThumbprint>466A7D5A3E7FA1F2CE03C1829E5CB7A85976F61D</RemoteDebuggerConnectorCertificateThumbprint>

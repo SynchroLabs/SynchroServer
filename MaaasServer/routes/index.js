@@ -4,5 +4,5 @@
  */
 
 exports.index = function(req, res){
-  res.render('index', { title: 'Mobile Application As A Service (MAAAS)' });
+  res.render('index', { title: 'Synchro API' });
 };

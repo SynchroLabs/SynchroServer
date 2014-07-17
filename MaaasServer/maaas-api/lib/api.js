@@ -190,6 +190,35 @@ function getFilteredView(session, view)
     return processObject(session, lodash.cloneDeep(view));
 }
 
+function getViewModel(routeModule, context, session, params)
+{
+    viewModel = {};
+    if (routeModule.InitializeViewModel)
+    {
+        logger.info("Initializing view model");
+        viewModel = routeModule.InitializeViewModel(context, session, params);
+    }
+
+    return viewModel;
+}
+
+function getView(routeModule, context, session, viewModel)
+{
+    var view = {};
+
+    if (routeModule.View)
+    {
+        view = getFilteredView(session, routeModule.View);
+    }
+
+    if (routeModule.InitializeView)
+    {
+        view = routeModule.InitializeView(context, session, viewModel, view);
+    }
+
+    return view;
+}
+
 // Public API
 //
 var MaaasApi = function(moduleManager)
@@ -242,15 +271,11 @@ MaaasApi.prototype.navigateToView = function(context, route, params)
     if (routeModule)
     {
         logger.info("Found route module for " + route);
-        context.session.ViewModel = {};
-        if (routeModule.InitializeViewModel)
-        {
-            logger.info("Initializing view model (on nav)");
-            context.session.ViewModel = routeModule.InitializeViewModel(context, context.session, params);
-        }
+
+        context.session.ViewModel = getViewModel(routeModule, context, context.session, params);
 
         context.response.Path = route;
-        context.response.View = getFilteredView(context.session, routeModule.View);
+        context.response.View = getView(routeModule, context, context.session, context.session.ViewModel);
         context.response.ViewModel = context.session.ViewModel;
     }
 }
@@ -344,14 +369,9 @@ MaaasApi.prototype.process = function(session, requestObject)
         }
         else
         {
-            context.session.ViewModel = {};
-            if (routeModule.InitializeViewModel)
-            {
-                logger.info("Initializing view model");
-                context.session.ViewModel = routeModule.InitializeViewModel(context, context.session);
-            }
+            context.session.ViewModel = getViewModel(routeModule, context, context.session);
 
-            context.response.View = getFilteredView(context.session, routeModule.View);
+            context.response.View = getView(routeModule, context, context.session, context.session.ViewModel);
             context.response.ViewModel = session.ViewModel;
         }
     }
