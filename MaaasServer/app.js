@@ -65,23 +65,24 @@ function createApiProcessor(apiManager, appPath, directory)
         serviceName: 'RedisSessionStore',
         serviceConfiguration: 
         {
-            //host: "192.168.1.168",
             host: "synchroapi.redis.cache.windows.net",
             port: 6379,
-            password: "7YTzfcTk9PHyiJdY62q6SRabTiGa9EFMaZgo7KzPUrc=" // Redis Primary Key synchroapi
+            password: "7YTzfcTk9PHyiJdY62q6SRabTiGa9EFMaZgo7KzPUrc=", // Redis Primary Key synchroapi
+            pingInterval: 60
         }
     }
 
     var moduleStoreSpec = 
     {
+        /*        
         packageRequirePath: path.resolve('./maaas-api'), 
         serviceName: 'FileModuleStore',
         serviceConfiguration: 
         {
             moduleDirectory: path.resolve(__dirname, path.join("maaas-samples", directory))
         }
+       */
         
-        /*        
         packageRequirePath: path.resolve('./maaas-azure'), 
         serviceName: 'AzureModuleStore',
         serviceConfiguration: 
@@ -90,7 +91,6 @@ function createApiProcessor(apiManager, appPath, directory)
             storageAccessKey: "KqhUhHFkjOFDWI3mFG9AiGO8H0OWPaYPmRHf9vUqiKsp5nPFFGjX8gmFmJ1E3lbg9m02K76UrFfaxLU/JKWrxg==",
             containerName: directory
         }
-       */
     }
 
     var resourceResolverSpec = 

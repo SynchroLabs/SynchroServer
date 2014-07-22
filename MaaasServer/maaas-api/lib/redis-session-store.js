@@ -6,7 +6,7 @@
 
 // https://github.com/mranney/node_redis
 var redis = require("redis");
-redis.debug_mode = true;
+// redis.debug_mode = true;
 
 var uuid = require('node-uuid');
 var wait = require('wait.for');
@@ -21,6 +21,7 @@ module.exports = function(params)
     var port = params.port;
     var host = params.host;
     var password = params.password;
+    var pingInterval = params.pingInterval;
 
     // Setup Redis
     //
@@ -42,6 +43,35 @@ module.exports = function(params)
 		});		
 	}
 
+    // When using Azure Redis, when the connection times out, the client is not notified and does not recover
+    // cleanly.  For more details, see - https://github.com/mranney/node_redis/issues/628
+    //
+    // We do a one minute redis PING heartbeat, which appears to keep the Azure Redis connections up and running
+    // indefinitely. 
+    //
+    function heartbeat()
+    {
+        logger.info("Redis ping starting...");
+        client.ping(function(err, result)
+        {
+            if (err)
+            {
+                logger.error("Redis ping returned err: " + err);
+            }
+            else
+            {
+                logger.info("Redis ping returned: " + result);
+            }
+        });
+    }
+
+    if (pingInterval)
+    {
+        setInterval(heartbeat, pingInterval * 1000);
+    }
+
+    // Profiling functions...
+    //
     function timerStart()
     {
         return process.hrtime();
