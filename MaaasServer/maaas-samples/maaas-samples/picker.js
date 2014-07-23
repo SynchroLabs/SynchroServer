@@ -52,10 +52,10 @@ exports.Commands =
 {
     clicked: function(context, session, viewModel, params)
     {
-        return Maaas.showMessage(context, { message: params.control + " selection changed, new color: " + params.colorName });
+        return Synchro.showMessage(context, { message: params.control + " selection changed, new color: " + params.colorName });
     },
     exit: function(context)
     {
-        return Maaas.navigateToView(context, "menu");
+        return Synchro.navigateToView(context, "menu");
     },
 }

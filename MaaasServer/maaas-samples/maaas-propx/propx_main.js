@@ -56,18 +56,18 @@ exports.Commands =
 {
     search: function(context, session, viewModel)
     {
-        return Maaas.navigateToView(context, "propx_list", { searchTerm: viewModel.search });
+        return Synchro.navigateToView(context, "propx_list", { searchTerm: viewModel.search });
     },
     location: function(context, session, viewModel)
     {
-        return Maaas.navigateToView(context, "propx_list");
+        return Synchro.navigateToView(context, "propx_list");
     },
     previousSearch: function(context, session, viewModel, params)
     {
-        return Maaas.navigateToView(context, "propx_list", { searchTerm: params.searchTerm });
+        return Synchro.navigateToView(context, "propx_list", { searchTerm: params.searchTerm });
     },
     favs: function(context, session, viewModel)
     {
-        return Maaas.navigateToView(context, "propx_favs");
+        return Synchro.navigateToView(context, "propx_favs");
     }
 }

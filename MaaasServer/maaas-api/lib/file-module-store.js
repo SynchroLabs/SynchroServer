@@ -11,7 +11,7 @@ module.exports = function(params)
     {
         getAppDefinition: function()
         {
-            var appDefinitionPath = path.resolve(moduleDir, "maaas.json");
+            var appDefinitionPath = path.resolve(moduleDir, "synchro.json");
             var content = fs.readFileSync(appDefinitionPath, 'utf8');
             return JSON.parse(content);
         },

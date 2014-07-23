@@ -1,6 +1,6 @@
 ﻿// Sandbox page
 //
-var userImage =  Maaas.getResourceUrl("user.png");
+var userImage =  Synchro.getResourceUrl("user.png");
 var profileImage = "http://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash3/c23.23.285.285/s160x160/943786_10201215910308278_1343091684_n.jpg";
 
 exports.View =
@@ -46,6 +46,6 @@ exports.Commands =
     },
     exit: function(context)
     {
-        return Maaas.navigateToView(context, "menu");
+        return Synchro.navigateToView(context, "menu");
     },
 }

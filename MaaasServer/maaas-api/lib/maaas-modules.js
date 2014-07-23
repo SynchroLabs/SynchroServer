@@ -79,7 +79,7 @@ Module._extensions['.js'] = (function(original)
             // but that would interfere with the line numbering of the file, which is important for debugging/breakpoints.
             //
             module.maaasSupportModule = moduleSource.maaasSupportModule;
-            var source = " var Maaas = module.maaasSupportModule; " + moduleSource.source;
+            var source = " var Synchro = module.maaasSupportModule; " + moduleSource.source;
             module._compile(source, filename);
         }
         else

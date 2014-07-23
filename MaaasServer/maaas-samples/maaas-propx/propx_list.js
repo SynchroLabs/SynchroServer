@@ -62,7 +62,7 @@ exports.InitializeViewModel = function(context, session, params)
         searchTerm: params && params.searchTerm
     }
 
-    var props = Maaas.waitFor(getProperties);
+    var props = Synchro.waitFor(getProperties);
 
     console.log("Got " + props.response.listings.length + " listings");
     viewModel.location = props.response.locations[0].title;
@@ -87,10 +87,10 @@ exports.Commands =
     propertySelected: function(context, session, viewModel, params)
     {
         console.log("Property selected: " + params.property.title);
-        return Maaas.navigateToView(context, "propx_detail", { property: params.property });
+        return Synchro.navigateToView(context, "propx_detail", { property: params.property });
     },
     exit: function(context)
     {
-        return Maaas.navigateToView(context, "propx_main");
+        return Synchro.navigateToView(context, "propx_main");
     },
 }

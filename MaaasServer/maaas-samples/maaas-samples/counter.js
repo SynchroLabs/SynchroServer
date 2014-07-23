@@ -62,7 +62,7 @@ exports.InitializeViewModel = function(context, session)
     var viewModel =
     {
         count: session.count,
-        font: fontStyle.normal,
+        font: (session.count < 10) ? fontStyle.normal : fontStyle.highlighted
     }
     return viewModel;
 }
@@ -86,6 +86,6 @@ exports.Commands =
     {
         session.count = viewModel.count;
         console.log("Updated session count to: " + session.count);
-        return Maaas.navigateToView(context, "menu");
+        return Synchro.navigateToView(context, "menu");
     },
 }

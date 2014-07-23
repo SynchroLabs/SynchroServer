@@ -2930,8 +2930,8 @@
     <Content Include="maaas-azure\node_modules\node-uuid\README.md" />
     <Content Include="maaas-azure\node_modules\node-uuid\test\test.html" />
     <Content Include="maaas-azure\package.json" />
-    <Content Include="maaas-samples\maaas-propx\maaas.json" />
-    <Content Include="maaas-samples\maaas-samples\maaas.json" />
+    <Content Include="maaas-samples\maaas-propx\synchro.json" />
+    <Content Include="maaas-samples\maaas-samples\synchro.json" />
     <Content Include="maaas-studio\node_modules\express-hbs\.editorconfig" />
     <Content Include="maaas-studio\node_modules\express-hbs\.jsbeautifyrc" />
     <Content Include="maaas-studio\node_modules\express-hbs\.npmignore" />

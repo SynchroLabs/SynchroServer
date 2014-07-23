@@ -25,6 +25,6 @@ exports.Commands =
     },
     exit: function(context)
     {
-        return Maaas.navigateToView(context, "propx_main");
+        return Synchro.navigateToView(context, "propx_main");
     },
 }

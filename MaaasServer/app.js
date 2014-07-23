@@ -178,7 +178,13 @@ app.get('/', login.checkAuth, function(request, response)
 
             var host = request.host; 
             var port = app.get("port");
-            if (port != 80)
+
+            // This bit of port checking is to add a non-standard port spec if needed (particularly handy in local dev
+            // environments).  When deploying to Azure, the port is actually a named pipe reference, which you don't want
+            // to add to the endpoint - and presumably you'll be on a standard port on cloud deployments anyway.  So we only
+            // add the port to the endpoint spec here if it's an integer greater than 0 and not the default port (80).
+            //
+            if ((port === parseInt(port)) && (port > 0) && (port != 80))
             {
                 host += ":" + port;
             }

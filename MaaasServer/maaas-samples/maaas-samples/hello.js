@@ -33,6 +33,6 @@ exports.Commands =
 {
     exit: function(context)
     {
-        return Maaas.navigateToView(context, "menu");
+        return Synchro.navigateToView(context, "menu");
     },
 }

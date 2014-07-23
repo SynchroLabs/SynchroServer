@@ -69,7 +69,7 @@ module.exports = function(params)
     {
         getAppDefinition: function()
         {
-            var content = wait.for(getBlobText, "maaas.json");
+            var content = wait.for(getBlobText, "synchro.json");
             return JSON.parse(content);
         },
 

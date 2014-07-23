@@ -47,19 +47,19 @@ exports.Commands =
                     { label: "Cancel" },
                 ]
             }
-            return Maaas.showMessage(context, messageBox);
+            return Synchro.showMessage(context, messageBox);
         }
         else
         {
-            return Maaas.showMessage(context, { message: "Sorry, you failed!" });
+            return Synchro.showMessage(context, { message: "Sorry, you failed!" });
         }
     },
     success: function(context)
     {
-        return Maaas.navigateToView(context, "counter");
+        return Synchro.navigateToView(context, "counter");
     },
     cancel: function(context)
     {
-        return Maaas.navigateToView(context, "menu");
+        return Synchro.navigateToView(context, "menu");
     },
 }
