@@ -35,11 +35,14 @@ exports.View =
             { control: "text", value: "Non-Microsoft OS", fontsize: 12 },
             ]},
 
-        { control: "text", value: "Scaling: {deviceMetrics.scalingFactor:P1}", fontsize: 12 },
         { control: "text", value: "Height (inches): {deviceMetrics.heightInches:F2}", fontsize: 12 },
         { control: "text", value: "Width (inches): {deviceMetrics.widthInches:F2}", fontsize: 12 },
+        { control: "text", value: "Height (device units): {deviceMetrics.heightDeviceUnits:F2}", fontsize: 12 },
+        { control: "text", value: "Width (device units): {deviceMetrics.widthDeviceUnits:F2}", fontsize: 12 },
+        { control: "text", value: "Device Scaling: {deviceMetrics.deviceScalingFactor:P1}", fontsize: 12 },
         { control: "text", value: "Height (units): {deviceMetrics.heightUnits:F2}", fontsize: 12 },
         { control: "text", value: "Width (units): {deviceMetrics.widthUnits:F2}", fontsize: 12 },
+        { control: "text", value: "Scaling: {deviceMetrics.scalingFactor:P1}", fontsize: 12 },
     ]
 }
 
