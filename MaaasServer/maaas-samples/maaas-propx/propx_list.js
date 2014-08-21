@@ -1,4 +1,4 @@
-﻿// Property Cross list page
+// Property Cross list page
 //
 var http = require('http');
 
@@ -8,7 +8,8 @@ exports.View =
     onBack: "exit",
     elements: 
     [
-        { control: "stackpanel", width: "*", height: "*", contents: [
+        /* Phone - single list with nav to detail page */
+        { control: "stackpanel", filterDeviceType: "Phone", width: "*", height: "*", contents: [
             { control: "text", value: "Found {properties} listings in {location}", fontsize: 12 },
 
             { control: "listview", select: "None", height: "*", width: 460, margin: { bottom: 0 }, binding: { items: "properties", onItemClick: { command: "propertySelected", property: "{$data}" } }, itemTemplate:
@@ -20,6 +21,33 @@ exports.View =
                     ] },
                 ] },
             },
+        ] },
+        /* Tablet - list with details panel for selected item */
+        { control: "stackpanel", filterDeviceType: "Tablet", orientation: "Horizontal", width: "*", height: "*", contents: [
+            { control: "stackpanel", width: "480", height: "*", contents: [
+                { control: "text", value: "Found {properties} listings in {location}", fontsize: 12 },
+
+                { control: "listview", select: "Single", height: "*", width: 460, margin: { bottom: 0 }, binding: { items: "properties", selection: "selectedProperty" }, itemTemplate:
+                    { control: "stackpanel", orientation: "Horizontal", padding: { top: 5, bottom: 5 }, contents: [
+                        { control: "image", resource: "{img_url}", height: 90, width: 120 },
+                        { control: "stackpanel", orientation: "Vertical", padding: { left: 5 }, contents: [
+                            { control: "text", value: "{price_formatted}", font: { bold: true, size: 10 } },
+                            { control: "text", value: "{title}", fontsize: 8 },
+                        ] },
+                    ] },
+                },
+            ] },
+            { control: "stackpanel", width: "*", height: "*", visibility: "{$data}", binding: { with: "selectedProperty" }, contents: [
+                { control: "text", value: "Property Detail", fontsize: 12 },
+
+                { control: "stackpanel", contents: [
+                    { control: "text", value: "{price_formatted}", font: { bold: true, size: 14 } },
+                    { control: "text", value: "{title}", width: "*", ellipsize: true, fontsize: 12 },
+                    { control: "image", resource: "{img_url}", horizontalAlignment: "Left", margin: { top: 10, bottom: 10 }, height: 300, width: 400 },
+                    { control: "text", value: "{beds} bedroom, {baths} bath", fontsize: 12 },
+                    { control: "text", value: "{summary}", width: "*", font: { italic: true, size: 10 } },
+                ] },
+            ] },
         ] },
     ]
 }
@@ -59,6 +87,7 @@ exports.InitializeViewModel = function(context, session, params)
     {
         location: "None",
         properties: [],
+        selectedProperty: null,
         searchTerm: params && params.searchTerm
     }
 
