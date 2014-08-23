@@ -19,25 +19,25 @@ exports.View =
         // Toolbar support for ther various platforms
         //
         { select: "First", contents: [
-            { select: "All", filterOS: "Windows", contents: [
+            { select: "All", filter: { deviceMetric: "os", is: "Windows" }, contents: [
                 { control: "commandBar.button", text: "Add", icon: "Add", commandBar: "Bottom", commandType: "Secondary", binding: { command: "vary", amount: 1 } },
                 { control: "commandBar.button", text: "Subtract", icon: "Remove", commandBar: "Bottom", commandType: "Secondary", binding: { command: "vary", amount: -1 }, enabled: "{count}" },
                 { control: "commandBar.button", text: "Reset", icon: "Stop", commandBar: "Bottom", binding: "reset" },
                 ]
             },
-            { select: "All", filterOS: "WinPhone", contents: [
+            { select: "All", filter: { deviceMetric: "os", is: "WinPhone" }, contents: [
                 { control: "appBar.button", text: "Add", icon: "add", binding: { command: "vary", amount: 1 } },
                 { control: "appBar.button", text: "Subtract", icon: "minus", binding: { command: "vary", amount: -1 }, enabled: "{count}" },
                 { control: "appBar.button", text: "Reset", icon: "refresh", binding: "reset" },
                 ]
             },
-            { select: "All", filterOS: "Android", contents: [
+            { select: "All", filter: { deviceMetric: "os", is: "Android" }, contents: [
                 { control: "actionBar.item", text: "Add", binding: { command: "vary", amount: 1 } },
                 { control: "actionBar.item", text: "Subtract", binding: { command: "vary", amount: -1 }, enabled: "{count}" },
                 { control: "actionBar.item", text: "Reset", icon: "ic_action_refresh", showAsAction: "IfRoom", binding: "reset", enabled: "{count}" },
                 ]
             },
-            { select: "All", filterOS: "iOS", contents: [
+            { select: "All", filter: { deviceMetric: "os", is: "iOS" }, contents: [
                 { control: "navBar.button", systemItem: "Trash", binding: "reset", enabled: "{count}" },
                 { control: "toolBar.button", text: "Add", icon: "plus-symbol-mini", binding: { command: "vary", amount: 1 } },
                 { control: "toolBar.button", text: "Subtract", icon: "minus-symbol-mini", binding: { command: "vary", amount: -1 }, enabled: "{count}" },
@@ -67,7 +67,7 @@ exports.InitializeViewModel = function(context, session)
     return viewModel;
 }
 
-exports.OnChange = function(context, session, viewModel, source, changes)
+exports.OnViewModelChange = function(context, session, viewModel, source, changes)
 {
     viewModel.font = (viewModel.count < 10) ? fontStyle.normal : fontStyle.highlighted; 
 }

@@ -1,6 +1,58 @@
 ﻿
 var lodash = require("lodash");
 
+var logger = require('log4js').getLogger("util");
+
+exports.getObjectProperty = function(obj, propertyPath)
+{
+    propertyPath = propertyPath.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
+    var parts = propertyPath.split('.'),
+        last = parts.pop(),
+        len = parts.length,
+        i = 1,
+        current = parts[0];
+
+    if (len > 0)
+    {
+        while ((obj = obj[current]) && i < len)
+        {
+            current = parts[i];
+            i++;
+        }
+    }
+
+    if (obj)
+    {
+        return obj[last];
+    }
+}
+
+exports.setObjectProperty = function(obj, propertyPath, value)
+{
+    propertyPath = propertyPath.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
+    var parts = propertyPath.split('.'),
+        last = parts.pop(),
+        len = parts.length,
+        i = 1,
+        current = parts[0];
+
+    if (len > 0)
+    {
+        while ((obj = obj[current]) && i < len)
+        {
+            current = parts[i];
+            i++;
+        }
+    }
+    
+    if (obj)
+    {
+        logger.info("Updating bound item for property: " + propertyPath);
+        obj[last] = value;
+        return obj[last];
+    }
+}
+
 // 
 // Remove one or more items from an array.  
 //

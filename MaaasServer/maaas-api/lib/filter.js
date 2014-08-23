@@ -1,7 +1,9 @@
 // Module to apply View filtering logic
 //
 var lodash = require("lodash");
-var logger = require('log4js').getLogger("maaas-api");
+var util = require('./util');
+
+var logger = require('log4js').getLogger("filter");
 
 function equalsOrContains(haystack, needle)
 {
@@ -22,23 +24,126 @@ function equalsOrContains(haystack, needle)
     }
 }
 
+// Filter value domain types:
+//
+//   deviceMetric, viewMetric, viewModel
+//
+// Filter operators:
+//
+//   is, isnot, lt, lte, gt, gte
+//
+function processFilter(session, filter)
+{
+    var value = null;
+    var isDynamic = false;
+
+    if (filter["deviceMetric"])
+    {
+        value = util.getObjectProperty(session.DeviceMetrics, filter["deviceMetric"]);
+    }
+    else if (filter["viewMetric"])
+    {
+        value = util.getObjectProperty(session.ViewMetrics, filter["viewMetric"]);
+        isDynamic = true;
+    }
+    else if (filter["viewModel"])
+    {
+        value = util.getObjectProperty(session.ViewModel, filter["viewModel"]);
+        isDynamic = true;
+    }
+    else
+    {
+        // !!! Error - no filter value domain and value
+    }
+
+    var operands = ["is", "isnot", "lt", "lte", "gt", "gte"];
+    var operand = null;
+    var operandValue = null;
+
+    for (var i = 0; i < operands.length; i++)
+    {
+        if (filter[operands[i]] !== undefined)
+        {
+            operand = operands[i];
+            operandValue = filter[operand];
+            break;
+        }
+    }
+
+    // logger.info("operand: " + operand + ", operandValue: " + operandValue + ", value: " + value);
+
+    var result = false;
+
+    if (operand && (operandValue !== null))
+    {
+        switch (operand)
+        {
+            case "is":
+                result = equalsOrContains(operandValue, value);
+                break;
+
+            case "isnot":
+                result = !equalsOrContains(operandValue, value);
+                break;
+
+            case "lt":
+                result = value < operandValue;
+                break;
+
+            case "lte":
+                result = value <= operandValue;
+                break;
+
+            case "gt":
+                result = value > operandValue;
+                break;
+
+            case "gte":
+                result = value >= operandValue;
+                break;
+        }
+    }
+    else
+    {
+        // !!! Error - no operand and operand value
+    }
+
+    return result;
+}
+
 // Return false if any provided filter criteria is not met, otherwise true
 //
 function objectPassesFilter(session, obj)
 {
-    if (obj["filterOS"] && !equalsOrContains(obj["filterOS"], session.DeviceMetrics.os))
+    if (obj["filter"])
     {
-        return false;
-    }
+        var result = true;
 
-    if (obj["filterDeviceType"] && !equalsOrContains(obj["filterDeviceType"], session.DeviceMetrics.deviceType))
-    {
-        return false;
-    }
+        if (obj["filter"] instanceof Array)
+        {
+            // Multiple filters - treated as an AND with shortcut evaluation...
+            //
+            for (var i = 0; i < obj["filter"].length; i++) 
+            {
+                result = processFilter(session, obj["filter"][i]);
+                if (!result)
+                {
+                    break;
+                }
+            }
+        }
+        else
+        {
+            // Single filter...
+            //
+            result = processFilter(session, obj["filter"]);
+        }
 
-    if (obj["filterDeviceClass"] && !equalsOrContains(obj["filterDeviceClass"], session.DeviceMetrics.deviceClass))
-    {
-        return false;
+        // Remove the "filter" attribute (now that it's processed and no longer relevant)
+        //
+        delete obj["filter"];
+
+        return result;
     }
 
     // If we get here, we didn't fail to meet any filter criteria, so we won!

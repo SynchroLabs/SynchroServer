@@ -9,7 +9,7 @@ exports.View =
     elements: 
     [
         /* Phone - single list with nav to detail page */
-        { control: "stackpanel", filterDeviceType: "Phone", width: "*", height: "*", contents: [
+        { control: "stackpanel", filter: { deviceMetric: "deviceType", is: "Phone" }, width: "*", height: "*", contents: [
             { control: "text", value: "Found {properties} listings in {location}", fontsize: 12 },
 
             { control: "listview", select: "None", height: "*", width: 460, margin: { bottom: 0 }, binding: { items: "properties", onItemClick: { command: "propertySelected", property: "{$data}" } }, itemTemplate:
@@ -23,7 +23,7 @@ exports.View =
             },
         ] },
         /* Tablet - list with details panel for selected item */
-        { control: "stackpanel", filterDeviceType: "Tablet", orientation: "Horizontal", width: "*", height: "*", contents: [
+        { control: "stackpanel", filter: { deviceMetric: "deviceType", is: "Tablet" }, orientation: "Horizontal", width: "*", height: "*", contents: [
             { control: "stackpanel", width: "480", height: "*", contents: [
                 { control: "text", value: "Found {properties} listings in {location}", fontsize: 12 },
 

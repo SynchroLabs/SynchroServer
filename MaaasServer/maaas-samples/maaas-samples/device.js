@@ -14,24 +14,28 @@ exports.View =
 
         // No select:First here, just to show that you can use filters on standalone nodes...
         //
-        { control: "text", filterDeviceType: "Phone", value: "Primary orientation is Portrait (phone)", fontsize: 12 },
-        { control: "text", filterDeviceType: "Tablet", value: "Primary orientation is Landscape (tablet)", fontsize: 12 },
+        { control: "text", filter: { deviceMetric: "deviceType", is: "Phone" }, value: "Phone type device", fontsize: 12 },
+        { control: "text", filter: { deviceMetric: "deviceType", is: "Tablet" }, value: "Tablet type device", fontsize: 12 },
+
+        { control: "text", value: "Natural orientation is {deviceMetrics.naturalOrientation}", fontsize: 12 },
+
+        { control: "text", value: "Current orientation is {orientation}", fontsize: 12 },
 
         // Here is a select:First that will work just as if the items were not included in a select first (since exactly
         // one of the children will be valid on any given platform).
         //
         { select: "First", contents: [
-            { control: "text", filterOS: "Windows", value: "Windows Rules!", fontsize: 12 },
-            { control: "text", filterOS: "WinPhone", value: "Windows Phone Rules!", fontsize: 12 },
-            { control: "text", filterOS: "Android", value: "Android Rules!", fontsize: 12 },
-            { control: "text", filterOS: "iOS", value: "iOS Rules!", fontsize: 12 },
+            { control: "text", filter: { deviceMetric: "os", is: "Windows" }, value: "Windows Rules!", fontsize: 12 },
+            { control: "text", filter: { deviceMetric: "os", is: "WinPhone" }, value: "Windows Phone Rules!", fontsize: 12 },
+            { control: "text", filter: { deviceMetric: "os", is: "Android" }, value: "Android Rules!", fontsize: 12 },
+            { control: "text", filter: { deviceMetric: "os", is: "iOS" }, value: "iOS Rules!", fontsize: 12 },
             ]},
 
         // This is the real use-case for select:First, where there would be one or more filtered children with an unfiltered
         // "default" at the bottom...
         //
         { select: "First", contents: [
-            { control: "text", filterOS: ["Windows", "WinPhone"], value: "Microsoft OS", fontsize: 12 },
+            { control: "text", filter: { deviceMetric: "os", is: ["Windows", "WinPhone"] }, value: "Microsoft OS", fontsize: 12 },
             { control: "text", value: "Non-Microsoft OS", fontsize: 12 },
             ]},
 
@@ -51,8 +55,14 @@ exports.InitializeViewModel = function(context, session)
     var viewModel =
     {
         deviceMetrics: session.DeviceMetrics,
+        orientation: session.ViewMetrics.orientation,
     }
     return viewModel;
+}
+
+exports.OnViewMetricsChange = function(context, session, viewModel)
+{
+    viewModel.orientation = session.ViewMetrics.orientation;
 }
 
 exports.Commands = 
