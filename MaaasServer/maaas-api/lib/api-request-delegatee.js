@@ -32,6 +32,7 @@ exports.init = function(params)
 
     var ApiProcessor = require('./api');
     api = new ApiProcessor(moduleManager);
+    api.load();
 }
 
 function apiProcess(session, body)

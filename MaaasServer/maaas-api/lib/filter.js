@@ -32,24 +32,23 @@ function equalsOrContains(haystack, needle)
 //
 //   is, isnot, lt, lte, gt, gte
 //
-function processFilter(session, filter)
+function processFilter(filterState, filter)
 {
     var value = null;
-    var isDynamic = false;
 
     if (filter["deviceMetric"])
     {
-        value = util.getObjectProperty(session.DeviceMetrics, filter["deviceMetric"]);
+        value = util.getObjectProperty(filterState.deviceMetrics, filter["deviceMetric"]);
     }
     else if (filter["viewMetric"])
     {
-        value = util.getObjectProperty(session.ViewMetrics, filter["viewMetric"]);
-        isDynamic = true;
+        value = util.getObjectProperty(filterState.viewMetrics, filter["viewMetric"]);
+        filterState.isDynamic = true;
     }
     else if (filter["viewModel"])
     {
-        value = util.getObjectProperty(session.ViewModel, filter["viewModel"]);
-        isDynamic = true;
+        value = util.getObjectProperty(filterState.viewModel, filter["viewModel"]);
+        filterState.isDynamic = true;
     }
     else
     {
@@ -113,7 +112,7 @@ function processFilter(session, filter)
 
 // Return false if any provided filter criteria is not met, otherwise true
 //
-function objectPassesFilter(session, obj)
+function objectPassesFilter(filterState, obj)
 {
     if (obj["filter"])
     {
@@ -125,7 +124,7 @@ function objectPassesFilter(session, obj)
             //
             for (var i = 0; i < obj["filter"].length; i++) 
             {
-                result = processFilter(session, obj["filter"][i]);
+                result = processFilter(filterState, obj["filter"][i]);
                 if (!result)
                 {
                     break;
@@ -136,7 +135,7 @@ function objectPassesFilter(session, obj)
         {
             // Single filter...
             //
-            result = processFilter(session, obj["filter"]);
+            result = processFilter(filterState, obj["filter"]);
         }
 
         // Remove the "filter" attribute (now that it's processed and no longer relevant)
@@ -150,7 +149,7 @@ function objectPassesFilter(session, obj)
     return true;
 }
 
-function processSelectFirst(session, obj, containingArray)
+function processSelectFirst(filterState, obj, containingArray)
 {
     // If the object is a select:First, process it now - promote first qualifying child, if any
     //
@@ -162,9 +161,9 @@ function processSelectFirst(session, obj, containingArray)
             {
                 // Return the first qualifying child
                 var childObj = obj["contents"][i];
-                if (objectPassesFilter(session, childObj))
+                if (objectPassesFilter(filterState, childObj))
                 {
-                    return processSelectFirst(session, childObj);
+                    return processSelectFirst(filterState, childObj);
                 }
             }
         }
@@ -172,7 +171,7 @@ function processSelectFirst(session, obj, containingArray)
         return null;
     }
 
-    return processObject(session, obj); // Not a select:First
+    return processObject(filterState, obj); // Not a select:First
 }
 
 function processSelectAll(obj, containingArray)
@@ -196,9 +195,9 @@ function processSelectAll(obj, containingArray)
     }
 }
 
-function processObject(session, obj)
+function processObject(filterState, obj)
 {    
-    if (!objectPassesFilter(session, obj))
+    if (!objectPassesFilter(filterState, obj))
     {
         return null;
     }
@@ -219,7 +218,7 @@ function processObject(session, obj)
                     // If the array element is an Object, process that object...
                     if (obj[property][i] && (obj[property][i] instanceof Object))
                     {
-                        var childObj = processSelectFirst(session, obj[property][i], newArray);
+                        var childObj = processSelectFirst(filterState, obj[property][i], newArray);
                         if (childObj)
                         {
                             processSelectAll(childObj, newArray);
@@ -235,8 +234,23 @@ function processObject(session, obj)
     return obj;
 }
 
-exports.filterView = function(session, view)
-{    
+exports.filterView = function(deviceMetrics, viewMetrics, viewModel, view)
+{   
+    var filterState = 
+    { 
+        deviceMetrics: deviceMetrics,
+        viewMetrics: viewMetrics,
+        viewModel: viewModel, 
+        isDynamic: false 
+    };
+
     // logger.info("Applying filter to view");
-    return processObject(session, lodash.cloneDeep(view));
+    var result = processObject(filterState, lodash.cloneDeep(view));
+
+    if (filterState.isDynamic)
+    {
+        result["dynamic"] = true;
+    }
+
+    return result;
 }

@@ -1,7 +1,13 @@
 ﻿
+var crypto = require("crypto");
 var lodash = require("lodash");
 
 var logger = require('log4js').getLogger("util");
+
+exports.jsonHash = function(obj)
+{
+   return crypto.createHash('sha1').update(JSON.stringify(obj)).digest("hex");
+}
 
 exports.getObjectProperty = function(obj, propertyPath)
 {
