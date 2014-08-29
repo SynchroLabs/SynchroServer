@@ -156,7 +156,7 @@ MaaasApi.prototype.process = function(session, requestObject)
 	var routeModule = this.moduleManager.getModule(route);
     if (routeModule)
     {
-        var viewModel = session.ViewModel; // !!! Use this throughout and only store back to session at the end if we're staying on the same page
+        var viewModel = session.ViewModel; // Use this ViewModel throughout and only store back to session at the end if we're staying on the same page
         var viewModelAfterUpdate = null;
 
         logger.info("Found route module for: " + route);
@@ -182,11 +182,17 @@ MaaasApi.prototype.process = function(session, requestObject)
             //
             viewModelAfterUpdate = JSON.parse(JSON.stringify(viewModel));
 
-            // If we had changes from the view and we have a change listener for this route, call it.
+            // If we have a view model change listener for this route, analyze changes, and call it as appropriate.
+            //
             if (routeModule.OnViewModelChange)
             {
-                // !!! Pass changelist (consistent with command side changelist)
-                routeModule.OnViewModelChange(context, context.session, viewModel, "view");
+                // Get the changelist for the callback, but only call if there are any changes
+                //
+                var viewModelUpdates = objectMonitor.getChangeList(null, viewModelBeforeUpdate, viewModelAfterUpdate);
+                if (viewModelUpdates && (viewModelUpdates.length > 0))
+                {
+                    routeModule.OnViewModelChange(context, context.session, viewModel, "view", viewModelUpdates);
+                }
             }
         }
 
@@ -213,26 +219,37 @@ MaaasApi.prototype.process = function(session, requestObject)
                     viewModelAfterUpdate = JSON.parse(JSON.stringify(viewModel));
                 }
 
-                // !!! Probably should look up the command first to see if it's there, and fail cleaner if not.
+                // Only process command if it exists...
                 //
-                routeModule.Commands[context.request.Command](context, context.session, viewModel, context.request.Parameters);
-
-                // If we have a view model change listener for this route, analyze changes, and call it as appropriate.
-                //
-                if (routeModule.OnViewModelChange)
+                if (routeModule.Commands && routeModule.Commands[context.request.Command])
                 {
-                    // !!! We need to call getChangeList here also, to determine if there were any changes, and
-                    //     to construct the changelist for the handler (consistend with the view side changelist).
-                    routeModule.OnViewModelChange(context, context.session, viewModel, "command");
+                    routeModule.Commands[context.request.Command](context, context.session, viewModel, context.request.Parameters);
+
+                    // If we have a view model change listener for this route, analyze changes, and call it as appropriate.
+                    //
+                    if (routeModule.OnViewModelChange)
+                    {
+                        // Get the changelist for the callback, but only call if there are any changes
+                        //
+                        var viewModelUpdates = objectMonitor.getChangeList(null, viewModelAfterUpdate, viewModel);
+                        if (viewModelUpdates && (viewModelUpdates.length > 0))
+                        {
+                            routeModule.OnViewModelChange(context, context.session, viewModel, "command", viewModelUpdates); 
+                        }
+                    }
+
+                    // Only update the session ViewModel and send back updates if we're staying on this view (path)...
+                    //
+                    if (context.request.Path == context.response.Path)
+                    {
+                        context.session.ViewModel = viewModel;
+                        var viewModelUpdates = objectMonitor.getChangeList(null, viewModelAfterUpdate, viewModel);
+                        context.response.ViewModelDeltas = viewModelUpdates;
+                    }                    
                 }
-
-                // Only update the session ViewModel and send back updates if we're staying on this view (path)...
-                //
-                if (context.request.Path == context.response.Path)
+                else
                 {
-                    context.session.ViewModel = viewModel;
-                    var viewModelUpdates = objectMonitor.getChangeList(null, viewModelAfterUpdate, viewModel);
-                    context.response.ViewModelDeltas = viewModelUpdates;
+                    context.response.Error = "Command not found: " + context.request.Command;
                 }
             }
             break;
@@ -259,9 +276,13 @@ MaaasApi.prototype.process = function(session, requestObject)
                     //
                     if (routeModule.OnViewModelChange)
                     {
-                        // !!! We need to call getChangeList here also, to determine if there were any changes, and
-                        //     to construct the changelist for the handler (consistend with the view side changelist).
-                        routeModule.OnViewModelChange(context, context.session, viewModel, "viewMetrics");
+                        // Get the changelist for the callback, but only call if there are any changes
+                        //
+                        var viewModelUpdates = objectMonitor.getChangeList(null, viewModelAfterUpdate, viewModel);
+                        if (viewModelUpdates && (viewModelUpdates.length > 0))
+                        {
+                            routeModule.OnViewModelChange(context, context.session, viewModel, "viewMetrics", viewModelUpdates);
+                        }
                     }
                 }
 
@@ -317,7 +338,7 @@ MaaasApi.prototype.process = function(session, requestObject)
     }
     else
     {
-        context.response.error = "No route found for command: " + context.request.command;
+        context.response.Error = "No route found for path: " + context.request.Path;
     }
 
     return context.response;

@@ -65,6 +65,16 @@ function logChange(changeType, path, value)
     logger.debug(msg);
 }
 
+// For primitive changes...
+//
+// { path: "state.foo.bar", change: "add",    value: "foo" }
+// { path: "state.foo.bar", change: "update", value: "foo" }
+// { path: "state.foo.bar", change: "remove" }
+//
+// For object/array contents changed...
+//
+// { path: "state.foo" change: "object" }
+//
 exports.getChangeList = function(basePath, originalObject, newObject)
 {
     // Doing "own properties" prevents inspection of prototype functions (among other things)
@@ -80,46 +90,3 @@ exports.getChangeList = function(basePath, originalObject, newObject)
 
     return changes;
 }
-
-//=========================================================================================
-// Test
-//=========================================================================================
-/*
-var state =
-{
-    property1: "value1",
-    property2: "value2",
-    days: ["Monday", "Tuesday", "Wednesday"],
-    colorNames: [{ color: "red" }, { color: "green" }, { color: "blue" }],
-    user:
-    {
-        username: "testuser",
-        password: ""
-    }
-}
-
-var originalState = JSON.parse(JSON.stringify(state));
-
-state.property1 = "newValue1";
-state.property3 = "newValue3";
-state.days[1] = "Saturday";
-state.days.pop();
-state.colorNames.unshift({ color: "greenish" });
-state.user.password = "testpass";
-
-theChanges = getChangeList("state", originalState, state);
-logger.info("Changes: ", JSON.stringify(theChanges, null, 4));
-*/
-
-// For primitive changes...
-//
-// { path: "state.foo.bar", change: "add",    value: "foo" }
-// { path: "state.foo.bar", change: "update", value: "foo" }
-// { path: "state.foo.bar", change: "remove" }
-//
-// For object/array contents changed...
-//
-// { path: "state.foo" change: "object" }
-//
-
-

@@ -103,8 +103,11 @@
     <Compile Include="maaas-api\node_modules\redis\test-unref.js" />
     <Compile Include="maaas-api\node_modules\redis\test.js" />
     <Compile Include="maaas-api\test\apitest.js" />
+    <Compile Include="maaas-api\test\assert-helper.js" />
     <Compile Include="maaas-api\test\filtertest.js" />
+    <Compile Include="maaas-api\test\objectmontest.js" />
     <Compile Include="maaas-api\test\testdevices.js" />
+    <Compile Include="maaas-api\test\utiltest.js" />
     <Compile Include="maaas-aws\node_modules\aws-sdk\lib\aws.js" />
     <Compile Include="maaas-aws\node_modules\aws-sdk\lib\browser.js" />
     <Compile Include="maaas-aws\node_modules\aws-sdk\lib\config.js" />
