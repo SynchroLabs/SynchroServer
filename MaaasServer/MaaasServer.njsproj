@@ -1246,6 +1246,7 @@
     <Compile Include="maaas-samples\maaas-propx\propx_favs.js" />
     <Compile Include="maaas-samples\maaas-propx\propx_list.js" />
     <Compile Include="maaas-samples\maaas-propx\propx_main.js" />
+    <Compile Include="maaas-samples\maaas-samples\autocomplete.js" />
     <Compile Include="maaas-samples\maaas-samples\binding.js" />
     <Compile Include="maaas-samples\maaas-samples\counter.js" />
     <Compile Include="maaas-samples\maaas-samples\device.js" />

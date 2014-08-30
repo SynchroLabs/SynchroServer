@@ -201,7 +201,23 @@ MaaasApi.prototype.process = function(session, requestObject)
             case "Page":
             {
                 logger.info("Page request for: " + route);
+
                 populateNewPageResponse(route, routeModule, context);
+            }
+            break;
+
+            case "Update": // View model update only (no command or view metric change - just data update)
+            {
+                logger.info("Updating view model");
+
+                // Only update the session ViewModel and send back updates if we're staying on this view (path)...
+                //
+                if (context.request.Path == context.response.Path)
+                {
+                    context.session.ViewModel = viewModel;
+                    var viewModelUpdates = objectMonitor.getChangeList(null, viewModelAfterUpdate, viewModel);
+                    context.response.ViewModelDeltas = viewModelUpdates;
+                }        
             }
             break;
 

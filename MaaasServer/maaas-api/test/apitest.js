@@ -640,7 +640,6 @@ describe("API Processor", function()
 
 				InitializeViewModel: function(context, session)
 				{
-					foo = "bar";
 				    var viewModel =
 				    {
 				    	count: 0,
@@ -666,6 +665,10 @@ describe("API Processor", function()
 						case "view":
 						{
 							session.test.viewChanges = { called: true, changes: changes };
+							if (viewModel.count >= 10)
+							{
+								viewModel.large = true;
+							}
 						}
 						break;
 
@@ -714,6 +717,56 @@ describe("API Processor", function()
 			var requestObject = { Mode: "Page", Path: "test", DeviceMetrics: metrics.DeviceMetrics, ViewMetrics: metrics.ViewMetrics };
 			var response = apiProcessor.process(session, requestObject);
 
+		});
+
+		it("should call OnViewModelChange with correct changes and source when client sends view model changes only", function() 
+		{
+			var viewModelDeltas = 
+			[
+			    { path: "count", value: 1 },
+			];
+			var requestObject = { Mode: "Update", Path: "test", ViewModelDeltas: viewModelDeltas };
+			var response = apiProcessor.process(session, requestObject);
+
+			var expectedSessionTest = 
+			{
+				viewChanges:
+				{
+					called: true,
+					changes: 
+					[
+					    { path: "count", change: "update", value: 1 },
+					]
+				}
+			}
+
+			assert.objectsEqual(session.test, expectedSessionTest);
+			assert.objectsEqual(response.ViewModelDeltas, []);
+		});
+
+		it("should call OnViewModelChange when client sends view model changes only, then return view model changes made during that processing", function() 
+		{
+			var viewModelDeltas = 
+			[
+			    { path: "count", value: 10 },
+			];
+			var requestObject = { Mode: "Update", Path: "test", ViewModelDeltas: viewModelDeltas };
+			var response = apiProcessor.process(session, requestObject);
+
+			var expectedSessionTest = 
+			{
+				viewChanges:
+				{
+					called: true,
+					changes: 
+					[
+					    { path: "count", change: "update", value: 10 },
+					]
+				}
+			}
+
+			assert.objectsEqual(session.test, expectedSessionTest);
+			assert.objectsEqual(response.ViewModelDeltas, [{ path: "large", change: "add", value: true }]);
 		});
 
 		it("should call OnViewModelChange with correct changes and source when client sends view model changes with command", function() 
