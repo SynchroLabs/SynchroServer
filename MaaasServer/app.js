@@ -7,7 +7,6 @@ var http = require('http');
 var path = require('path');
 var url = require('url');
 var wait = require('wait.for');
-
 var WebSocket = require('faye-websocket');
 
 var log4js = require('log4js');
@@ -17,6 +16,12 @@ log4js.configure({ appenders: [ { type: "console", layout: { type: "basic" } } ]
 var logger = log4js.getLogger("app");
 logger.info("Maaas.io server loading...");
 
+var commander = require( 'commander' );
+commander.version('0.0.1')
+commander.option('-t, --test', 'Run with test services')
+commander.parse(process.argv);
+
+logger.info( "Test servies: " + commander.test );
 
 // Create Maaas API processor manager
 //
@@ -33,65 +38,81 @@ var maaasStudioUrlPrefix = "/studio";
 
 var maaasStudio = new MaaasStudio(maaasStudioUrlPrefix, apiManager);
 
+
 // Create the Maaas API processors
 //
 function createApiProcessor(apiManager, appPath, directory)
 {
-    var sessionStoreSpec = 
-    { 
-        packageRequirePath: path.resolve('./maaas-api'), 
-        serviceName: 'MemorySessionStore',
-        serviceConfiguration: {}
+    var sessionStoreSpec = null;
+    var moduleStoreSpec = null;
 
-        /*
-        packageRequirePath: path.resolve('./maaas-api'), 
-        serviceName: 'FileSessionStore',
-        serviceConfiguration: 
-        {
-            sessionStateFile: path.resolve(__dirname, "sessions.json")
-        }
-
-        packageRequirePath: path.resolve('./maaas-azure'), 
-        serviceName: 'AzureSessionStore',
-        serviceConfiguration: 
-        {
-            storageAccount: "synchroncus",
-            storageAccessKey: "KqhUhHFkjOFDWI3mFG9AiGO8H0OWPaYPmRHf9vUqiKsp5nPFFGjX8gmFmJ1E3lbg9m02K76UrFfaxLU/JKWrxg==",
-            tableName: "maaasSessions"
-        }
-
-        packageRequirePath: path.resolve('./maaas-api'), 
-        serviceName: 'RedisSessionStore',
-        serviceConfiguration: 
-        {
-            host: "synchroapi.redis.cache.windows.net",
-            port: 6379,
-            password: "7YTzfcTk9PHyiJdY62q6SRabTiGa9EFMaZgo7KzPUrc=", // Redis Primary Key synchroapi
-            pingInterval: 60
-        }
-        */
-    }
-
-    var moduleStoreSpec = 
+    if (commander.test)
     {
-        packageRequirePath: path.resolve('./maaas-api'), 
-        serviceName: 'FileModuleStore',
-        serviceConfiguration: 
+        sessionStoreSpec =
         {
-            moduleDirectory: path.resolve(__dirname, path.join("maaas-samples", directory))
-        }
-        
-        /*        
-        packageRequirePath: path.resolve('./maaas-azure'), 
-        serviceName: 'AzureModuleStore',
-        serviceConfiguration: 
+            packageRequirePath: path.resolve('./maaas-api'), 
+            serviceName: 'MemorySessionStore',
+            serviceConfiguration: {}
+
+            /*
+            packageRequirePath: path.resolve('./maaas-api'), 
+            serviceName: 'FileSessionStore',
+            serviceConfiguration: 
+            {
+                sessionStateFile: path.resolve(__dirname, "sessions.json")
+            }
+            */
+        };
+
+        moduleStoreSpec = 
         {
-            storageAccount: "synchroncus",
-            storageAccessKey: "KqhUhHFkjOFDWI3mFG9AiGO8H0OWPaYPmRHf9vUqiKsp5nPFFGjX8gmFmJ1E3lbg9m02K76UrFfaxLU/JKWrxg==",
-            containerName: directory
+            packageRequirePath: path.resolve('./maaas-api'), 
+            serviceName: 'FileModuleStore',
+            serviceConfiguration: 
+            {
+                moduleDirectory: path.resolve(__dirname, path.join("maaas-samples", directory))
+            }        
         }
-       */
     }
+    else
+    {
+        sessionStoreSpec =
+        {
+            packageRequirePath: path.resolve('./maaas-api'), 
+            serviceName: 'RedisSessionStore',
+            serviceConfiguration: 
+            {
+                host: "synchroapi.redis.cache.windows.net",
+                port: 6379,
+                password: "7YTzfcTk9PHyiJdY62q6SRabTiGa9EFMaZgo7KzPUrc=", // Redis Primary Key synchroapi
+                pingInterval: 60
+            }
+
+            /*
+            packageRequirePath: path.resolve('./maaas-azure'), 
+            serviceName: 'AzureSessionStore',
+            serviceConfiguration: 
+            {
+                storageAccount: "synchroncus",
+                storageAccessKey: "KqhUhHFkjOFDWI3mFG9AiGO8H0OWPaYPmRHf9vUqiKsp5nPFFGjX8gmFmJ1E3lbg9m02K76UrFfaxLU/JKWrxg==",
+                tableName: "maaasSessions"
+            }
+            */
+        };
+
+        moduleStoreSpec = 
+        {
+            packageRequirePath: path.resolve('./maaas-azure'), 
+            serviceName: 'AzureModuleStore',
+            serviceConfiguration:
+            {
+                storageAccount: "synchroncus",
+                storageAccessKey: "KqhUhHFkjOFDWI3mFG9AiGO8H0OWPaYPmRHf9vUqiKsp5nPFFGjX8gmFmJ1E3lbg9m02K76UrFfaxLU/JKWrxg==",
+                containerName: directory
+            }
+        };
+    }
+
 
     var resourceResolverSpec = 
     { 

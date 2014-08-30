@@ -18,11 +18,9 @@ exports.View =
     elements:
     [
         { control: "text", value: "Enter a State", fontsize: 12, margin: { bottom: 0 } },
-        { control: "stackpanel", orientation: "Horizontal", contents: [
-            { control: "edit", binding: { value: "searchText", sync: "change" }, placeholder: "state name", width: 200 },
-            { control: "button", caption: "Check", width: 125, binding: "check" },
-        ] },
+        { control: "edit", binding: { value: "searchText", sync: "change" }, placeholder: "state name", width: 200 },
         { control: "listbox", width: 250, height: 300, select: "None", binding: { items: "suggestions",  onItemClick: { command: "suggestionSelected", suggestion: "{$data}" } }, visibility: "{suggestions}"},
+        { control: "button", caption: "Check", width: 125, binding: "check" },
     ]
 }
 
