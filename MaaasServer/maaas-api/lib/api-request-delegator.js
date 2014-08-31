@@ -30,8 +30,8 @@ module.exports = function(sessionStoreSpec, moduleStoreSpec, resourceResolverSpe
         if (debugPort)
         {
             options['execArgv'] = ['--debug=' + debugPort];
-            options['silent'] = true;
         }
+        options['silent'] = true;
 
         logger.info("Launching child process...");
 

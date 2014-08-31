@@ -16,12 +16,14 @@ log4js.configure({ appenders: [ { type: "console", layout: { type: "basic" } } ]
 var logger = log4js.getLogger("app");
 logger.info("Maaas.io server loading...");
 
+// Process command line params
+//
 var commander = require( 'commander' );
-commander.version('0.0.1')
-commander.option('-t, --test', 'Run with test services')
+commander.version('0.0.1');
+commander.option('-n, --nofork', 'Do not fork api processors (run inproc)');
+commander.option('-p, --port <n>', 'Server port', parseInt);
+commander.option('-t, --test', 'Run with local test services');
 commander.parse(process.argv);
-
-logger.info( "Test servies: " + commander.test );
 
 // Create Maaas API processor manager
 //
@@ -113,7 +115,6 @@ function createApiProcessor(apiManager, appPath, directory)
         };
     }
 
-
     var resourceResolverSpec = 
     { 
         packageRequirePath: path.resolve('./maaas-api'), 
@@ -124,8 +125,17 @@ function createApiProcessor(apiManager, appPath, directory)
         }
     }
 
-    var bFork = true;  // Run API processor forked or in-proc
-    var bDebug = true; // Enable debugging of API processor (only valid if running forked)
+    var bFork = true;   // Run API processor forked
+    var bDebug = true;  // Enable debugging of API processor (only valid if running forked)
+
+    if (commander.nofork)
+    {
+        // This situation is typically for when you want to run this "app" itself under a local debugger, and
+        // you want to be able to debug the api processor and actual Synchro module code also.
+        //
+        bFork = false;  // Run API processor in-proc
+        bDebug = false; // Debugging of API processor not available in-proc, so don't even ask ;)
+    }
 
     apiManager.createApiProcessor(appPath, sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, bFork, bDebug);
 }
@@ -133,16 +143,16 @@ function createApiProcessor(apiManager, appPath, directory)
 createApiProcessor(apiManager, "samples", "maaas-samples");
 createApiProcessor(apiManager, "propx", "maaas-propx");
 
-
 // Now let's set up the web / api servers...
 //
 var app = express();
 
+// Set server port.  Priority is: explicit from command line, provided by environment, default (1337)
+//
+app.set('port', commander.port || process.env.PORT || 1337);
+
 var MemoryStore = express.session.MemoryStore;
 var sessionStore = new MemoryStore();
-
-// all environments
-app.set('port', process.env.PORT || 1337);
 
 var hbs = require('express-hbs');
 
@@ -170,7 +180,7 @@ app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 maaasStudio.addMiddleware(app);
 
-// development only
+// development only (!!! parameterize?)
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
