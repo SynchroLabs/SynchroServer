@@ -1,10 +1,10 @@
-﻿// This module contains the MAAAS API that is exposed to pages/screens
+﻿// This module contains the helper API that is exposed to our app modules
 //
 var wait = require('wait.for');
 
 module.exports = function(apiProcessor, resourceResolver)
 {
-	var maaas = 
+	var services = 
 	{
 		getResourceUrl: function(resource)
 		{
@@ -27,5 +27,5 @@ module.exports = function(apiProcessor, resourceResolver)
 		}
 	}
 
-	return maaas;
+	return services;
 }

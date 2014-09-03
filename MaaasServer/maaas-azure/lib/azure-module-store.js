@@ -1,5 +1,4 @@
-// This is the cloud-based module store.  It works with modules in the "maaas-modules" container of the Azure
-// storage "maaas".
+// This is the Azure cloud-based module store.  It works with modules stored in the specified Azure storage blob container.
 //
 var path = require('path');
 var azure = require('azure');

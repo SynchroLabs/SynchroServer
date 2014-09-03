@@ -4,8 +4,7 @@ require("./assert-helper");
 var ApiProcessor = require("../lib/api");
 var devices = require("./testdevices");
 
-var logger = require('log4js').getLogger("apitest");
-
+var logger = require('log4js').getLogger("api-test");
 require('log4js').setGlobalLogLevel("ERROR");
 
 function createApiProcessor(testModules)
@@ -136,7 +135,7 @@ describe("API Processor", function()
 		}
 
 		var apiProcessor = createApiProcessor(testModules);
-    	Synchro = require("../lib/maaas")(apiProcessor, null);
+    	Synchro = require("../lib/app-services")(apiProcessor, null);
 
 		var session = {};
 		var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4");

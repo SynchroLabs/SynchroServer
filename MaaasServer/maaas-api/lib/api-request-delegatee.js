@@ -28,7 +28,7 @@ exports.init = function(params)
     var moduleStore = maaasApi.createServiceFromSpec(params.moduleStoreSpec);
     var resourceResolver = maaasApi.createServiceFromSpec(params.resourceResolverSpec);
 
-    var moduleManager = require('./maaas-modules')(moduleStore, resourceResolver);
+    var moduleManager = require('./module-manager')(moduleStore, resourceResolver);
 
     var ApiProcessor = require('./api');
     api = new ApiProcessor(moduleManager);

@@ -1,11 +1,11 @@
-﻿// Following is code to load Maaas modules that do not (necessarily) exist in physical disk files.
+﻿// Following is code to load Synchro modules that do not (necessarily) exist in physical disk files.
 //
 // Reference: https://github.com/joyent/node/blob/master/lib/module.js
 //
 var path = require('path');
 var Module = require('module');
 
-var logger = require('log4js').getLogger("maaas-modules");
+var logger = require('log4js').getLogger("module-manager");
 
 
 // This is where we keep the dictionary of pending modules, where the index is the filename (full path) 
@@ -13,9 +13,9 @@ var logger = require('log4js').getLogger("maaas-modules");
 //
 var pendingModules = { };
 
-function pushModuleSource(filename, source, maaasSupportModule)
+function pushModuleSource(filename, source, supportModule)
 {
-    pendingModules[filename] = { source: source, maaasSupportModule: maaasSupportModule };
+    pendingModules[filename] = { source: source, supportModule: supportModule };
 }
 
 function popModuleSource(filename)
@@ -75,11 +75,11 @@ Module._extensions['.js'] = (function(original)
             //
             // This happens as part of NativeModule.wrap() - see: https://github.com/joyent/node/blob/master/src/node.js
             //
-            // Below we take advantage of this to jam in the Maaas module reference.  It is tempting to add a newline, 
+            // Below we take advantage of this to jam in the Synchro module reference.  It is tempting to add a newline, 
             // but that would interfere with the line numbering of the file, which is important for debugging/breakpoints.
             //
-            module.maaasSupportModule = moduleSource.maaasSupportModule;
-            var source = " var Synchro = module.maaasSupportModule; " + moduleSource.source;
+            module.supportModule = moduleSource.supportModule;
+            var source = " var Synchro = module.supportModule; " + moduleSource.source;
             module._compile(source, filename);
         }
         else
@@ -103,21 +103,21 @@ module.exports = function(moduleStore, resourceResolver)
     //
     var routes = {};
 
-    var maaasSupportModule;
+    var supportModule;
 
     function loadModule(moduleName, source)
     {
         var filename = path.resolve(moduleDir, moduleName);
 
-        logger.info("Pushing source for module: " + moduleName + " with Maaas support module: " + maaasSupportModule);
-        pushModuleSource(filename, source, maaasSupportModule);
-        var maaasModule = require(filename);
+        logger.info("Pushing source for module: " + moduleName + " with api services module: " + supportModule);
+        pushModuleSource(filename, source, supportModule);
+        var synchroModule = require(filename);
         popModuleSource(filename); // Should get popped in module load, this is just in case module was cached (and not loaded/popped)
 
         var routePath = path.basename(moduleName, path.extname(moduleName));
         logger.info("Found and loaded route processor for: " + routePath);
-        routes[routePath] = maaasModule;
-        maaasModule.View["path"] = routePath;
+        routes[routePath] = synchroModule;
+        synchroModule.View["path"] = routePath; // !!! Questionable (for dynamic views via InitializeView)
     }
 
     var moduleManager = 
@@ -126,7 +126,7 @@ module.exports = function(moduleStore, resourceResolver)
         {
             cb = cb || function() {};
 
-            maaasSupportModule = require('./maaas')(apiProcessor, resourceResolver);
+            supportModule = require('./app-services')(apiProcessor, resourceResolver);
 
             var moduleNames = moduleStore.listModules();
             for (var i = 0; i < moduleNames.length; i++) 
