@@ -55,7 +55,14 @@ describe("Module Manager", function()
         {
         }
     };
-    var resourceResolver = {};
+
+    var resourceResolver =
+    {
+        getResourceUrl: function(resource)
+        {
+            return "test:" + resource;
+        }
+    };
 
     var moduleManager = require('../lib/module-manager')(moduleStore, resourceResolver);
 
@@ -89,7 +96,7 @@ describe("Module Manager", function()
         assert.objectsEqual(counterViewModel, { count: 0 });
     });
 
-    it("should add route path to the view of a loaded module", function()
+    it("should get correct view from loaded module", function()
     {
         var menu = moduleManager.getModule("menu");
         var view = 
@@ -98,15 +105,39 @@ describe("Module Manager", function()
             elements: 
             [
 		        { control: "button", caption: "Counter", binding: "goToCounter" },
-	        ],
-            path: "menu"
+	        ]
         };
         assert.objectsEqual(menu.View, view);
     });
 
-    it("should add route path to view of module with dynamic view only");
+    it("should be able to load a module with dynamic view only, and get correct view from same", function()
+    {
+        // This used to fail (fail to load the module at all, because it lacked the View member)
+        //
+        var counter = moduleManager.getModule("counter");
+        var view = 
+        {
+            title: "Counter Page",
+            onBack: "exit",
+            elements: 
+            [
+                { control: "text", value: "Count: {count}", font: 24 },
+            ]
+        };
+        assert.objectsEqual(counter.View, undefined);
+        assert.objectsEqual(counter.InitializeView(), view);
+    });
 
-    it("should be able to access app services from loaded module");
+    it("should be able to access app services from loaded module", function() 
+    {
+        var counter = moduleManager.getModule("counter");
+        var counterViewModel = counter.InitializeViewModel({}, {});
+        assert.objectsEqual(counterViewModel, { count: 0 });
+
+        // This will do a Synchro.getResourceUrl() in the module
+        counter.Commands.test({}, {}, counterViewModel);
+        assert.objectsEqual(counterViewModel, { count: 0, url: "test:user.png" });
+    });
 
     it("should update already loaded module instance with new module content on reloadModule, reflecting provided source", function()
     {
@@ -120,14 +151,14 @@ describe("Module Manager", function()
         var moduleFilePath = path.resolve(moduleDirectory, "counter_update.js");
         var content = removeBOM(fs.readFileSync(moduleFilePath, 'utf8'));
 
-        moduleManager.reloadModule("counter", content);
+        moduleManager.reloadModule("counter.js", content);
 
         counter = moduleManager.getModule("counter");
         counter.Commands.inc({}, {}, counterViewModel);
         assert.objectsEqual(counterViewModel, { count: 6 });
     });
 
-    it.skip("should update already loaded module instance with module content from module store on reloadModule without source", function()
+    it("should update already loaded module instance with module content from module store on reloadModule", function()
     {
         var counter = moduleManager.getModule("counter");
         var counterViewModel = counter.InitializeViewModel({}, {});
@@ -136,7 +167,7 @@ describe("Module Manager", function()
         counter.Commands.inc({}, {}, counterViewModel);
         assert.objectsEqual(counterViewModel, { count: 5 });
                 
-        moduleManager.reloadModule("counter");
+        moduleManager.reloadModule("counter.js");
         
         counter = moduleManager.getModule("counter");
         counter.Commands.inc({}, {}, counterViewModel);

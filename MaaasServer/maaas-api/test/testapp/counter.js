@@ -1,11 +1,18 @@
-﻿exports.View =
+﻿// Special case of view initializer with no view template defined in exports.View
+//
+exports.InitializeView = function(context, session, viewModel, view)
 {
-    title: "Counter Page",
-    onBack: "exit",
-    elements: 
-    [
-		{ control: "text", value: "Count: {count}", font: 24 },
-	]
+    var view =
+    {
+        title: "Counter Page",
+        onBack: "exit",
+        elements: 
+        [
+            { control: "text", value: "Count: {count}", font: 24 },
+        ]
+    };
+
+    return view;
 }
 
 exports.InitializeViewModel = function(context, session)
@@ -19,6 +26,10 @@ exports.InitializeViewModel = function(context, session)
 
 exports.Commands =
 {
+    test: function(context, session, viewModel)
+    {
+        viewModel.url = Synchro.getResourceUrl("user.png");
+    },
     inc: function(context, session, viewModel)
     {
         viewModel.count += 1;

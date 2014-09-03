@@ -117,7 +117,6 @@ module.exports = function(moduleStore, resourceResolver)
         var routePath = path.basename(moduleName, path.extname(moduleName));
         logger.info("Found and loaded route processor for: " + routePath);
         routes[routePath] = synchroModule;
-        synchroModule.View["path"] = routePath; // !!! Questionable (for dynamic views via InitializeView)
     }
 
     var moduleManager = 
