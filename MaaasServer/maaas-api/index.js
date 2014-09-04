@@ -43,7 +43,7 @@ exports.createApiProcessorManager = function(baseDebugPort)
             	debugPort = currentDebugPort++;
             }
 
-            logger.info("Creating managed API processor, debug port is: " + debugPort);
+            logger.info("Creating managed API processor for appPath: " + appPath + ", debug port is: " + debugPort);
             var apiProcessor = require("./lib/api-request-delegator")(sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, runForked, debugPort);
             apiProcessors[appPath] = apiProcessor;
             return apiProcessor;
@@ -51,6 +51,7 @@ exports.createApiProcessorManager = function(baseDebugPort)
 
         getApiProcessor: function(appPath)
         {
+            logger.info("Getting API processor for appPath: " + appPath);
             return apiProcessors[appPath];
         },
 
@@ -83,6 +84,7 @@ exports.createApiProcessorManager = function(baseDebugPort)
 
         processHttpRequest: function(appPath, request, response)
         {
+            logger.info("Processing http request for appPath: " + appPath);
             var apiProcessor = apiProcessors[appPath];
             if (apiProcessor)
             {

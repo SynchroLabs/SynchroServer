@@ -14,7 +14,7 @@ var log4js = require('log4js');
 log4js.configure({ appenders: [ { type: "console", layout: { type: "basic" } } ], replaceConsole: true })
 
 var logger = log4js.getLogger("app");
-logger.info("Maaas.io server loading...");
+logger.info("Synchro server loading...");
 
 // Process command line params
 //
@@ -41,7 +41,7 @@ var maaasStudioUrlPrefix = "/studio";
 var maaasStudio = new MaaasStudio(maaasStudioUrlPrefix, apiManager);
 
 
-// Create the Maaas API processors
+// Create the Synchro API processors
 //
 function createApiProcessor(apiManager, appPath, directory)
 {

@@ -9,12 +9,10 @@
 //     processHttpRequest(request, response);
 //     processWebSocket(request, socket, body);
 //     
-var logger = require('log4js').getLogger("api-delegator");
+var logger = require('log4js').getLogger("api-request-delegator");
 
 module.exports = function(sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, fork, debugPort)
-{
-    var child = require("./api-request-delegatee");
-
+{ 
     var params = 
     {
         sessionStoreSpec: sessionStoreSpec,
@@ -22,9 +20,13 @@ module.exports = function(sessionStoreSpec, moduleStoreSpec, resourceResolverSpe
         resourceResolverSpec: resourceResolverSpec
     }
 
-    var childProcessor = null;
+    var requestProcessor = null; // public interface we'll return below
+
     if (fork)
     {
+        // This ref to the processor proxy is so we can call the http post processing in-proc
+        var apiRequestProcessorProxy = require("./api-request-processor-proxy"); 
+
         var args = [JSON.stringify(params)]; // argv[2] in child process
         var options = {};
         if (debugPort)
@@ -35,8 +37,7 @@ module.exports = function(sessionStoreSpec, moduleStoreSpec, resourceResolverSpe
 
         logger.info("Launching child process...");
 
-        var childProcess = require('child_process').fork(__dirname + '/api-request-delegatee.js', args, options);
-
+        var childProcess = require('child_process').fork(__dirname + '/api-request-processor-proxy.js', args, options);
         if (!childProcess)
         {
             logger.info("Child process fork failed!");
@@ -90,10 +91,10 @@ module.exports = function(sessionStoreSpec, moduleStoreSpec, resourceResolverSpe
             logger.info("Processing pending request id: " + message.id);
             var pendingRequest = pendingRequests[message.id];
             delete pendingRequests[message.id];
-            child.postProcessHttpRequest(pendingRequest.request, pendingRequest.response, message.err, message.data);
+            apiRequestProcessorProxy.postProcessHttpRequest(pendingRequest.request, pendingRequest.response, message.err, message.data);
         });
 
-        childProcessor =
+        requestProcessor =
         {
             sessionStoreSpec: sessionStoreSpec,
             moduleStoreSpec: moduleStoreSpec,
@@ -128,9 +129,10 @@ module.exports = function(sessionStoreSpec, moduleStoreSpec, resourceResolverSpe
     }
     else
     {
-        child.init(params);
+        var apiRequestProcessorModule = require("./api-request-processor");
+        var apiRequestProcessor = apiRequestProcessorModule.createApiRequestProcessor(params);
 
-        childProcessor =
+        requestProcessor =
         {
             sessionStoreSpec: sessionStoreSpec,
             moduleStoreSpec: moduleStoreSpec,
@@ -141,24 +143,24 @@ module.exports = function(sessionStoreSpec, moduleStoreSpec, resourceResolverSpe
             processHttpRequest : function(request, response)
             {
                 logger.info("Process in-proc child http request");
-                child.processHttpRequest(request, function(err, data)
+                apiRequestProcessor.processHttpRequest(request, function(err, data)
                 {
-                    child.postProcessHttpRequest(request, response, err, data);
+                    apiRequestProcessorModule.postProcessHttpRequest(request, response, err, data);
                 });
             },
 
             processWebSocket: function(request, socket, body)
             {
                 logger.info("Process in-proc child web socket");
-                child.processWebSocket(request, socket, body);
+                apiRequestProcessor.processWebSocket(request, socket, body);
             },
 
             reloadModule: function(moduleName)
             {
-                child.reloadModule(moduleName);
+                apiRequestProcessor.reloadModule(moduleName);
             }
         }
     }
 
-    return childProcessor;
+    return requestProcessor;
 }

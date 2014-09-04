@@ -3,7 +3,7 @@
 var objectMonitor = require('./objectmon');
 var util = require('./util');
 
-var logger = require('log4js').getLogger("maaas-api");
+var logger = require('log4js').getLogger("api");
 
 var wait = require('wait.for');
 
@@ -43,45 +43,45 @@ function getView(routeModule, context, session, viewModel, isViewMetricUpdate)
 
 // Public API
 //
-var MaaasApi = function(moduleManager)
+var SynchroApi = function(moduleManager)
 {
     this.appDefinition = null;
     this.moduleManager = moduleManager;
 }
 
-MaaasApi.prototype.load = function(err, appDefinition)
+SynchroApi.prototype.load = function(err, appDefinition)
 {
-    // Load the Maaas modules asynchronously...
+    // Load the Synchro modules asynchronously...
     //
     try
     {
-        logger.info("Launching fiber to load Maaas app...");
+        logger.info("Launching fiber to load Synchro app...");
         wait.launchFiber(this.moduleManager.loadModules, this, this.onLoadComplete.bind(this)); // Load modules in a fiber - keep node spinning on async module load operations
     }
     catch (err)
     {
-        logger.info("Error launching fiber to load Maaas app: " + err);
+        logger.info("Error launching fiber to load Synchro app: " + err);
     }
 }
 
-MaaasApi.prototype.onLoadComplete = function(err, appDefinition)
+SynchroApi.prototype.onLoadComplete = function(err, appDefinition)
 {
     this.appDefinition = appDefinition;
-    logger.info("Maaas app load complete for: " + this.appDefinition.name + " - " + this.appDefinition.description);
+    logger.info("Synchro app load complete for: " + this.appDefinition.name + " - " + this.appDefinition.description);
 }
 
-MaaasApi.prototype.getAppDefinition = function()
+SynchroApi.prototype.getAppDefinition = function()
 {
     logger.info("Sending appDefinition: " + this.appDefinition);
     return this.appDefinition;
 }
 
-MaaasApi.prototype.reloadModule = function(moduleName)
+SynchroApi.prototype.reloadModule = function(moduleName)
 {
     this.moduleManager.reloadModule(moduleName);
 }
 
-MaaasApi.prototype.showMessage = function(context, messageBox)
+SynchroApi.prototype.showMessage = function(context, messageBox)
 {
     context.response.MessageBox = messageBox;
 }
@@ -114,7 +114,7 @@ function populateNewPageResponse(route, routeModule, context, params)
 // route - the route to the new view
 // params - option dictionary of params, if provided is passed to InitializeViewModel
 //
-MaaasApi.prototype.navigateToView = function(context, route, params)
+SynchroApi.prototype.navigateToView = function(context, route, params)
 {
     var routeModule = this.moduleManager.getModule(route);
     if (routeModule)
@@ -125,9 +125,9 @@ MaaasApi.prototype.navigateToView = function(context, route, params)
     }
 }
 
-// Takes a Maaas request object and returns a Maaas response object
+// Takes a Synchro request object and returns a Synchro response object
 //
-MaaasApi.prototype.process = function(session, requestObject)
+SynchroApi.prototype.process = function(session, requestObject)
 {
     var context = 
     {
@@ -360,4 +360,4 @@ MaaasApi.prototype.process = function(session, requestObject)
     return context.response;
 }
 
-module.exports = MaaasApi;
+module.exports = SynchroApi;

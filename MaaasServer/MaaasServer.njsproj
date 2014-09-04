@@ -9,7 +9,7 @@
     <NodeExePath />
     <NodeExeArguments>
     </NodeExeArguments>
-    <ScriptArguments />
+    <ScriptArguments>-t -n</ScriptArguments>
     <StartWebBrowser>True</StartWebBrowser>
     <LaunchUrl />
   </PropertyGroup>
