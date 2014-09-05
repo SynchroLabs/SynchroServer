@@ -1,11 +1,12 @@
-// !!! World's second worst session store.
+// World's second worst session store.
 //
-// !!! Since this requires write access to the local file system, it will not work on Azure/AWS.  This is only suitable for testing session persistence
-//     on a locally running server.
+// Note: Since this requires write access to the local file system, it will not work on Azure/AWS.  This is only 
+//       really suitable for testing session persistence on a locally running server.
 //
-// !!! If anyone was going to use this for some reason (or base something on it), at very least it should be made asynchronous (async file IO combined with wait.for).
+// Note: If anyone was going to use this for some reason (or base something on it), at very least it should be made
+//       asynchronous (async file IO combined with wait.for).
 //
-// Note: This is the session store for Maaas clients calling the Maaas API, and is not related to any web session store
+// Note: This is the session store for Synchro clients calling the Sycnhro API, and is not related to any web session store
 //       for the admin/development web site.
 //
 var uuid = require('node-uuid');

@@ -127,7 +127,7 @@ Array.prototype.clean = function()
 {
     for (var i = 0; i < this.length; i++) 
     {
-        if (this[i] == null) 
+        if (this[i] == null) // null or undefined
         {         
             this.splice(i, 1);
             i--;

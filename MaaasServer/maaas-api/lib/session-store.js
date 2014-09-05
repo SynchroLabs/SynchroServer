@@ -1,4 +1,4 @@
-﻿// !!! World's worst session store.  Not peristent or scalable.  Use only for local testing.
+﻿// World's worst session store.  Not peristent or scalable.  Use only for local testing.
 //
 // Note: This is the session store for Maaas clients calling the Maaas API, and is not related to any web session store
 //       for the admin/development web site.

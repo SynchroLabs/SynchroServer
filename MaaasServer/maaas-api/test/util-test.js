@@ -174,6 +174,34 @@ describe("Util", function ()
 			assert.objectsEqual(arr, [2, 3, 4, 5]);
 		});
 
+		it("should remove undefined at start of array", function() 
+		{
+			var arr = [undefined, 2, 3, 4, 5];
+			arr.clean();
+			assert.objectsEqual(arr, [2, 3, 4, 5]);
+		});
+
+		it("should not remove remove 0 at start of array", function() 
+		{
+			var arr = [0, 2, 3, 4, 5];
+			arr.clean();
+			assert.objectsEqual(arr, [0, 2, 3, 4, 5]);
+		});
+
+		it("should not remove remove false at start of array", function() 
+		{
+			var arr = [false, 2, 3, 4, 5];
+			arr.clean();
+			assert.objectsEqual(arr, [false, 2, 3, 4, 5]);
+		});
+
+		it("should not remove remove empty string at start of array", function() 
+		{
+			var arr = ["", 2, 3, 4, 5];
+			arr.clean();
+			assert.objectsEqual(arr, ["", 2, 3, 4, 5]);
+		});
+
 		it("should remove null in middle of array", function() 
 		{
 			var arr = [1, 2, null, 4, 5];

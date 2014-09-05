@@ -133,7 +133,7 @@ SynchroApi.prototype.process = function(session, requestObject)
     {
         session: session,
         request: requestObject,
-        response: { control: "response", Path: requestObject.Path } // !!! Not sure what "control: response" is intended to do, or if it's needed
+        response: { Path: requestObject.Path } 
     };
 
     logger.info("Processing path " + context.request.Path);

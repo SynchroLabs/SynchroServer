@@ -1,5 +1,8 @@
 ﻿// This is the file-based module store. 
 //
+// Note: This requires write access to the local file system for putModuleSoure support (required if
+//       using Studio with save/update).
+//
 var fs = require('fs');
 var path = require('path');
 

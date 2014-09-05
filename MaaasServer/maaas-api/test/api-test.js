@@ -950,7 +950,6 @@ describe("API Processor", function()
 
 			var expectedResponse = 
 			{
-				control: "response",
 				Path: "foo",
 				Error: "No route found for path: foo"
 			}
@@ -998,7 +997,6 @@ describe("API Processor", function()
 
 			var expectedResponse = 
 			{
-				control: "response",
 				Path: "menu",
 				Error: "Command not found: foo"
 			}
