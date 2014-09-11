@@ -13,6 +13,7 @@ var uuid = require('node-uuid');
 
 var fs = require('fs');
 var path = require('path');
+var util = require('./util');
 
 module.exports = function(params)
 {

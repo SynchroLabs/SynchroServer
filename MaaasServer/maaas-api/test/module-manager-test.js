@@ -3,21 +3,9 @@ require("./assert-helper");
 
 var fs = require('fs');
 var path = require('path');
+var util = require("../lib/util");
 
 var logger = require('log4js').getLogger("module-manager-test");
-
-function removeBOM(content)
-{
-    // Remove byte order marker. This catches EF BB BF (the UTF-8 BOM) because the buffer-to-string
-    // conversion in `fs.readFileSync()` translates it to FEFF, the UTF-16 BOM.
-    //
-    if (content.charCodeAt(0) === 0xFEFF)
-    {
-        content = content.slice(1);
-    }
-
-    return content;
-}
 
 describe("Module Manager", function()
 {
@@ -30,7 +18,7 @@ describe("Module Manager", function()
         getAppDefinition: function()
         {
             var appDefinitionPath = path.resolve(moduleDirectory, "synchro.json");
-            var content = removeBOM(fs.readFileSync(appDefinitionPath, 'utf8'));
+            var content = util.removeBOM(fs.readFileSync(appDefinitionPath, 'utf8'));
             logger.info("got app def: " + content);
             return JSON.parse(content);
         },
@@ -43,7 +31,7 @@ describe("Module Manager", function()
         getModuleSource: function(moduleFilename)
         {
             var moduleFilePath = path.resolve(moduleDirectory, moduleFilename);
-            var content = removeBOM(fs.readFileSync(moduleFilePath, 'utf8'));
+            var content = util.removeBOM(fs.readFileSync(moduleFilePath, 'utf8'));
             return content;
         },
             
@@ -149,7 +137,7 @@ describe("Module Manager", function()
         assert.objectsEqual(counterViewModel, { count: 1 });
 
         var moduleFilePath = path.resolve(moduleDirectory, "counter_update.js");
-        var content = removeBOM(fs.readFileSync(moduleFilePath, 'utf8'));
+        var content = util.removeBOM(fs.readFileSync(moduleFilePath, 'utf8'));
 
         moduleManager.reloadModule("counter.js", content);
 
