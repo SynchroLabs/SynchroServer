@@ -1,3 +1,5 @@
+require('./test');
+
 var assert = require("assert");
 require("./assert-helper");
 

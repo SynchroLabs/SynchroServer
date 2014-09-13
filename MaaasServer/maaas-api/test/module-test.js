@@ -1,12 +1,16 @@
+require('./test');
+
 var assert = require("assert");
 require("./assert-helper");
 
 var path = require('path');
+var net = require('net');
 
 var synchroApiModule = require("../index");
 
 var logger = require('log4js').getLogger("module-test");
 
+// This is testing the functionality of the top level module APIs (in index.js of this module).
 
 // Test fixture
 exports.createService = function(serviceName, serviceConfiguration)
@@ -47,7 +51,7 @@ describe("Synchro API module", function ()
 		});
 	});
 
-	describe("Processor Manager", function () 
+	describe("Processor Manager", function() 
 	{
 		var apiProcessorManager = synchroApiModule.createApiProcessorManager(6969);
 		var inprocProcessor;
@@ -74,39 +78,130 @@ describe("Synchro API module", function ()
 			serviceConfiguration: { prefix: "test:" }
 		};
 
-		it("Should create API processor manager", function () 
+		it("Should create API processor manager", function() 
 		{
 			assert.notEqual(apiProcessorManager, null);
 		});
 
-		it("Should create specified in-proc API processor", function ()
+		it("Should create specified in-proc API processor", function(done)
 		{
-			inprocProcessor = apiProcessorManager.createApiProcessor("inproc", sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, false, false);
-			assert.notEqual(inprocProcessor, null);
+			apiProcessorManager.createApiProcessorAsync("inproc", sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, false, false, function(err, apiProcessor)
+			{
+				inprocProcessor = apiProcessor;
+				assert.equal(err, null);
+				assert.notEqual(inprocProcessor, null);
+				assert.equal(inprocProcessor.isForked, false);
+				done();
+			});
 		});
 
-		it.skip("Should create specified forked API processor", function() 
+		it("Should create specified forked API processor", function(done) 
 		{
-			// !!! This doesn't wait for the forked proc to get created and verify that we can talk to it yet. The forked process needs to send a
-			//     message to the main process and signal it that the forked process is running and ready to handle requests.  We could use a callback
-			//     for this, or an event, and probably combine either of those with a "ready" member so we can check/poll readiness.
-			//
-			forkedProcessor = apiProcessorManager.createApiProcessor("forked", sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, true, true);
-			assert.notEqual(forkedProcessor, null);
+			apiProcessorManager.createApiProcessorAsync("forked", sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, true, true, function(err, apiProcessor)
+			{
+				forkedProcessor = apiProcessor;
+				assert.equal(err, null);
+				assert.notEqual(forkedProcessor, null);
+				assert.equal(forkedProcessor.isForked, true);
+				done();
+			});
 		});
 
-		it("Should fail to create API processor if one already exists at the specified path");
-		it("Should find proper API processor based on path");
-		it("Should fail to find API processor when none coorespond to path");
-		it("Should return all API processors");
-		it("Should return module store for API processor");
-		it("Should route HTTP request to in-proc API processor");
-		it("Should route HTTP request to forked API processor");
-		it("Should route websocket request to in-proc API processor");
-		it("Should route websocket request to forked API processor");
+		it("Should fail to create API processor if one already exists at the specified path", function(done) 
+		{
+			apiProcessorManager.createApiProcessorAsync("inproc", sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, false, false, function(err, apiProcessor)
+			{
+				assert.notEqual(err, null);
+				assert.equal(apiProcessor, null);
+				done();
+			});
+		});
+
+		it("Should find proper API processor based on path", function()
+		{
+			assert.equal(apiProcessorManager.getApiProcessor("inproc"), inprocProcessor);
+			assert.equal(apiProcessorManager.getApiProcessor("forked"), forkedProcessor);
+		});
+
+		it("Should fail to find API processor when none coorespond to path", function()
+		{
+			assert.equal(apiProcessorManager.getApiProcessor("foo"), null);
+		});
+
+		it("Should return all API processors", function()
+		{
+			var apiProcessors = apiProcessorManager.getApiProcessors();
+			assert.equal(Object.keys(apiProcessors).length, 2);
+			assert.equal(apiProcessors["inproc"], inprocProcessor);
+			assert.equal(apiProcessors["forked"], forkedProcessor);
+		});
+
+		it("Should return module store for API processor", function()
+		{
+			assert.equal(apiProcessorManager.getModuleStore("inproc"), inprocProcessor.moduleStore); 
+			assert.equal(apiProcessorManager.getModuleStore("forked"), forkedProcessor.moduleStore); 
+		});
+
+		it("Should get proper app definition from API processor", function(done)
+		{
+			var request = { headers: [], body: { Mode: "AppDefinition" } };
+			var response = 
+			{
+				send: function(data)
+				{
+					var expectedAppDefinition = 
+					{
+						"name": "synchro-test",
+						"version": "0.0.0",
+						"description": "Synchro API Test",
+						"mainPage": "launch",
+						"author": "Bob Dickinson <bob@synchro.io> (http://synchro.io/)"
+					};
+
+					assert.objectsEqual(data, expectedAppDefinition);
+					done();
+				}
+			};
+
+			apiProcessorManager.processHttpRequest("inproc", request, response);
+		});
+
+		it("Should route HTTP request to in-proc API processor", function(done)
+		{
+			var request = { headers: [], body: { Mode: "Page", Path: "counter" } };
+			var response = 
+			{
+				send: function(data)
+				{
+					assert.notEqual(data, null);
+					assert.equal(data.View.title, "Counter Page");
+					assert.equal(data.ViewModel.count, 0);
+					done();
+				}
+			};
+
+			apiProcessorManager.processHttpRequest("inproc", request, response);
+		});
+
+		it("Should route HTTP request to forked API processor", function(done)
+		{
+			var request = { headers: [], body: { Mode: "Page", Path: "counter" } };
+			var response = 
+			{
+				send: function(data)
+				{
+					assert.notEqual(data, null);
+					assert.equal(data.View.title, "Counter Page");
+					assert.equal(data.ViewModel.count, 0);
+					done();
+				}
+			};
+
+			apiProcessorManager.processHttpRequest("forked", request, response);
+		});
 	});
 
-	describe("Built-in Services", function () 
+	describe("Built-in Services", function() 
 	{
 		it("Should create file module store", function() 
 		{

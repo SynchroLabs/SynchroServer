@@ -37,8 +37,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="app.js" />
-    <Compile Include="maaas-api\lib\api-request-delegatee.js" />
     <Compile Include="maaas-api\lib\api-request-delegator.js" />
+    <Compile Include="maaas-api\lib\api-request-processor-proxy.js" />
+    <Compile Include="maaas-api\lib\api-request-processor.js" />
     <Compile Include="maaas-api\lib\api.js" />
     <Compile Include="maaas-api\lib\file-module-store.js" />
     <Compile Include="maaas-api\index.js" />
@@ -107,7 +108,9 @@
     <Compile Include="maaas-api\test\assert-helper.js" />
     <Compile Include="maaas-api\test\filter-test.js" />
     <Compile Include="maaas-api\test\module-manager-test.js" />
+    <Compile Include="maaas-api\test\module-test.js" />
     <Compile Include="maaas-api\test\objectmon-test.js" />
+    <Compile Include="maaas-api\test\test.js" />
     <Compile Include="maaas-api\test\testapp\counter.js" />
     <Compile Include="maaas-api\test\testapp\counter_update.js" />
     <Compile Include="maaas-api\test\testapp\menu.js" />

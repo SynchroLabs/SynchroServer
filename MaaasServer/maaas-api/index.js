@@ -35,8 +35,14 @@ exports.createApiProcessorManager = function(baseDebugPort)
 
     var apiManager =
     {
-		createApiProcessor: function(appPath, sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, runForked, enableDebug)
+		createApiProcessorAsync: function(appPath, sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, runForked, enableDebug, onCompleted)
     	{
+            if (apiProcessors[appPath])
+            {
+                onCompleted("An API processor already exists for path: " + appPath);
+                return;
+            }
+
             var debugPort = 0; // No debugging
             if (enableDebug)
             {
@@ -44,9 +50,14 @@ exports.createApiProcessorManager = function(baseDebugPort)
             }
 
             logger.info("Creating managed API processor for appPath: " + appPath + ", debug port is: " + debugPort);
-            var apiProcessor = require("./lib/api-request-delegator")(sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, runForked, debugPort);
-            apiProcessors[appPath] = apiProcessor;
-            return apiProcessor;
+            var apiProcessor = require("./lib/api-request-delegator")(sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, runForked, debugPort, function(err, apiProcessor)
+            {
+                if (!err)
+                {
+                    apiProcessors[appPath] = apiProcessor;
+                }
+                onCompleted(err, apiProcessor);
+            });
     	},
 
         getApiProcessor: function(appPath)

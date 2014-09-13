@@ -8,6 +8,7 @@ var path = require('path');
 var url = require('url');
 var wait = require('wait.for');
 var WebSocket = require('faye-websocket');
+var async = require('async');
 
 var log4js = require('log4js');
 // Redirect console.log to log4js, turn off color coding
@@ -40,10 +41,9 @@ var maaasStudioUrlPrefix = "/studio";
 
 var maaasStudio = new MaaasStudio(maaasStudioUrlPrefix, apiManager);
 
-
 // Create the Synchro API processors
 //
-function createApiProcessor(apiManager, appPath, directory)
+function createApiProcessorAsync(apiManager, appPath, directory, onCreated)
 {
     var sessionStoreSpec = null;
     var moduleStoreSpec = null;
@@ -137,11 +137,9 @@ function createApiProcessor(apiManager, appPath, directory)
         bDebug = false; // Debugging of API processor not available in-proc, so don't even ask ;)
     }
 
-    apiManager.createApiProcessor(appPath, sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, bFork, bDebug);
+    apiManager.createApiProcessorAsync(appPath, sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, bFork, bDebug, onCreated);
 }
 
-createApiProcessor(apiManager, "samples", "maaas-samples");
-createApiProcessor(apiManager, "propx", "maaas-propx");
 
 // Now let's set up the web / api servers...
 //
@@ -241,41 +239,34 @@ app.all(maaasApiUrlPrefix + '/:appPath', function(request, response)
 
 var server = http.createServer(app);
 
-// This is a copy of the WebSocket.isWebSocket function.  This was failing (on Azure only),
-// because the Connection: Upgrade header sent by the client (confirmed by Fiddler) was
-// getting modified by something in the Azure environment such that it showed up at this
-// point as Connection: Keep-alive.  So we will use this re-written version to skip that
-// check (it presumably qualified somehow since the server.on('upgrade') got triggered).
-//
-function isWebSocket(request) 
-{
-    if (request.method !== 'GET') 
-        return false;
-
-    var connection = request.headers.connection || '',
-        upgrade    = request.headers.upgrade || '';
-
-    return request.method === 'GET' &&
-           // !!! connection.toLowerCase().split(/\s*,\s*/).indexOf('upgrade') >= 0 &&
-           upgrade.toLowerCase() === 'websocket';
-}
-
-// !!! Running the API processor as a forked process on Azure does not work with a WebSocket connection.
-//     Node.js has a concept of being able to pass a "handle" (a socket in this case) from the parent
-//     process to the child process, which is how the main processor dispatches API request to the API
-//     processor when using WebSockets.  On Azure, the socket you get is on a named pipe, and on Windows 
-//     you cannot pass a named pipe socket handle over the IPC mechanism (which is also a named pipe).
-//
-//     This is the main Node/libuv bug: https://github.com/joyent/libuv/issues/480
-//
 server.on('upgrade', function(request, socket, body) 
 {
+    // The WebSocket.isWebSocket() function was failing (on Azure only) because the Connection: Upgrade
+    // header sent by the client (confirmed by Fiddler) was getting modified by something in the Azure 
+    // environment such that it showed up at this point as Connection: Keep-alive.  So we will use this
+    // simplified version to check for a websocket connect (not sure what else would trigger "upgrade").
+    //
+    function isWebSocket(request) 
+    {
+        var upgrade = request.headers.upgrade || '';
+        return request.method === 'GET' && upgrade.toLowerCase() === 'websocket';
+    }
+
     if (isWebSocket(request)) // was: if (WebSocket.isWebSocket(request))
     {
         var path = url.parse(request.url).pathname; 
 
         if (path.indexOf(maaasApiUrlPrefix + "/") == 0)
         {
+            // !!! Running the API processor as a forked process on Azure does not work with a WebSocket
+            //     connection. Node.js has a concept of being able to pass a "handle" (a socket in this 
+            //     case) from the parent process to the child process, which is how the main processor 
+            //     dispatches API request to the API processor when using WebSockets.  On Azure, the socket
+            //     you get is on a named pipe, and on Windows you cannot pass a named pipe socket handle
+            //     over the IPC mechanism (which is also a named pipe).
+            //
+            //     This is the main Node/libuv bug: https://github.com/joyent/libuv/issues/480
+            //
             var appPath = path.substring(maaasApiUrlPrefix.length + 1);
             apiManager.processWebSocket(appPath, request, socket, body);
         }
@@ -290,6 +281,41 @@ server.on('upgrade', function(request, socket, body)
     }
 });
 
-server.listen(app.get('port'), function(){
-    logger.info('Express server listening on port ' + app.get('port') + ", node version: " + process.version);
+// Here is all the asynchronous startup stuff...
+//
+function loadApiProcessorsAsync(callback)
+{
+    var synchroApps = 
+    [
+        { appUriPath: "samples", appModulePath: "maaas-samples" },
+        { appUriPath: "propx", appModulePath: "maaas-propx" }
+    ]
+
+    function loadApiProcessorAsync(synchroApp, callback)
+    {
+        createApiProcessorAsync(apiManager, synchroApp.appUriPath, synchroApp.appModulePath, callback);        
+    }
+
+    async.each(synchroApps, loadApiProcessorAsync, callback);    
+}
+
+function startServerAsync(callback)
+{
+    server.listen(app.get('port'), function()
+    {
+        logger.info('Express server listening on port ' + app.get('port') + ", node version: " + process.version);
+        callback(null);
+    });
+}
+
+async.series([loadApiProcessorsAsync, startServerAsync], function(err)
+{
+    if (err)
+    {
+        logger.error("Failed to start: " + err);
+    }
+    else
+    {
+        logger.info("Server up and running!");
+    }
 });

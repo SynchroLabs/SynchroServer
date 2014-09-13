@@ -121,10 +121,8 @@ module.exports = function(moduleStore, resourceResolver)
 
     var moduleManager = 
     {
-        loadModules: function(apiProcessor, cb)
+        loadModules: function(apiProcessor)
         {
-            cb = cb || function() {};
-
             supportModule = require('./app-services')(apiProcessor, resourceResolver);
 
             var moduleNames = moduleStore.listModules();
@@ -136,7 +134,7 @@ module.exports = function(moduleStore, resourceResolver)
             }
 
             var appDefinition = moduleStore.getAppDefinition();
-            cb(null, appDefinition);
+            return appDefinition;
         },
 
         reloadModule: function(moduleName, source) 

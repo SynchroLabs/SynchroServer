@@ -10,7 +10,7 @@ var logger = require('log4js').getLogger("api-request-processor");
 
 var SynchroApiSessionIdHeader = "synchro-api-session-id";
 
-exports.createApiRequestProcessor = function(params)
+exports.createApiRequestProcessorAsync = function(params, callback)
 {
     logger.info("Initializing API request processor");
 
@@ -20,9 +20,12 @@ exports.createApiRequestProcessor = function(params)
 
     var moduleManager = require('./module-manager')(moduleStore, resourceResolver);
 
+
     var ApiProcessor = require('./api');
     var api = new ApiProcessor(moduleManager);
+    logger.info("Loading API request processor");
     api.load();
+    logger.info("Done loading API request processor");
 
     function apiProcess(session, body)
     {
@@ -93,7 +96,6 @@ exports.createApiRequestProcessor = function(params)
 
         callback(null, responseObject);
     }
-
 
     // This is called when the websocket connection is initiated.  The "state" returned is passed in to each
     // processWebSocketMessage() call.
@@ -220,6 +222,9 @@ exports.postProcessHttpRequest = function(request, response, err, data)
 {
     // Do the least amount of work possible to convert the provided err/data into a response...
     //
-    response.socket.setNoDelay(true);
+    if (response.socket)
+    {
+        response.socket.setNoDelay(true);        
+    }
     response.send(data);
 }

@@ -51,23 +51,8 @@ var SynchroApi = function(moduleManager)
 
 SynchroApi.prototype.load = function(err, appDefinition)
 {
-    // Load the Synchro modules asynchronously...
-    //
-    try
-    {
-        logger.info("Launching fiber to load Synchro app...");
-        wait.launchFiber(this.moduleManager.loadModules, this, this.onLoadComplete.bind(this)); // Load modules in a fiber - keep node spinning on async module load operations
-    }
-    catch (err)
-    {
-        logger.info("Error launching fiber to load Synchro app: " + err);
-    }
-}
-
-SynchroApi.prototype.onLoadComplete = function(err, appDefinition)
-{
-    this.appDefinition = appDefinition;
-    logger.info("Synchro app load complete for: " + this.appDefinition.name + " - " + this.appDefinition.description);
+    this.appDefinition = this.moduleManager.loadModules(this);
+    return this.appDefinition;
 }
 
 SynchroApi.prototype.getAppDefinition = function()

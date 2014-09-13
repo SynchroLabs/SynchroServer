@@ -1,3 +1,5 @@
+require('./test');
+
 var assert = require("assert");
 require("./assert-helper");
 
@@ -5,7 +7,6 @@ var ApiProcessor = require("../lib/api");
 var devices = require("./testdevices");
 
 var logger = require('log4js').getLogger("api-test");
-require('log4js').setGlobalLogLevel("ERROR");
 
 function createApiProcessor(testModules)
 {

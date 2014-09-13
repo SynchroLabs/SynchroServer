@@ -1,4 +1,6 @@
-﻿var assert = require("assert");
+﻿require('./test');
+
+var assert = require("assert");
 require("./assert-helper");
 
 var fs = require('fs');
@@ -54,23 +56,18 @@ describe("Module Manager", function()
 
     var moduleManager = require('../lib/module-manager')(moduleStore, resourceResolver);
 
-    it("should get no error and proper app definition on callback from loadModules", function(done) 
+    it("should get proper app definition on loadModules", function() 
     {
-        moduleManager.loadModules({}, function(err, appDefinition)
+        var appDefinition = moduleManager.loadModules();
+        var expectedAppDefinition = 
         {
-            assert.equal(err, null);
-
-            var expectedAppDefinition = 
-            {
-                "name": "synchro-test",
-                "version": "0.0.0",
-                "description": "Synchro API Test",
-                "mainPage": "launch",
-                "author": "Bob Dickinson <bob@synchro.io> (http://synchro.io/)"
-            }
-            assert.objectsEqual(appDefinition, expectedAppDefinition);
-            done();
-        });
+            "name": "synchro-test",
+            "version": "0.0.0",
+            "description": "Synchro API Test",
+            "mainPage": "launch",
+            "author": "Bob Dickinson <bob@synchro.io> (http://synchro.io/)"
+        }
+        assert.objectsEqual(appDefinition, expectedAppDefinition);
     });
 
     it("should get loaded modules via getModule", function()
