@@ -41,7 +41,7 @@ describe("Synchro API module", function ()
 		{
 			var serviceSpec =
 			{
-				packageRequirePath: path.resolve('./test/module-test'),
+				packageRequirePath: path.resolve(__dirname, 'module-test'),
 				serviceName: "TestService",
 				serviceConfiguration: { foo: "bar"}
 			}
@@ -61,21 +61,21 @@ describe("Synchro API module", function ()
 		{
 			sessionStoreSpec:
 			{
-				packageRequirePath: path.resolve('./index'),
+				packageRequirePath: path.resolve(__dirname, '../index'),
 				serviceName: "MemorySessionStore",
 				serviceConfiguration: { }
 			},
 
 		    moduleStoreSpec:
 			{
-				packageRequirePath: path.resolve('./index'),
+				packageRequirePath: path.resolve(__dirname, '../index'),
 				serviceName: "FileModuleStore",
-				serviceConfiguration: { moduleDirectory: path.resolve('./test/testapp') }
+				serviceConfiguration: { moduleDirectory: path.resolve(__dirname, 'testapp') }
 			},
 
 			resourceResolverSpec: 
 			{
-				packageRequirePath: path.resolve('./index'),
+				packageRequirePath: path.resolve(__dirname, '../index'),
 				serviceName: "ResourceResolver",
 				serviceConfiguration: { prefix: "test:" }
 			}
@@ -208,7 +208,7 @@ describe("Synchro API module", function ()
 	{
 		it("Should create file module store", function() 
 		{
-			var service = synchroApiModule.createService("FileModuleStore", { moduleDirectory: path.resolve('./test/testapp') } );
+			var service = synchroApiModule.createService("FileModuleStore", { moduleDirectory: path.resolve(__dirname, 'testapp') } );
 			var appDefinition = service.getAppDefinition();
 			assert.equal(appDefinition.name, "synchro-test");
 		});

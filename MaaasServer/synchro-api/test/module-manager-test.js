@@ -11,7 +11,7 @@ var logger = require('log4js').getLogger("module-manager-test");
 
 describe("Module Manager", function()
 {
-    var moduleDirectory = path.resolve('test', 'testapp');
+    var moduleDirectory = path.resolve(__dirname, 'testapp');
 
     logger.info("moduleDirectory: " + moduleDirectory);
 
