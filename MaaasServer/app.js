@@ -1,6 +1,3 @@
-/**
- * Module dependencies.
- */
 var express = require('express');
 var login = require('./routes/login');
 var http = require('http');
@@ -9,6 +6,7 @@ var url = require('url');
 var wait = require('wait.for');
 var WebSocket = require('faye-websocket');
 var async = require('async');
+var netutil = require('./netutil');
 
 var log4js = require('log4js');
 // Redirect console.log to log4js, turn off color coding
@@ -23,131 +21,60 @@ var commander = require( 'commander' );
 commander.version('0.0.1');
 commander.option('-n, --nofork', 'Do not fork api processors (run inproc)');
 commander.option('-p, --port <n>', 'Server port', parseInt);
-commander.option('-t, --test', 'Run with local test services');
+commander.option('-s, --services <value>', 'Run with specified services configuration');
 commander.parse(process.argv);
 
-// Create Maaas API processor manager
+// Load config - precendence: command line, environment, config.json, default
 //
-var maaasApi = require('./maaas-api');
-var maaasApiUrlPrefix = "/api";
-
-var baseDebugPort = 6969;
-var apiManager = maaasApi.createApiProcessorManager(baseDebugPort);
-
-// Create Maaas studio
-//
-var MaaasStudio = require('./maaas-studio');
-var maaasStudioUrlPrefix = "/studio";
-
-var maaasStudio = new MaaasStudio(maaasStudioUrlPrefix, apiManager);
-
-// Create the Synchro API processors
-//
-function createApiProcessorAsync(apiManager, appPath, directory, onCreated)
+var nconf = require('nconf');
+var overrides = {};
+if (commander.port)
 {
-    var sessionStoreSpec = null;
-    var moduleStoreSpec = null;
-
-    if (commander.test)
-    {
-        sessionStoreSpec =
-        {
-            packageRequirePath: path.resolve('./maaas-api'), 
-            serviceName: 'MemorySessionStore',
-            serviceConfiguration: {}
-
-            /*
-            packageRequirePath: path.resolve('./maaas-api'), 
-            serviceName: 'FileSessionStore',
-            serviceConfiguration: 
-            {
-                sessionStateFile: path.resolve(__dirname, "sessions.json")
-            }
-            */
-        };
-
-        moduleStoreSpec = 
-        {
-            packageRequirePath: path.resolve('./maaas-api'), 
-            serviceName: 'FileModuleStore',
-            serviceConfiguration: 
-            {
-                moduleDirectory: path.resolve(__dirname, path.join("maaas-samples", directory))
-            }        
-        }
-    }
-    else
-    {
-        sessionStoreSpec =
-        {
-            packageRequirePath: path.resolve('./maaas-api'), 
-            serviceName: 'RedisSessionStore',
-            serviceConfiguration: 
-            {
-                host: "synchroapi.redis.cache.windows.net",
-                port: 6379,
-                password: "7YTzfcTk9PHyiJdY62q6SRabTiGa9EFMaZgo7KzPUrc=", // Redis Primary Key synchroapi
-                pingInterval: 60
-            }
-
-            /*
-            packageRequirePath: path.resolve('./maaas-azure'), 
-            serviceName: 'AzureSessionStore',
-            serviceConfiguration: 
-            {
-                storageAccount: "synchroncus",
-                storageAccessKey: "KqhUhHFkjOFDWI3mFG9AiGO8H0OWPaYPmRHf9vUqiKsp5nPFFGjX8gmFmJ1E3lbg9m02K76UrFfaxLU/JKWrxg==",
-                tableName: "maaasSessions"
-            }
-            */
-        };
-
-        moduleStoreSpec = 
-        {
-            packageRequirePath: path.resolve('./maaas-azure'), 
-            serviceName: 'AzureModuleStore',
-            serviceConfiguration:
-            {
-                storageAccount: "synchroncus",
-                storageAccessKey: "KqhUhHFkjOFDWI3mFG9AiGO8H0OWPaYPmRHf9vUqiKsp5nPFFGjX8gmFmJ1E3lbg9m02K76UrFfaxLU/JKWrxg==",
-                containerName: directory
-            }
-        };
-    }
-
-    var resourceResolverSpec = 
-    { 
-        packageRequirePath: path.resolve('./maaas-api'), 
-        serviceName: 'ResourceResolver',
-        serviceConfiguration: 
-        {
-            prefix: "https://synchroncus.blob.core.windows.net/resources/"
-        }
-    }
-
-    var bFork = true;   // Run API processor forked
-    var bDebug = true;  // Enable debugging of API processor (only valid if running forked)
-
-    if (commander.nofork)
-    {
-        // This situation is typically for when you want to run this "app" itself under a local debugger, and
-        // you want to be able to debug the api processor and actual Synchro module code also.
-        //
-        bFork = false;  // Run API processor in-proc
-        bDebug = false; // Debugging of API processor not available in-proc, so don't even ask ;)
-    }
-
-    apiManager.createApiProcessorAsync(appPath, sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, bFork, bDebug, onCreated);
+    overrides.PORT = commander.port;
 }
+if (commander.services)
+{
+    overrides.SERVICES_CONFIG = commander.services;
+}
+nconf.overrides(overrides);
+nconf.env();
+nconf.file({ file: 'config.json' });
+nconf.defaults(
+{
+    'PORT': 1337,
+    'SERVICES_CONFIG': 'local',
+    'API_PATH_PREFIX': "/api",
+    'STUDIO_PATH_PREFIX': "/studio",
+    'DEBUG_BASE_PORT': 6969,
+    'FILE_STORE_PATH': path.resolve(__dirname, "synchro-samples"),
+    'LOCAL_RESOURCE_PREFIX': 
+        "http://" + netutil.addNonStandardPort(netutil.getExternalIPAddress(), (nconf.get("PORT") || 1337)) + 
+        (nconf.get('API_PATH_PREFIX') || "/api") + 
+        "/resources/",
+    'SYNCHRO_APPS':
+    [
+        { "uriPath": "samples", "container": "samples" },
+        { "uriPath": "propx", "container": "propx" }
+    ]
+});
 
+// Create Synchro API processor manager
+//
+var synchroApi = require('./synchro-api');
+var synchroApiUrlPrefix = nconf.get("API_PATH_PREFIX");
+
+var apiManager = synchroApi.createApiProcessorManager(nconf.get('DEBUG_BASE_PORT'));
+
+// Create Synchro studio
+//
+var SynchroStudio = require('./synchro-studio');
+var synchroStudioUrlPrefix = nconf.get("STUDIO_PATH_PREFIX");
+
+var synchroStudio = new SynchroStudio(synchroStudioUrlPrefix, apiManager);
 
 // Now let's set up the web / api servers...
 //
 var app = express();
-
-// Set server port.  Priority is: explicit from command line, provided by environment, default (1337)
-//
-app.set('port', commander.port || process.env.PORT || 1337);
 
 var MemoryStore = express.session.MemoryStore;
 var sessionStore = new MemoryStore();
@@ -169,25 +96,26 @@ app.use(express.cookieParser());
 // is my guess) - for now we just omit expiration...
 app.use(express.cookieSession({ store: sessionStore, secret: 'sdf89f89fd7sdf7sdf', cookie: { maxAge: false, httpOnly: true } }));
 app.use(express.favicon());
-app.use(log4js.connectLogger(logger, { level: 'auto' })); //app.use(express.logger('dev'));
+app.use(log4js.connectLogger(logger, { level: 'auto' })); 
 app.use(express.query());
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
+
+// Serve client app resources locally (can be removed if not needed in your config).  Note that this route must be added before
+// the app.router below in order for it to get a crack at the request.
+//
+app.use(synchroApiUrlPrefix + '/resources', express.static(path.join(nconf.get('FILE_STORE_PATH'), 'resources')));
+
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
-maaasStudio.addMiddleware(app);
+synchroStudio.addMiddleware(app);
 
-// development only (!!! parameterize?)
-if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
-}
-
-maaasStudio.addRoutes(app, login.checkAuth);
+synchroStudio.addRoutes(app, login.checkAuth);
 
 app.get('/', login.checkAuth, function(request, response) 
 {
-    // Handle in a fiber, keep node spinning
+    // Launch fiber to asynchronously process the loaded apps and render the 'index' (app list) page
     //
     wait.launchFiber(function()
     {
@@ -196,31 +124,14 @@ app.get('/', login.checkAuth, function(request, response)
         var apiProcessors = apiManager.getApiProcessors();
         for (appPath in apiProcessors)
         {
-            var apiProcessor = apiManager.getApiProcessor(appPath);
-            logger.info("Found API processor at path '" + appPath + "'");
-
             var moduleStore = apiManager.getModuleStore(appPath);
-            var appDefinition = moduleStore.getAppDefinition();
-            logger.info("API processor for app named: '" + appDefinition.name + "'"); 
-
-            var studioPath =  maaasStudioUrlPrefix + "/" + appPath + "/sandbox";   
-
-            var host = request.host; 
-            var port = app.get("port");
-
-            // This bit of port checking is to add a non-standard port spec if needed (particularly handy in local dev
-            // environments).  When deploying to Azure, the port is actually a named pipe reference, which you don't want
-            // to add to the endpoint - and presumably you'll be on a standard port on cloud deployments anyway.  So we only
-            // add the port to the endpoint spec here if it's an integer greater than 0 and not the default port (80).
-            //
-            if ((port === parseInt(port)) && (port > 0) && (port != 80))
-            {
-                host += ":" + port;
-            }
-
-            var endpoint = host + maaasApiUrlPrefix + "/" + appPath;
-
-            applications.push({ appPath: appPath, studioPath: studioPath, endpoint: endpoint, appDefinition: appDefinition })
+            applications.push(
+            { 
+                appPath: appPath, 
+                studioPath: synchroStudioUrlPrefix + "/" + appPath + "/sandbox", 
+                endpoint: netutil.addNonStandardPort(request.host, nconf.get("PORT")) + synchroApiUrlPrefix + "/" + appPath, 
+                appDefinition: moduleStore.getAppDefinition()
+            });
         }
 
         response.render('index', { applications: applications });
@@ -232,7 +143,7 @@ app.get('/logout', login.logout);
 
 // Let the API processor handle requests to /api 
 //
-app.all(maaasApiUrlPrefix + '/:appPath', function(request, response) 
+app.all(synchroApiUrlPrefix + '/:appPath', function(request, response) 
 {
     apiManager.processHttpRequest(request.params.appPath, request, response);
 });
@@ -241,22 +152,11 @@ var server = http.createServer(app);
 
 server.on('upgrade', function(request, socket, body) 
 {
-    // The WebSocket.isWebSocket() function was failing (on Azure only) because the Connection: Upgrade
-    // header sent by the client (confirmed by Fiddler) was getting modified by something in the Azure 
-    // environment such that it showed up at this point as Connection: Keep-alive.  So we will use this
-    // simplified version to check for a websocket connect (not sure what else would trigger "upgrade").
-    //
-    function isWebSocket(request) 
-    {
-        var upgrade = request.headers.upgrade || '';
-        return request.method === 'GET' && upgrade.toLowerCase() === 'websocket';
-    }
-
-    if (isWebSocket(request)) // was: if (WebSocket.isWebSocket(request))
+    if (netutil.isWebSocket(request)) // was: if (WebSocket.isWebSocket(request))
     {
         var path = url.parse(request.url).pathname; 
 
-        if (path.indexOf(maaasApiUrlPrefix + "/") == 0)
+        if (path.indexOf(synchroApiUrlPrefix + "/") == 0)
         {
             // !!! Running the API processor as a forked process on Azure does not work with a WebSocket
             //     connection. Node.js has a concept of being able to pass a "handle" (a socket in this 
@@ -267,12 +167,12 @@ server.on('upgrade', function(request, socket, body)
             //
             //     This is the main Node/libuv bug: https://github.com/joyent/libuv/issues/480
             //
-            var appPath = path.substring(maaasApiUrlPrefix.length + 1);
+            var appPath = path.substring(synchroApiUrlPrefix.length + 1);
             apiManager.processWebSocket(appPath, request, socket, body);
         }
-        else if (path === maaasStudioUrlPrefix) // !!! Web session auth (maybe inside websocket processor - to get/use session)
+        else if (path === synchroStudioUrlPrefix) // !!! Web session auth (maybe inside websocket processor - to get/use session)
         {
-            maaasStudio.processWebSocket(request, socket, body);
+            synchroStudio.processWebSocket(request, socket, body);
         }
         else
         {
@@ -283,17 +183,29 @@ server.on('upgrade', function(request, socket, body)
 
 // Here is all the asynchronous startup stuff...
 //
+var servicesConfig = require('./services-config');
+
 function loadApiProcessorsAsync(callback)
 {
-    var synchroApps = 
-    [
-        { appUriPath: "samples", appModulePath: "maaas-samples" },
-        { appUriPath: "propx", appModulePath: "maaas-propx" }
-    ]
+    var synchroApps = nconf.get('SYNCHRO_APPS');
 
     function loadApiProcessorAsync(synchroApp, callback)
     {
-        createApiProcessorAsync(apiManager, synchroApp.appUriPath, synchroApp.appModulePath, callback);        
+        var services = servicesConfig.getServicesConfig(nconf.get('SERVICES_CONFIG'), synchroApp.container);
+
+        var bFork = true;   // Run API processor forked
+        var bDebug = true;  // Enable debugging of API processor (only valid if running forked)
+
+        if (commander.nofork)
+        {
+            // This situation is typically for when you want to run this "app" itself under a local debugger, and
+            // you want to be able to debug the api processor and actual Synchro module code also.
+            //
+            bFork = false;  // Run API processor in-proc
+            bDebug = false; // Debugging of API processor not available in-proc, so don't even ask ;)
+        }
+
+        apiManager.createApiProcessorAsync(synchroApp.uriPath, services, bFork, bDebug, callback);
     }
 
     async.each(synchroApps, loadApiProcessorAsync, callback);    
@@ -301,9 +213,9 @@ function loadApiProcessorsAsync(callback)
 
 function startServerAsync(callback)
 {
-    server.listen(app.get('port'), function()
+    server.listen(nconf.get('PORT'), function()
     {
-        logger.info('Express server listening on port ' + app.get('port') + ", node version: " + process.version);
+        logger.info('Express server listening on port ' + this.address().port + ", node version: " + process.version);
         callback(null);
     });
 }
