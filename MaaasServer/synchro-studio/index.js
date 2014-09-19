@@ -1,4 +1,4 @@
-﻿// Maaas Studio module
+﻿// Synchro Studio module
 //
 // http://justjs.com/posts/creating-reusable-express-modules-with-their-own-routes-views-and-static-assets
 //
@@ -8,8 +8,6 @@ var path = require('path');
 var wait = require('wait.for');
 
 var hbs = require('express-hbs');
-
-var maaasApi = require('../synchro-api');
 
 var render = hbs.create().express3({
     // partialsDir: __dirname + '/views/partials',
@@ -23,7 +21,7 @@ var debugApi = require('./lib/ws-debug-server');
 
 // Constructor
 //
-var MaaasStudio = function(basePath, apiManager)
+var SynchroStudio = function(basePath, apiManager)
 {
 	this.basePath = basePath;
 	this.apiManager = apiManager;
@@ -32,14 +30,14 @@ var MaaasStudio = function(basePath, apiManager)
 // Called before the Express router or any routes are added to the app.  This is a good time to add any
 // static middleware.
 //
-MaaasStudio.prototype.addMiddleware = function(expressApp)
+SynchroStudio.prototype.addMiddleware = function(expressApp)
 {
 	logger.info("Adding static path from basePath: " + this.basePath);
 	logger.info("Static path is: " + path.join(__dirname, 'public'));
 	expressApp.use(this.basePath, express.static(path.join(__dirname, 'public')));
 }
 
-MaaasStudio.prototype.addRoutes = function(expressApp, checkAuth) 
+SynchroStudio.prototype.addRoutes = function(expressApp, checkAuth) 
 {
 	self = this;
 
@@ -61,17 +59,17 @@ MaaasStudio.prototype.addRoutes = function(expressApp, checkAuth)
 	});
 }
 
-MaaasStudio.prototype.getApiProcessor = function(appName)
+SynchroStudio.prototype.getApiProcessor = function(appName)
 {
 	return this.apiManager.getApiProcessor(appName);
 }
 
-MaaasStudio.prototype.getModuleStore = function(appName)
+SynchroStudio.prototype.getModuleStore = function(appName)
 {
 	return this.apiManager.getModuleStore(appName);
 }
 
-MaaasStudio.prototype.render = function(templateName, locals, res)
+SynchroStudio.prototype.render = function(templateName, locals, res)
 {
 	var dirname = path.join(__dirname, '/views');
 
@@ -90,9 +88,9 @@ MaaasStudio.prototype.render = function(templateName, locals, res)
     });
 }
 
-MaaasStudio.prototype.processWebSocket = function(request, socket, body)
+SynchroStudio.prototype.processWebSocket = function(request, socket, body)
 {
     debugApi.processWebSocket(request, socket, body);
 }
 
-module.exports = MaaasStudio;
+module.exports = SynchroStudio;

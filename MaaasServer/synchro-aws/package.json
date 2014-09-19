@@ -1,9 +1,9 @@
 {
-  "name": "maaas-aws",
+  "name": "synchro-aws",
   "version": "0.0.0",
-  "description": "Mobile Application As A Service - Amazon AWS support",
+  "description": "Synchro API - Amazon AWS support",
   "main": "index.js",  
-  "author": "Bob Dickinson <bob@maaas.io> (http://maaas.io/)",
+  "homepage": "http://synchro.io/",
   "dependencies": {
     "aws-sdk": "^2.0.0-rc.15"
   }

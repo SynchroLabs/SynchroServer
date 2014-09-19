@@ -1,4 +1,4 @@
-// Maaas AWS module
+// Synchro AWS module
 //
 var logger = require('log4js').getLogger("synchro-aws");
 

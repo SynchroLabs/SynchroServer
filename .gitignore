@@ -167,3 +167,6 @@ $RECYCLE.BIN/
 # RDD - Sublime editor 
 *.sublime-project
 *.sublime-workspace
+
+# RDD - Exclude config
+/MaaasServer/config.json

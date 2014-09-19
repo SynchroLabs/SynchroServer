@@ -4,10 +4,10 @@
 var logger = require('log4js').getLogger("web-edit");
 
 // GET /edit
-exports.edit = function(maaasStudio, appName, req, res)
+exports.edit = function(synchroStudio, appName, req, res)
 {
-    var apiProcessor = maaasStudio.getApiProcessor(appName);
-    var moduleStore = maaasStudio.getModuleStore(appName);
+    var apiProcessor = synchroStudio.getApiProcessor(appName);
+    var moduleStore = synchroStudio.getModuleStore(appName);
 
     var page = null;
     var code = "";
@@ -25,13 +25,13 @@ exports.edit = function(maaasStudio, appName, req, res)
 
     var debugPort = apiProcessor.debugPort;
 
-    maaasStudio.render('sandbox', { title: 'Synchro', code: code, page: page, files: files, debugPort: debugPort }, res);
+    synchroStudio.render('sandbox', { title: 'Synchro', code: code, page: page, files: files, debugPort: debugPort }, res);
 };
 
 // GET /module
-exports.loadModule = function(maaasStudio, appName, req, res)
+exports.loadModule = function(synchroStudio, appName, req, res)
 {
-    var moduleStore = maaasStudio.getModuleStore(appName);
+    var moduleStore = synchroStudio.getModuleStore(appName);
 
     logger.info("Load module");
     var result = { };
@@ -51,10 +51,10 @@ exports.loadModule = function(maaasStudio, appName, req, res)
 };
 
 // POST /module
-exports.saveModule = function(maaasStudio, appName, req, res)
+exports.saveModule = function(synchroStudio, appName, req, res)
 {
-    var apiProcessor = maaasStudio.getApiProcessor(appName);
-    var moduleStore = maaasStudio.getModuleStore(appName);
+    var apiProcessor = synchroStudio.getApiProcessor(appName);
+    var moduleStore = synchroStudio.getModuleStore(appName);
 
     logger.info("Save module");
     var result = { };

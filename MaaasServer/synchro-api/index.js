@@ -1,4 +1,4 @@
-// Maaas module
+// Synchro API module
 //
 var logger = require('log4js').getLogger("synchro-api");
 
@@ -9,12 +9,12 @@ var logger = require('log4js').getLogger("synchro-api");
 //
 //    var serviceSpec = 
 //    {
-//        packageRequirePath = path.resolve('./maaas-module-providing-service'),
+//        packageRequirePath = path.resolve('./synchro-module-providing-service'),
 //        serviceName = NameOfTheService,
 //        serviceConfiguration = { ... appropriate configuration object ... }
 //    }
 //
-// The method below is used internally by Maaas modules (the API processor and any other modules that need
+// The method below is used internally by Synchro modules (the API processor and any other modules that need
 // these) to create services from a specification...
 //
 exports.createServiceFromSpec = function(serviceSpec)
@@ -69,7 +69,7 @@ exports.createApiProcessorManager = function(baseDebugPort)
         getModuleStore: function(appPath)
         {
             // The apiProcessor has a module store in its process, but there are cases where the main Node / web process (particularly when serving the
-            // the web site for the Maaas "studio" application) needs a module store using the same configuration information...
+            // the web site for the Synchro "studio" application) needs a module store using the same configuration information...
             //
             var apiProcessor = apiProcessors[appPath];
             if (apiProcessor)

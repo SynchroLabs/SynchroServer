@@ -1,12 +1,9 @@
 {
-    "name": "MaaasServer",
+    "name": "synchro-server",
     "version": "0.0.0",
-    "description": "MaaasServer",
+    "description": "Synchro Server",
     "main": "app.js",
-    "author": {
-        "name": "Bob",
-        "email": ""
-    },
+    "homepage": "http://synchro.io/",
     "dependencies": {
         "express": "~3.4.8",
         "faye-websocket": "~0.7.0",

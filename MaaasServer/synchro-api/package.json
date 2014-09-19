@@ -1,10 +1,10 @@
 {
-  "name": "maaas-api",
+  "name": "synchro-api",
   "version": "0.0.0",
-  "description": "Mobile Application As A Service - API Server",
+  "description": "Synchro API Server",
   "main": "index.js",
   "scripts": { "test": "mocha" },
-  "author": "Bob Dickinson <bob@maaas.io> (http://maaas.io/)",
+  "homepage": "http://synchro.io/",
   "dependencies": {
     "objectdiff": "^1.1.0",
     "lodash": "^2.4.1",

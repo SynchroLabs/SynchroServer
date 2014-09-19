@@ -1,4 +1,4 @@
-// Maaas Azure module
+// Synchro Azure module
 //
 var logger = require('log4js').getLogger("synchro-azure");
 

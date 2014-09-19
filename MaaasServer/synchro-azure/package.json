@@ -1,9 +1,9 @@
 {
-  "name": "maaas-azure",
+  "name": "synchro-azure",
   "version": "0.0.0",
-  "description": "Mobile Application As A Service - Azure support",
+  "description": "Synchro API - Azure support",
   "main": "index.js",
-  "author": "Bob Dickinson <bob@maaas.io> (http://maaas.io/)",
+  "homepage": "http://synchro.io/",
   "dependencies": {
     "azure": "^0.9.7",
     "node-uuid": "^1.4.1",

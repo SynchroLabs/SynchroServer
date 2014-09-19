@@ -1,6 +1,6 @@
 // Redis session store
 //
-// Note: This is the session store for Maaas clients calling the Maaas API, and is not related to any web session store
+// Note: This is the session store for Synchro clients calling the Synchro API, and is not related to any web session store
 //       for the admin/development web site.
 //
 
@@ -11,7 +11,7 @@ var redis = require("redis");
 var uuid = require('node-uuid');
 var wait = require('wait.for');
 
-var logger = require('log4js').getLogger("maaas-redis-session");
+var logger = require('log4js').getLogger("synchro-redis-session");
 
 logger.info("Redis session store");
 

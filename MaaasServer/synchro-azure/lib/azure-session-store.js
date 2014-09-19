@@ -1,9 +1,9 @@
 // Azure session store
 //
-// Note: This is the session store for Maaas clients calling the Maaas API, and is not related to any web session store
+// Note: This is the session store for Synchro clients calling the Synchro API, and is not related to any web session store
 //       for the admin/development web site.
 //
-var logger = require('log4js').getLogger("maaas-azure-session");
+var logger = require('log4js').getLogger("synchro-azure-session");
 
 var uuid = require('node-uuid');
 var azure = require('azure-storage');

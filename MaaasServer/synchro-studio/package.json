@@ -1,8 +1,8 @@
 {
-  "name": "maaas-studio",
+  "name": "synchro-studio",
   "version": "0.0.0",
-  "description": "Mobile Application As A Service - Development environment",
-  "author": "Bob Dickinson <bob@maaas.io> (http://maaas.io/)",
+  "description": "Synchro Studio",
+  "homepage": "http://synchro.io/",
   "dependencies": {
     "express-hbs": "^0.7.9"
   }

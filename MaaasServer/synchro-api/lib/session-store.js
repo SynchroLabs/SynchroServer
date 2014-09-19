@@ -1,6 +1,6 @@
 ﻿// World's worst session store.  Not peristent or scalable.  Use only for local testing.
 //
-// Note: This is the session store for Maaas clients calling the Maaas API, and is not related to any web session store
+// Note: This is the session store for Synchro clients calling the Synchro API, and is not related to any web session store
 //       for the admin/development web site.
 //
 var uuid = require('node-uuid');

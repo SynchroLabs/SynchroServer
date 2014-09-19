@@ -2,7 +2,7 @@
 //
 // Note: This module and the objects it returns may be called in-proc or cross-process, as documented below.
 //
-var maaasApi = require('../index'); // !!! Should probably be 'maaas-api' (if maaas-api installed as module in node_modules)
+var synchroApi = require('../index'); // This is our own 'synchro-api' module
 var wait = require('wait.for');
 var WebSocket = require('faye-websocket');
 
@@ -14,9 +14,9 @@ exports.createApiRequestProcessorAsync = function(params, callback)
 {
     logger.info("Initializing API request processor");
 
-    var sessionStore = maaasApi.createServiceFromSpec(params.sessionStoreSpec);
-    var moduleStore = maaasApi.createServiceFromSpec(params.moduleStoreSpec);
-    var resourceResolver = maaasApi.createServiceFromSpec(params.resourceResolverSpec);
+    var sessionStore = synchroApi.createServiceFromSpec(params.sessionStoreSpec);
+    var moduleStore = synchroApi.createServiceFromSpec(params.moduleStoreSpec);
+    var resourceResolver = synchroApi.createServiceFromSpec(params.resourceResolverSpec);
 
     var moduleManager = require('./module-manager')(moduleStore, resourceResolver);
 
