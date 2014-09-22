@@ -88,5 +88,10 @@ exports.getChangeList = function(basePath, originalObject, newObject)
         changes.push({ path: path, change: changeType, value: value });
     });
 
+
+    // Return null on empty (maybe later)
+    //
+    //    return (changes.length > 0) ? changes : null;
+    //
     return changes;
 }

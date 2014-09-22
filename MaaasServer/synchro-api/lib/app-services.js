@@ -24,6 +24,11 @@ module.exports = function(apiProcessor, resourceResolver)
 		waitFor: function()
 		{
 		    return wait.for.apply(this, arguments);
+		},
+
+		interimUpdate: function(context)
+		{
+			apiProcessor.interimUpdate(context);
 		}
 	}
 

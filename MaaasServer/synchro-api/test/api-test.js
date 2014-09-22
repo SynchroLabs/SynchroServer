@@ -1,10 +1,14 @@
 require('./test');
 
 var assert = require("assert");
-require("./assert-helper");
+var assertHelper = require("./assert-helper");
 
 var ApiProcessor = require("../lib/api");
+var ReaderWriter = require("../lib/reader-writer");
+var readerWriter = new ReaderWriter();
 var devices = require("./testdevices");
+
+var wait = require('wait.for');
 
 var logger = require('log4js').getLogger("api-test");
 
@@ -19,11 +23,16 @@ function createApiProcessor(testModules)
     	}
     }
 
-	return new ApiProcessor(testModuleManager);
+	return new ApiProcessor(testModuleManager, readerWriter);
 }
 
 describe("API Processor", function()
 {
+	beforeEach(function()
+	{
+		readerWriter.drain();
+	});
+
 	describe("Initial Page Request", function()
 	{
 		var modules =
@@ -52,29 +61,30 @@ describe("API Processor", function()
 
 		var apiProcessor = createApiProcessor(modules);
 
-		var session = {};
+		var session = { id: 420 };
 		var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4");
 
         // Initial page request
 		var requestObject = { Mode: "Page", Path: "menu", DeviceMetrics: metrics.DeviceMetrics, ViewMetrics: metrics.ViewMetrics };
-		var response = apiProcessor.process(session, requestObject);
+		var response = {};
+		apiProcessor.process(session, requestObject, response);
 
         it("should store device and view metric from request in session", function() 
         {
-			assert.objectsEqual(metrics.DeviceMetrics, session.DeviceMetrics);
-			assert.objectsEqual(metrics.ViewMetrics, session.ViewMetrics);
+			assert.objectsEqual(session.DeviceMetrics, metrics.DeviceMetrics);
+			assert.objectsEqual(session.ViewMetrics, metrics.ViewMetrics);
 		});
 
         it("should store view state and view model in session", function() 
         {
-			assert.objectsEqual({ path: "menu" }, session.ViewState);
-			assert.objectsEqual({ foo: "bar" }, session.ViewModel);
+			assert.objectsEqual(session.ViewState, { path: "menu" });
+			assert.objectsEqual(session.ViewModel, { foo: "bar" });
 		});
 
         it("should return view and view model in response", function() 
         {
-			assert.objectsEqual(modules.menu.View, response.View);
-			assert.objectsEqual({ foo: "bar" }, response.ViewModel);
+			assert.objectsEqual(response.View, modules.menu.View);
+			assert.objectsEqual(response.ViewModel, { foo: "bar" });
 		});
 	});
 
@@ -138,46 +148,62 @@ describe("API Processor", function()
 		var apiProcessor = createApiProcessor(testModules);
     	Synchro = require("../lib/app-services")(apiProcessor, null);
 
-		var session = {};
+		var session = { id: 420 };
 		var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4");
 
-        it("should return menu page and view model when requesting menu page", function() 
+        it("should return menu page and view model when requesting menu page", function(done) 
         {
 	        // Initial page request
 			var requestObject = { Mode: "Page", Path: "menu", DeviceMetrics: metrics.DeviceMetrics, ViewMetrics: metrics.ViewMetrics };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-			assert.objectsEqual(testModules.menu.View, response.View);
-			assert.objectsEqual({}, response.ViewModel);
+			readerWriter.readAsync(session.id, function(err, responseObject)
+			{
+				assert.objectsEqual(response.View, testModules.menu.View);
+				assert.objectsEqual(response.ViewModel, {});
+				done();
+			});
 		});
 
-        it("should return counter page and view model after menu page command goToCounter", function() 
+        it("should return counter page and view model after menu page command goToCounter", function(done) 
         {
 	        // Command: navigate to counter
 			var requestObject = { Mode: "Command", Path: "menu", Command: "goToCounter" };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-			assert.objectsEqual(testModules.counter.View, response.View);
-			var expectedViewModel = 
+			readerWriter.readAsync(session.id, function(err, responseObject)
 			{
-				count: 0,
-				fontColor: "Green"
-			};
-			assert.objectsEqual(expectedViewModel, response.ViewModel);
+				assert.objectsEqual(responseObject.View, testModules.counter.View);
+				var expectedViewModel = 
+				{
+					count: 0,
+					fontColor: "Green"
+				};
+				assert.objectsEqual(responseObject.ViewModel, expectedViewModel);
+				done();
+			});
+
 		});
 
-        it("should return menu page and view model after counter page exit command", function() 
+        it("should return menu page and view model after counter page exit command", function(done) 
         {
 	        // Command: exit
 			var requestObject = { Mode: "Command", Path: "counter", Command: "exit" };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-			assert.objectsEqual(testModules.menu.View, response.View);
-			assert.objectsEqual({}, response.ViewModel);
+			readerWriter.readAsync(session.id, function(err, responseObject)
+			{
+				assert.objectsEqual(responseObject.View, testModules.menu.View);
+				assert.objectsEqual(responseObject.ViewModel, {});
+				done();
+			});
 		});
 	});
 
-	describe("ViewModel updates from command", function()
+	describe("ViewModel updates from command", function(done)
 	{
 		var modules =
 		{
@@ -224,42 +250,52 @@ describe("API Processor", function()
 
 		var apiProcessor = createApiProcessor(modules);
 
-		var session = {};
+		var session = { id: 420 };
 		var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4");
 
-        it("should store initial view model in session and return it in response", function() 
+        it("should store initial view model in session and return it in response", function(done) 
         {
 			var requestObject = { Mode: "Page", Path: "counter", DeviceMetrics: metrics.DeviceMetrics, ViewMetrics: metrics.ViewMetrics };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-			var expectedViewModel = 
+			readerWriter.readAsync(session.id, function(err, responseObject)
 			{
-				count: 0,
-				fontColor: "Green"
-			};
-			assert.objectsEqual(expectedViewModel, session.ViewModel);
-			assert.objectsEqual(expectedViewModel, response.ViewModel);
+				var expectedViewModel = 
+				{
+					count: 0,
+					fontColor: "Green"
+				};
+				assert.objectsEqual(session.ViewModel, expectedViewModel);
+				assert.objectsEqual(responseObject.ViewModel, expectedViewModel);
+				done();
+			});
 		});
 
-        it("should store updated view model in session and return deltas in response after command modifies view model", function() 
+        it("should store updated view model in session and return deltas in response after command modifies view model", function(done) 
         {
 	        // Command: vary count (add 12)
 			var requestObject = { Mode: "Command", Path: "counter", Command: "vary", Parameters: { amount: 12 } };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-			var expectedViewModel = 
+			readerWriter.readAsync(session.id, function(err, responseObject)
 			{
-				count: 12,
-				fontColor: "Red"
-			};
-			assert.objectsEqual(expectedViewModel, session.ViewModel);
+				var expectedViewModel = 
+				{
+					count: 12,
+					fontColor: "Red"
+				};
+				assert.objectsEqual(session.ViewModel, expectedViewModel);
 
-			var expectedDeltas = 
-			[
-			    { path: "count", change: "update", value: 12 },
-			    { path: "fontColor", change: "update", value: "Red" }
-			];
-			assert.objectsEqual(expectedDeltas, response.ViewModelDeltas);
+				var expectedDeltas = 
+				[
+				    { path: "count", change: "update", value: 12 },
+				    { path: "fontColor", change: "update", value: "Red" }
+				];
+				assert.objectsEqual(responseObject.ViewModelDeltas, expectedDeltas);
+				done();
+			});
 		});
 	});
 
@@ -287,27 +323,32 @@ describe("API Processor", function()
 		}
 
 		var apiProcessor = createApiProcessor(modules);
-		var session = {};
+		var session = { id: 420 };
 		var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4");
 
-		it("should return view modified by InitialzeView", function() 
+		it("should return view modified by InitialzeView", function(done) 
 		{
 	        // Initial page request
 			var requestObject = { Mode: "Page", Path: "custom", DeviceMetrics: metrics.DeviceMetrics, ViewMetrics: metrics.ViewMetrics };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-	        // Verify response contains correct view and viewModel
-	        var expectedView = 
-	        {
-			    title: "Custom Page",
-			    elements: 
-			    [
-			        { control: "text", value: "Super Custom", font: 12 }, // InitializeView updated this
-			    ]
-	        }
-			assert.objectsEqual(expectedView, response.View);
-			assert.objectsEqual({}, response.ViewModel);
-			assert.objectsEqual({}, session.ViewModel);
+			readerWriter.readAsync(session.id, function(err, responseObject)
+			{
+		        // Verify response contains correct view and viewModel
+		        var expectedView = 
+		        {
+				    title: "Custom Page",
+				    elements: 
+				    [
+				        { control: "text", value: "Super Custom", font: 12 }, // InitializeView updated this
+				    ]
+		        }
+				assert.objectsEqual(responseObject.View, expectedView);
+				assert.objectsEqual(responseObject.ViewModel, {});
+				assert.objectsEqual(session.ViewModel, {});
+				done();
+			});
 		});
 	});
 
@@ -331,50 +372,60 @@ describe("API Processor", function()
 
 		var apiProcessor = createApiProcessor(modules);
 
-		var session = {};
+		var session = { id: 420 };
 		var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4");
 
-		it("should return correctly filtered view on initial request", function()
+		it("should return correctly filtered view on initial request", function(done)
 		{
 	        // Initial page request
 			var requestObject = { Mode: "Page", Path: "dynamic", DeviceMetrics: metrics.DeviceMetrics, ViewMetrics: metrics.ViewMetrics };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-	        // Verify response contains correct view and viewModel
-	        var expectedView = 
-	        {
-	        	dynamic: true,
-			    title: "Dynamic Page",
-			    elements: 
-			    [
-			        { control: "text", value: "Portrait", font: 12 },
-			    ]
-	        }
-			assert.objectsEqual(expectedView, response.View);
-			assert.objectsEqual({}, response.ViewModel);
-			assert.objectsEqual({}, session.ViewModel);
+			readerWriter.readAsync(session.id, function(err, responseObject)
+			{
+		        // Verify response contains correct view and viewModel
+		        var expectedView = 
+		        {
+		        	dynamic: true,
+				    title: "Dynamic Page",
+				    elements: 
+				    [
+				        { control: "text", value: "Portrait", font: 12 },
+				    ]
+		        }
+				assert.objectsEqual(responseObject.View, expectedView);
+				assert.objectsEqual(responseObject.ViewModel, {});
+				assert.objectsEqual(session.ViewModel, {});
+				done();
+			});
 		});
 
-		it("should return new filtered view on view update (orientation changed)", function()
+		it("should return new filtered view on view update (orientation changed)", function(done)
 		{
 	        // Update view to landscape
 	        var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4", "Landscape");
 			var requestObject = { Mode: "ViewUpdate", Path: "dynamic", ViewMetrics: metrics.ViewMetrics };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-	        // Verify response contains correct view and viewModel
-	        expectedView = 
-	        {
-	        	dynamic: true,
-			    title: "Dynamic Page",
-			    elements: 
-			    [
-			        { control: "text", value: "Landscape", font: 12 },
-			    ]
-	        }
+			readerWriter.readAsync(session.id, function(err, responseObject)
+			{
+		        // Verify response contains correct view and viewModel
+		        var expectedView = 
+		        {
+		        	dynamic: true,
+				    title: "Dynamic Page",
+				    elements: 
+				    [
+				        { control: "text", value: "Landscape", font: 12 },
+				    ]
+		        }
 
-			assert.objectsEqual(expectedView, response.View);
-			assert.equal(undefined, response.ViewModelDeltas);
+				assert.objectsEqual(response.View, expectedView);
+				assert.equal(responseObject.ViewModelDeltas, undefined);
+				done();
+			});
 		});
     });
 
@@ -425,49 +476,59 @@ describe("API Processor", function()
 
 		var apiProcessor = createApiProcessor(modules);
 
-		var session = {};
+		var session = { id: 420 };
 		var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4");
 
-		it("should return view that reflects view model initialized, view filtered, and view initialized, in order", function()
+		it("should return view that reflects view model initialized, view filtered, and view initialized, in order", function(done)
 		{
 	        // Initial page request
 			var requestObject = { Mode: "Page", Path: "dynamic", DeviceMetrics: metrics.DeviceMetrics, ViewMetrics: metrics.ViewMetrics };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-	        // Verify response contains correct view and viewModel
-	        var expectedView = 
-	        {
-	        	dynamic: true,
-			    title: "Dynamic Page",
-			    elements: 
-			    [
-			        { control: "text", value: "Portrait - Init", font: 12 },
-			    ]
-	        }
-			assert.objectsEqual(expectedView, response.View);
-			assert.objectsEqual({ orientation: "Portrait" }, response.ViewModel);
-			assert.objectsEqual({ orientation: "Portrait" }, session.ViewModel);
+			readerWriter.readAsync(session.id, function(err, responseObject)
+			{
+		        // Verify response contains correct view and viewModel
+		        var expectedView = 
+		        {
+		        	dynamic: true,
+				    title: "Dynamic Page",
+				    elements: 
+				    [
+				        { control: "text", value: "Portrait - Init", font: 12 },
+				    ]
+		        }
+				assert.objectsEqual(responseObject.View, expectedView);
+				assert.objectsEqual(responseObject.ViewModel, { orientation: "Portrait" });
+				assert.objectsEqual(session.ViewModel, { orientation: "Portrait" });
+				done();
+			});
 		});
 
-		it("should return updated view that reflects view model initialized, view filtered, and view initialized, in order, after view update", function()
+		it("should return updated view that reflects view model initialized, view filtered, and view initialized, in order, after view update", function(done)
 		{
 	        // Update view to landscape
 	        var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4", "Landscape");
 			var requestObject = { Mode: "ViewUpdate", Path: "dynamic", ViewMetrics: metrics.ViewMetrics };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-	        // Verify response contains correct view and viewModel
-	        expectedView = 
-	        {
-	        	dynamic: true,
-			    title: "Dynamic Page",
-			    elements: 
-			    [
-			        { control: "text", value: "Landscape - Update", font: 12 },
-			    ]
-	        }
-			assert.objectsEqual(expectedView, response.View);
-			assert.objectsEqual([{ path: "orientation", change: "update", value: "Landscape" }], response.ViewModelDeltas);
+			readerWriter.readAsync(session.id, function(err, responseObject)
+			{
+		        // Verify response contains correct view and viewModel
+		        var expectedView = 
+		        {
+		        	dynamic: true,
+				    title: "Dynamic Page",
+				    elements: 
+				    [
+				        { control: "text", value: "Landscape - Update", font: 12 },
+				    ]
+		        }
+				assert.objectsEqual(responseObject.View, expectedView);
+				assert.objectsEqual(responseObject.ViewModelDeltas, [{ path: "orientation", change: "update", value: "Landscape" }]);
+				done();
+			});
 	    });
     });
 
@@ -511,49 +572,59 @@ describe("API Processor", function()
 
 		var apiProcessor = createApiProcessor(modules);
 
-		var session = {};
+		var session = { id: 420 };
 		var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4");
 
-		it("should return dynamic page that has been initialized by InitializeView", function()
+		it("should return dynamic page that has been initialized by InitializeView", function(done)
 		{
 	        // Initial page request
 			var requestObject = { Mode: "Page", Path: "dynamic", DeviceMetrics: metrics.DeviceMetrics, ViewMetrics: metrics.ViewMetrics };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-	        // Verify response contains correct view and viewModel
-	        var expectedView = 
-	        {
-	        	dynamic: true,
-			    title: "Dynamic Page",
-			    elements: 
-			    [
-			        { control: "text", value: "Portrait", font: 12 },
-			    ]
-	        }
-			assert.objectsEqual(expectedView, response.View);
-			assert.objectsEqual({ orientation: "Portrait" }, response.ViewModel);
-			assert.objectsEqual({ orientation: "Portrait" }, session.ViewModel);			
+			readerWriter.readAsync(session.id, function(err, responseObject)
+			{
+		        // Verify response contains correct view and viewModel
+		        var expectedView = 
+		        {
+		        	dynamic: true,
+				    title: "Dynamic Page",
+				    elements: 
+				    [
+				        { control: "text", value: "Portrait", font: 12 },
+				    ]
+		        }
+				assert.objectsEqual(responseObject.View, expectedView);
+				assert.objectsEqual(responseObject.ViewModel, { orientation: "Portrait" });
+				assert.objectsEqual(session.ViewModel, { orientation: "Portrait" });
+				done();
+			});
 		});
 
-		it("should return updated dynamic page that has been initialized by InitializeView after view update", function()
+		it("should return updated dynamic page that has been initialized by InitializeView after view update", function(done)
 		{
 	        // Update view to landscape
 	        var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4", "Landscape");
 			var requestObject = { Mode: "ViewUpdate", Path: "dynamic", ViewMetrics: metrics.ViewMetrics };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-	        // Verify response contains correct view and viewModel
-	        expectedView = 
-	        {
-	        	dynamic: true,
-			    title: "Dynamic Page",
-			    elements: 
-			    [
-			        { control: "text", value: "Landscape", font: 12 },
-			    ]
-	        }
-			assert.objectsEqual(expectedView, response.View);
-			assert.objectsEqual([{ path: "orientation", change: "update", value: "Landscape" }], response.ViewModelDeltas);
+			readerWriter.readAsync(session.id, function(err, responseObject)
+			{
+		        // Verify response contains correct view and viewModel
+		        var expectedView = 
+		        {
+		        	dynamic: true,
+				    title: "Dynamic Page",
+				    elements: 
+				    [
+				        { control: "text", value: "Landscape", font: 12 },
+				    ]
+		        }
+				assert.objectsEqual(responseObject.View, expectedView);
+				assert.objectsEqual(responseObject.ViewModelDeltas, [{ path: "orientation", change: "update", value: "Landscape" }]);
+				done();
+			});
 	    });
     });
 
@@ -579,40 +650,50 @@ describe("API Processor", function()
 
 		var apiProcessor = createApiProcessor(modules);
 
-		var session = {};
+		var session = { id: 420 };
 		var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4");
 
-		it("should return correctly filtered view on initial request", function()
+		it("should return correctly filtered view on initial request", function(done)
 		{
 	        // Initial page request
 			var requestObject = { Mode: "Page", Path: "dynamic", DeviceMetrics: metrics.DeviceMetrics, ViewMetrics: metrics.ViewMetrics };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-	        // Verify response contains correct view and viewModel
-	        var expectedView = 
-	        {
-	        	dynamic: true,
-			    title: "Dynamic Page",
-			    elements: 
-			    [
-			        { control: "text", value: "Narrow screen", font: 12 },
-			    ]
-	        }
-			assert.objectsEqual(expectedView, response.View);
-			assert.objectsEqual({ }, response.ViewModel);
-			assert.objectsEqual({ }, session.ViewModel);
+			readerWriter.readAsync(session.id, function(err, responseObject)
+			{
+		        // Verify response contains correct view and viewModel
+		        var expectedView = 
+		        {
+		        	dynamic: true,
+				    title: "Dynamic Page",
+				    elements: 
+				    [
+				        { control: "text", value: "Narrow screen", font: 12 },
+				    ]
+		        }
+				assert.objectsEqual(responseObject.View, expectedView);
+				assert.objectsEqual(responseObject.ViewModel, {});
+				assert.objectsEqual(session.ViewModel, {});
+				done();
+			});
 		});
 
-		it("should not return updated view after view change", function()
+		it("should not return updated view after view change", function(done)
 		{
 	        // Update view to landscape (will still not be wider than 6 inches)
 	        var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4", "Landscape");
 			var requestObject = { Mode: "ViewUpdate", Path: "dynamic", ViewMetrics: metrics.ViewMetrics };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-	        // Verify response does not send back an updated view (or view model changes)
-			assert.objectsEqual(undefined, response.View);
-			assert.objectsEqual(undefined, response.ViewModelDeltas);
+			readerWriter.readAsync(session.id, function(err, responseObject)
+			{
+		        // Verify response does not send back an updated view (or view model changes)
+				assert.objectsEqual(responseObject.View, undefined);
+				assert.objectsEqual(responseObject.ViewModelDeltas, undefined);
+				done();
+			});
 		});
     });
 
@@ -711,144 +792,176 @@ describe("API Processor", function()
 		beforeEach(function() 
 		{
 			apiProcessor = createApiProcessor(modules);
-			session = {};
+		    session = { id: 420 };
 
 	        // Initial page request
 			var requestObject = { Mode: "Page", Path: "test", DeviceMetrics: metrics.DeviceMetrics, ViewMetrics: metrics.ViewMetrics };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+
+			readerWriter.readAsync(session.id, function(err, responseObject)
+			{
+				// Ignore response
+			});
+
+			apiProcessor.process(session, requestObject, response);
 
 		});
 
-		it("should call OnViewModelChange with correct changes and source when client sends view model changes only", function() 
+		it("should call OnViewModelChange with correct changes and source when client sends view model changes only", function(done) 
 		{
 			var viewModelDeltas = 
 			[
 			    { path: "count", value: 1 },
 			];
 			var requestObject = { Mode: "Update", Path: "test", ViewModelDeltas: viewModelDeltas };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-			var expectedSessionTest = 
+			readerWriter.readAsync(session.id, function(err, responseObject)
 			{
-				viewChanges:
+				var expectedSessionTest = 
 				{
-					called: true,
-					changes: 
-					[
-					    { path: "count", change: "update", value: 1 },
-					]
+					viewChanges:
+					{
+						called: true,
+						changes: 
+						[
+						    { path: "count", change: "update", value: 1 },
+						]
+					}
 				}
-			}
 
-			assert.objectsEqual(session.test, expectedSessionTest);
-			assert.objectsEqual(response.ViewModelDeltas, []);
+				assert.objectsEqual(session.test, expectedSessionTest);
+				assert.objectsEqual(response.ViewModelDeltas, undefined);
+				done();
+			});
 		});
 
-		it("should call OnViewModelChange when client sends view model changes only, then return view model changes made during that processing", function() 
+		it("should call OnViewModelChange when client sends view model changes only, then return view model changes made during that processing", function(done) 
 		{
 			var viewModelDeltas = 
 			[
 			    { path: "count", value: 10 },
 			];
 			var requestObject = { Mode: "Update", Path: "test", ViewModelDeltas: viewModelDeltas };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-			var expectedSessionTest = 
+			readerWriter.readAsync(session.id, function(err, responseObject)
 			{
-				viewChanges:
+				var expectedSessionTest = 
 				{
-					called: true,
-					changes: 
-					[
-					    { path: "count", change: "update", value: 10 },
-					]
+					viewChanges:
+					{
+						called: true,
+						changes: 
+						[
+						    { path: "count", change: "update", value: 10 },
+						]
+					}
 				}
-			}
 
-			assert.objectsEqual(session.test, expectedSessionTest);
-			assert.objectsEqual(response.ViewModelDeltas, [{ path: "large", change: "add", value: true }]);
+				assert.objectsEqual(session.test, expectedSessionTest);
+				assert.objectsEqual(response.ViewModelDeltas, [{ path: "large", change: "add", value: true }]);
+				done();
+			});
 		});
 
-		it("should call OnViewModelChange with correct changes and source when client sends view model changes with command", function() 
+		it("should call OnViewModelChange with correct changes and source when client sends view model changes with command", function(done) 
 		{
 			var viewModelDeltas = 
 			[
 			    { path: "count", value: 1 },
 			];
 			var requestObject = { Mode: "Command", Path: "test", Command: "vary", Parameters: { amount: 0 }, ViewModelDeltas: viewModelDeltas };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-			var expectedSessionTest = 
+			readerWriter.readAsync(session.id, function(err, responseObject)
 			{
-				varyCommand: true,
-				viewChanges:
+				var expectedSessionTest = 
 				{
-					called: true,
-					changes: 
-					[
-					    { path: "count", change: "update", value: 1 },
-					]
+					varyCommand: true,
+					viewChanges:
+					{
+						called: true,
+						changes: 
+						[
+						    { path: "count", change: "update", value: 1 },
+						]
+					}
 				}
-			}
 
-			assert.objectsEqual(session.test, expectedSessionTest);
+				assert.objectsEqual(session.test, expectedSessionTest);
+				done();
+			});
 		});
 
-		it("should call OnViewModelChange with correct changes and source for changes sent with command and caused by processing the command", function() 
+		it("should call OnViewModelChange with correct changes and source for changes sent with command and caused by processing the command", function(done) 
 		{
 			var viewModelDeltas = 
 			[
 			    { path: "count", value: 1 },
 			];
 			var requestObject = { Mode: "Command", Path: "test", Command: "vary", Parameters: { amount: 1 }, ViewModelDeltas: viewModelDeltas };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-			var expectedSessionTest = 
+			readerWriter.readAsync(session.id, function(err, responseObject)
 			{
-				varyCommand: true,
-				viewChanges:
+				var expectedSessionTest = 
 				{
-					called: true,
-					changes: 
-					[
-					    { path: "count", change: "update", value: 1 },
-					]
-				},
-				commandChanges:
-				{
-					called: true,
-					changes: 
-					[
-					    { path: "count", change: "update", value: 2 },
-					]
+					varyCommand: true,
+					viewChanges:
+					{
+						called: true,
+						changes: 
+						[
+						    { path: "count", change: "update", value: 1 },
+						]
+					},
+					commandChanges:
+					{
+						called: true,
+						changes: 
+						[
+						    { path: "count", change: "update", value: 2 },
+						]
+					}
 				}
-			}
 
-			assert.objectsEqual(session.test, expectedSessionTest);
+				assert.objectsEqual(session.test, expectedSessionTest);
+				done();
+			});
 		});
 
-		it("should call OnViewModelChange with correct changes and source when command processing updates view model", function() 
+		it("should call OnViewModelChange with correct changes and source when command processing updates view model", function(done) 
 		{
 			var requestObject = { Mode: "Command", Path: "test", Command: "vary", Parameters: { amount: 1 } };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-			var expectedSessionTest = 
+			readerWriter.readAsync(session.id, function(err, responseObject)
 			{
-				varyCommand: true,
-				commandChanges:
+				var expectedSessionTest = 
 				{
-					called: true,
-					changes: 
-					[
-					    { path: "count", change: "update", value: 1 },
-					]
+					varyCommand: true,
+					commandChanges:
+					{
+						called: true,
+						changes: 
+						[
+						    { path: "count", change: "update", value: 1 },
+						]
+					}
 				}
-			}
 
-			assert.objectsEqual(session.test, expectedSessionTest);
+				assert.objectsEqual(session.test, expectedSessionTest);
+				done();
+			});
 		});
 
-		it("should call OnViewModelChange with correct changes and source when view metrics change includes view model changes", function() 
+		it("should call OnViewModelChange with correct changes and source when view metrics change includes view model changes", function(done) 
 		{
 			var newMetrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4", "Landscape");
 			var viewModelDeltas = 
@@ -859,62 +972,272 @@ describe("API Processor", function()
 			session.orientationLocked = true;
 
 			var requestObject = { Mode: "ViewUpdate", Path: "test", ViewMetrics: newMetrics.ViewMetrics, ViewModelDeltas: viewModelDeltas };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-			var expectedSessionTest = 
+			readerWriter.readAsync(session.id, function(err, responseObject)
 			{
-				viewChanges:
+				var expectedSessionTest = 
 				{
-					called: true,
-					changes: 
-					[
-					    { path: "count", change: "update", value: 1 },
-					]
+					viewChanges:
+					{
+						called: true,
+						changes: 
+						[
+						    { path: "count", change: "update", value: 1 },
+						]
+					}
 				}
-			}
 
-			assert.objectsEqual(session.test, expectedSessionTest);
+				assert.objectsEqual(session.test, expectedSessionTest);
+				done();
+			});
 		});
 
-		it("should call OnViewModelChange with correct changes and source when view metrics change processing updates view model", function() 
+		it("should call OnViewModelChange with correct changes and source when view metrics change processing updates view model", function(done) 
 		{
 			var newMetrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4", "Landscape");
 
 			var requestObject = { Mode: "ViewUpdate", Path: "test", ViewMetrics: newMetrics.ViewMetrics };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-			var expectedSessionTest = 
+			readerWriter.readAsync(session.id, function(err, responseObject)
 			{
-				viewmetricsChanges:
+				var expectedSessionTest = 
 				{
-					called: true,
-					changes: 
-					[
-					    { path: "orientation", change: "update", value: "Landscape" },
-					]
+					viewmetricsChanges:
+					{
+						called: true,
+						changes: 
+						[
+						    { path: "orientation", change: "update", value: "Landscape" },
+						]
+					}
 				}
-			}
 
-			assert.objectsEqual(session.test, expectedSessionTest);
+				assert.objectsEqual(session.test, expectedSessionTest);
+				done();
+			});
 		});
 
-		it("should not call OnViewModelChange after command if no view model changes made during command", function() 
+		it("should not call OnViewModelChange after command if no view model changes made during command", function(done) 
 		{
 			var requestObject = { Mode: "Command", Path: "test", Command: "reset" };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-			var expectedSessionTest = 
+			readerWriter.readAsync(session.id, function(err, responseObject)
 			{
-				resetCommand: true
-			}
+				var expectedSessionTest = 
+				{
+					resetCommand: true
+				}
 
-			assert.objectsEqual(session.test, expectedSessionTest);
+				assert.objectsEqual(session.test, expectedSessionTest);
+				done();
+			});
+
+		});
+	});
+
+	describe("Partial ViewModel updates", function(done)
+	{
+    	var Synchro = null;
+
+		var modules =
+		{
+			countdown:
+			{
+				View:
+				{
+				    title: "Countdown Page",
+				    onBack: "exit",
+				    elements: 
+				    [
+				        { control: "text", value: "Count: {count}", font: 24 },
+				    ]
+				},
+
+				InitializeViewModel: function(context, session)
+				{
+				    var viewModel =
+				    {
+				        count: 0,
+				        loading: true
+				    }
+				    return viewModel;
+				},
+
+				LoadViewModel: function(context, session, viewModel)
+				{
+				    Synchro.waitFor(Synchro.waitInterval, 100);
+				    viewModel.count = 3;
+				    viewModel.loading = false;
+				},
+
+				Commands:
+				{
+				    countdown: function(context, session, viewModel)
+				    {
+				        while (viewModel.count > 0)
+				        {
+				            Synchro.waitFor(Synchro.waitInterval, 50);
+				            viewModel.count--;
+				            Synchro.interimUpdate(context);
+				        }
+				    },
+				}
+			}
+		}
+
+		var apiProcessor = createApiProcessor(modules);
+    	Synchro = require("../lib/app-services")(apiProcessor, null);
+
+    	// Add this test utility fn (would normally just be a module-local function)
+    	Synchro.waitInterval = function(intervalMillis, callback)
+		{
+		    setTimeout(function(){callback()}, intervalMillis);
+		}
+
+		var session = { id: 420 };
+		var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4");
+
+        it("should give partial response after InitializeViewModel, followed by complete response after LoadViewModel", function(done) 
+        {
+        	// Run in fiber because Synchro.waitFor needs to be in fiber (called inside of apiProcessor.process)
+        	wait.launchFiber(function()
+        	{
+				var requestObject = { Mode: "Page", Path: "countdown", DeviceMetrics: metrics.DeviceMetrics, ViewMetrics: metrics.ViewMetrics };
+				var response = {};
+
+				var plan = new assertHelper.Plan(2, done);
+
+				function onResponse(err, responseObject)
+				{
+					logger.error("Resp[" + plan.count + "]: " + JSON.stringify(responseObject, null, 4));
+
+					switch (plan.count)
+					{
+						case 0:
+						{
+							var expectedViewModel = 
+							{
+								count: 0,
+								loading: true
+							};
+							assert.objectsEqual(session.ViewModel, expectedViewModel);
+							assert.equal(responseObject.Update, "Partial");
+							assert.objectsEqual(responseObject.ViewModel, expectedViewModel);
+							plan.ok(true);
+
+							readerWriter.readAsync(session.id, onResponse);
+						}
+						break;
+
+						case 1:
+						{
+							assert.equal(responseObject.Update, undefined);
+							var expectedDeltas = 
+							[
+							    { path: "count", change: "update", value: 3 },
+							    { path: "loading", change: "update", value: false }
+							];
+							assert.objectsEqual(responseObject.ViewModelDeltas, expectedDeltas);
+							plan.ok(true);
+						}
+						break;
+					}
+				}
+
+				readerWriter.readAsync(session.id, onResponse);
+
+				apiProcessor.process(session, requestObject, response);
+        	});
+		});
+
+        it("should return multiple partial responses, followed by complete response, on command using Synchro.interimUpdate", function(done) 
+        {
+        	// Run in fiber because Synchro.waitFor needs to be in fiber (called inside of apiProcessor.process)
+        	wait.launchFiber(function()
+        	{
+				var requestObject = { Mode: "Command", Path: "countdown", Command: "countdown" };
+				var response = {};
+
+				var plan = new assertHelper.Plan(4, done);
+
+				function onResponse(err, responseObject)
+				{
+					logger.error("Resp[" + plan.count + "]: " + JSON.stringify(responseObject, null, 4));
+
+					switch (plan.count)
+					{
+						case 0:
+						{
+							assert.equal(responseObject.Update, "Partial");
+							var expectedDeltas = 
+							[
+							    { path: "count", change: "update", value: 2 },
+							];
+							assert.objectsEqual(responseObject.ViewModelDeltas, expectedDeltas);
+							plan.ok(true);
+
+							readerWriter.readAsync(session.id, onResponse);
+						}
+						break;
+
+						case 1:
+						{
+							assert.equal(responseObject.Update, "Partial");
+							var expectedDeltas = 
+							[
+							    { path: "count", change: "update", value: 1 },
+							];
+							assert.objectsEqual(responseObject.ViewModelDeltas, expectedDeltas);
+							plan.ok(true);
+
+							readerWriter.readAsync(session.id, onResponse);
+						}
+						break;
+
+						case 2:
+						{
+							assert.equal(responseObject.Update, "Partial");
+							var expectedDeltas = 
+							[
+							    { path: "count", change: "update", value: 0 },
+							];
+							assert.objectsEqual(responseObject.ViewModelDeltas, expectedDeltas);
+							plan.ok(true);
+
+							readerWriter.readAsync(session.id, onResponse);
+						}
+						break;
+
+						case 3:
+						{
+							// There doesn't happen to be any ViewModel changes between the last interimUpdate and the
+							// completion (this response) in this particular test app, so the response is pretty much
+							// empty and just needed to break the long poll chain on the client.
+							//
+							assert.equal(responseObject.Update, undefined);
+							assert.objectsEqual(responseObject.ViewModelDeltas, undefined);
+							plan.ok(true);
+						}
+						break;
+					}
+				}
+
+				readerWriter.readAsync(session.id, onResponse);
+
+				apiProcessor.process(session, requestObject, response);
+			});
 		});
 	});
 
 	describe("Client Errors", function()
 	{
-		it("should fail with appropriate message when requesting page/route that does not exist", function()
+		it("should fail with appropriate message when requesting page/route that does not exist", function(done)
 		{
 			var modules =
 			{
@@ -942,23 +1265,28 @@ describe("API Processor", function()
 
 			var apiProcessor = createApiProcessor(modules);
 
-			var session = {};
+			var session = { id: 420 };
 			var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4");
 
 	        // Initial page request
 			var requestObject = { Mode: "Page", Path: "foo", DeviceMetrics: metrics.DeviceMetrics, ViewMetrics: metrics.ViewMetrics };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
 
-			var expectedResponse = 
+			readerWriter.readAsync(session.id, function(err, responseObject)
 			{
-				Path: "foo",
-				Error: "No route found for path: foo"
-			}
+				var expectedResponse = 
+				{
+					Path: "foo",
+					Error: "No route found for path: foo"
+				}
 
-			assert.objectsEqual(response, expectedResponse);
+				assert.objectsEqual(responseObject, expectedResponse);
+				done();
+			});
 		});
 
-		it("should fail with appropriate message when calling command that does not exist", function()
+		it("should fail with appropriate message when calling command that does not exist", function(done)
 		{
 			var modules =
 			{
@@ -991,18 +1319,30 @@ describe("API Processor", function()
 
 	        // Initial page request
 			var requestObject = { Mode: "Page", Path: "menu", DeviceMetrics: metrics.DeviceMetrics, ViewMetrics: metrics.ViewMetrics };
-			var response = apiProcessor.process(session, requestObject);
+			var response = {};
+
+			readerWriter.readAsync(session.id, function(err, responseObject)
+			{
+				// Ignore response
+			});
+
+			apiProcessor.process(session, requestObject, response);
 
 			requestObject = { Mode: "Command", Path: "menu", Command: "foo" };
-			response = apiProcessor.process(session, requestObject);
+			response = {};
+			apiProcessor.process(session, requestObject, response);
 
-			var expectedResponse = 
+			readerWriter.readAsync(session.id, function(err, responseObject)
 			{
-				Path: "menu",
-				Error: "Command not found: foo"
-			}
+				var expectedResponse = 
+				{
+					Path: "menu",
+					Error: "Command not found: foo"
+				}
 
-			assert.objectsEqual(response, expectedResponse);
+				assert.objectsEqual(response, expectedResponse);
+				done();
+			});
 		});
 	});
 });

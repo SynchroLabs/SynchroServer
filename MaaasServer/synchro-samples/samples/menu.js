@@ -23,6 +23,7 @@ exports.InitializeViewModel = function (context, session)
             { caption: "Hello World", view: "hello" },
             { caption: "Login Sample", view: "login" },
             { caption: "Click Counter Sample", view: "counter" },
+            { caption: "Countdown Sample", view: "countdown" },
             { caption: "Device", view: "device" },
             { caption: "Auto-Complete", view: "autocomplete" },
             { caption: "List Sample", view: "list" },

@@ -41,12 +41,120 @@ function getView(routeModule, context, session, viewModel, isViewMetricUpdate)
     return view;
 }
 
+function populateNewPageResponse(synchroApi, route, routeModule, context, params)
+{
+    var viewModel = getViewModel(routeModule, context, context.session, params);
+    var view = getView(routeModule, context, context.session, viewModel);
+
+    // Build response
+    //
+    context.response.Path = route;
+    context.response.View = view;
+    context.response.ViewModel = viewModel;
+
+    // Clear out any view model client sync baseline (which. if exists, is now obsolete)
+    //
+    context.clientViewModel = null;
+
+    // Update session - Note: we're only ever going to use the hash for dynamic views, so no use in computing it otherwise.
+    //
+    if (view.dynamic)
+    {
+        context.session.ViewState = { path: route, dynamic: true, viewHash: util.jsonHash(view) };
+    }
+    else
+    {
+        context.session.ViewState = { path: route };
+    }
+    context.session.ViewModel = viewModel;
+
+    if (routeModule.LoadViewModel)
+    {
+        sendUpdate(synchroApi, context, true);
+        routeModule.LoadViewModel(context, context.session, viewModel);
+    }
+}
+
+function sendUpdate(synchroApi, context, isInterim)
+{
+    if (isInterim)
+    {
+        context.response.Update = "Partial"
+    }
+    else
+    {
+        delete context.response.Update;
+    }
+
+    if (synchroApi.readerWriter.isWritePending(context.session.id))
+    {
+        // If there is currently a write pending on this channel, no need to take any action here.  Any view model
+        // changes made since that original update was posted will still be picked up when it gets sent.
+        //
+        // If the posted update was a partion/interim and the current update is a final/complete, that will get
+        // picked up when the write is satisfied (per the response.Update set above) and will result in a final/complete
+        // update being sent.
+        //
+        logger.error("Update - request already pending, no action taken");
+        return;
+    }
+
+    // Post the response write
+    //
+    logger.info("Posting write for session id: " + context.session.id);
+    synchroApi.readerWriter.writeAsync(context.session.id, function(err, writeData)
+    {
+        if (err)
+        {
+            logger.error("writeAsync err: " + err);  
+        }
+        else
+        {
+            logger.info("writeAsync posting to reader");
+
+            // We don't want to create/compute the response until we're ready to send it (which is now), since the 
+            // response type or view model could have changed subsequent to when the write was originally posted.
+            //
+            var response = context.response;
+
+            if (context.clientViewModel)
+            {
+                var viewModelUpdates = objectMonitor.getChangeList(null, context.clientViewModel, context.session.ViewModel);
+                if (viewModelUpdates.length > 0)
+                {
+                    response.ViewModelDeltas = viewModelUpdates;
+                }
+                else if (response.ViewModelDeltas)
+                {
+                    delete response.ViewModelDeltas;
+                }
+            }
+
+            if (response.Update == "Partial")
+            {
+                // Update response and view model state in preparation for subsequent update
+                //
+                context.response = { Path: response.Path }
+                context.clientViewModel = JSON.parse(JSON.stringify(context.session.ViewModel));
+            }
+            else
+            {
+                context.response = null;
+                context.clientViewModel = null;
+            }
+
+            writeData(response);                
+        }
+    });
+}
+
 // Public API
 //
-var SynchroApi = function(moduleManager)
+var SynchroApi = function(moduleManager, readerWriter)
 {
     this.appDefinition = null;
     this.moduleManager = moduleManager;
+    this.readerWriter = readerWriter;
 }
 
 SynchroApi.prototype.load = function(err, appDefinition)
@@ -71,30 +179,6 @@ SynchroApi.prototype.showMessage = function(context, messageBox)
     context.response.MessageBox = messageBox;
 }
 
-function populateNewPageResponse(route, routeModule, context, params)
-{
-    var viewModel = getViewModel(routeModule, context, context.session, params);
-    var view = getView(routeModule, context, context.session, viewModel);
-
-    // Build response
-    //
-    context.response.Path = route;
-    context.response.View = view;
-    context.response.ViewModel = viewModel;
-
-    // Update session - Note: we're only ever going to use the hash for dynamic views, so no use in computing it otherwise.
-    //
-    if (view.dynamic)
-    {
-        context.session.ViewState = { path: route, dynamic: true, viewHash: util.jsonHash(view) };
-    }
-    else
-    {
-        context.session.ViewState = { path: route };
-    }
-    context.session.ViewModel = viewModel;
-}
-
 // context - the current context
 // route - the route to the new view
 // params - option dictionary of params, if provided is passed to InitializeViewModel
@@ -106,20 +190,22 @@ SynchroApi.prototype.navigateToView = function(context, route, params)
     {
         logger.info("Found route module for: " + route);
         logger.info("Navigate to view: " + route);
-        populateNewPageResponse(route, routeModule, context, params);
+        populateNewPageResponse(this, route, routeModule, context, params);
     }
 }
 
 // Takes a Synchro request object and returns a Synchro response object
 //
-SynchroApi.prototype.process = function(session, requestObject)
+SynchroApi.prototype.process = function(session, requestObject, responseObject)
 {
     var context = 
     {
         session: session,
         request: requestObject,
-        response: { Path: requestObject.Path } 
+        response: responseObject 
     };
+
+    context.response.Path = requestObject.Path;
 
     logger.info("Processing path " + context.request.Path);
 
@@ -142,7 +228,6 @@ SynchroApi.prototype.process = function(session, requestObject)
     if (routeModule)
     {
         var viewModel = session.ViewModel; // Use this ViewModel throughout and only store back to session at the end if we're staying on the same page
-        var viewModelAfterUpdate = null;
 
         logger.info("Found route module for: " + route);
         
@@ -165,7 +250,7 @@ SynchroApi.prototype.process = function(session, requestObject)
             
             // Getting this here allows us to track any changes made by server logic (in change notifications or commands)
             //
-            viewModelAfterUpdate = JSON.parse(JSON.stringify(viewModel));
+            context.clientViewModel = JSON.parse(JSON.stringify(viewModel));
 
             // If we have a view model change listener for this route, analyze changes, and call it as appropriate.
             //
@@ -173,7 +258,7 @@ SynchroApi.prototype.process = function(session, requestObject)
             {
                 // Get the changelist for the callback, but only call if there are any changes
                 //
-                var viewModelUpdates = objectMonitor.getChangeList(null, viewModelBeforeUpdate, viewModelAfterUpdate);
+                var viewModelUpdates = objectMonitor.getChangeList(null, viewModelBeforeUpdate, context.clientViewModel);
                 if (viewModelUpdates && (viewModelUpdates.length > 0))
                 {
                     routeModule.OnViewModelChange(context, context.session, viewModel, "view", viewModelUpdates);
@@ -186,23 +271,13 @@ SynchroApi.prototype.process = function(session, requestObject)
             case "Page":
             {
                 logger.info("Page request for: " + route);
-
-                populateNewPageResponse(route, routeModule, context);
+                populateNewPageResponse(this, route, routeModule, context);
             }
             break;
 
             case "Update": // View model update only (no command or view metric change - just data update)
             {
                 logger.info("Updating view model");
-
-                // Only update the session ViewModel and send back updates if we're staying on this view (path)...
-                //
-                if (context.request.Path == context.response.Path)
-                {
-                    context.session.ViewModel = viewModel;
-                    var viewModelUpdates = objectMonitor.getChangeList(null, viewModelAfterUpdate, viewModel);
-                    context.response.ViewModelDeltas = viewModelUpdates;
-                }        
             }
             break;
 
@@ -215,9 +290,9 @@ SynchroApi.prototype.process = function(session, requestObject)
                 // (this is really "ViewModel after update from client, if any" or "ViewModel before
                 // any server code gets a crack at them").
                 //
-                if (!viewModelAfterUpdate)
+                if (!context.clientViewModel)
                 {
-                    viewModelAfterUpdate = JSON.parse(JSON.stringify(viewModel));
+                    context.clientViewModel = JSON.parse(JSON.stringify(viewModel));
                 }
 
                 // Only process command if it exists...
@@ -232,21 +307,12 @@ SynchroApi.prototype.process = function(session, requestObject)
                     {
                         // Get the changelist for the callback, but only call if there are any changes
                         //
-                        var viewModelUpdates = objectMonitor.getChangeList(null, viewModelAfterUpdate, viewModel);
+                        var viewModelUpdates = objectMonitor.getChangeList(null, context.clientViewModel, viewModel);
                         if (viewModelUpdates && (viewModelUpdates.length > 0))
                         {
                             routeModule.OnViewModelChange(context, context.session, viewModel, "command", viewModelUpdates); 
                         }
                     }
-
-                    // Only update the session ViewModel and send back updates if we're staying on this view (path)...
-                    //
-                    if (context.request.Path == context.response.Path)
-                    {
-                        context.session.ViewModel = viewModel;
-                        var viewModelUpdates = objectMonitor.getChangeList(null, viewModelAfterUpdate, viewModel);
-                        context.response.ViewModelDeltas = viewModelUpdates;
-                    }                    
                 }
                 else
                 {
@@ -266,9 +332,9 @@ SynchroApi.prototype.process = function(session, requestObject)
                     // (this is really "ViewModel after update from client, if any" or "ViewModel before
                     // any server code gets a crack at them").
                     //
-                    if (!viewModelAfterUpdate)
+                    if (!context.clientViewModel)
                     {
-                        viewModelAfterUpdate = JSON.parse(JSON.stringify(viewModel));
+                        context.clientViewModel = JSON.parse(JSON.stringify(viewModel));
                     }
 
                     routeModule.OnViewMetricsChange(context, context.session, viewModel);
@@ -279,7 +345,7 @@ SynchroApi.prototype.process = function(session, requestObject)
                     {
                         // Get the changelist for the callback, but only call if there are any changes
                         //
-                        var viewModelUpdates = objectMonitor.getChangeList(null, viewModelAfterUpdate, viewModel);
+                        var viewModelUpdates = objectMonitor.getChangeList(null, context.clientViewModel, viewModel);
                         if (viewModelUpdates && (viewModelUpdates.length > 0))
                         {
                             routeModule.OnViewModelChange(context, context.session, viewModel, "viewMetrics", viewModelUpdates);
@@ -318,23 +384,15 @@ SynchroApi.prototype.process = function(session, requestObject)
                     }
                 }
 
-                // Only update the session ViewModel and send back updates if we're staying on this view (path).
-                //
-                if (context.request.Path == context.response.Path)
-                {
-                    context.session.ViewModel = viewModel;
-
-                    // We are only going to have the possibility of deltas created by the module if there was an OnViewMetricsChange
-                    // handler (and we will have only created viewModelAfterUpdate as the baseline for the diffs in that case).
-                    //
-                    if (routeModule.OnViewMetricsChange)
-                    {
-                        var viewModelUpdates = objectMonitor.getChangeList(null, viewModelAfterUpdate, viewModel);
-                        context.response.ViewModelDeltas = viewModelUpdates;                        
-                    }
-                }
             }
             break;
+        }
+
+        // Only update the session ViewModel if we're staying on this view (path).
+        //
+        if ((requestObject.Mode !== "Page") && (context.request.Path == context.response.Path))
+        {
+            context.session.ViewModel = viewModel;
         }
     }
     else
@@ -342,7 +400,13 @@ SynchroApi.prototype.process = function(session, requestObject)
         context.response.Error = "No route found for path: " + context.request.Path;
     }
 
-    return context.response;
+    sendUpdate(this, context, false);
+}
+
+SynchroApi.prototype.interimUpdate = function(context)
+{
+    logger.info("Interim update...");
+    sendUpdate(this, context, true);
 }
 
 module.exports = SynchroApi;

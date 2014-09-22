@@ -16,3 +16,33 @@ assert.objectsEqual = function(actual, expected, message)
 	    assert.equal(JSON.stringify(actual, null, 4), JSON.stringify(expected, null, 4), message);
 	}
 }
+
+// For ensuring specified number of asynchronous events fire, at which point the final "done()" is called.
+//
+// Inspired by: http://dailyjs.com/2013/11/14/mocha-assertion-counting/
+//
+function Plan(count, done) 
+{
+    this.done = done;
+    this.count = 0;
+    this.maxCount = count;
+}
+
+Plan.prototype.ok = function(expression) 
+{
+    assert(expression);
+
+    this.count++;
+
+    if (this.count > this.maxCount) 
+    {
+        assert(false, 'Too many assertions called');
+    } 
+
+    if (this.count === this.maxCount) 
+    {
+        this.done();
+    }
+};
+
+exports.Plan = Plan;

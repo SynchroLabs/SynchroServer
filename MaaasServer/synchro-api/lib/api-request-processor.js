@@ -6,6 +6,8 @@ var synchroApi = require('../index'); // This is our own 'synchro-api' module
 var wait = require('wait.for');
 var WebSocket = require('faye-websocket');
 
+var ReaderWriter = require("../lib/reader-writer");
+
 var logger = require('log4js').getLogger("api-request-processor");
 
 var SynchroApiSessionIdHeader = "synchro-api-session-id";
@@ -19,17 +21,17 @@ exports.createApiRequestProcessorAsync = function(params, callback)
     var resourceResolver = synchroApi.createServiceFromSpec(params.resourceResolverSpec);
 
     var moduleManager = require('./module-manager')(moduleStore, resourceResolver);
-
+    var readerWriter = new ReaderWriter();
 
     var ApiProcessor = require('./api');
-    var api = new ApiProcessor(moduleManager);
+    var api = new ApiProcessor(moduleManager, readerWriter);
     logger.info("Loading API request processor");
     api.load();
     logger.info("Done loading API request processor");
 
-    function apiProcess(session, body)
+    function apiProcess(session, request, response)
     {
-        return api.process(session, body);
+        return api.process(session, request, response);
     }
 
     // This http request processor is always running in a fiber.  If this module is processing requests as a forked
@@ -37,7 +39,8 @@ exports.createApiRequestProcessorAsync = function(params, callback)
     //
     function internalProcessHttpRequest(request, callback)
     {
-        logger.info("API Processing http post request");
+        var requestObject = request.body;
+        logger.info("API Processing http request - mode: " + requestObject.Mode);
 
         // See if this is an AppDefinition request and process appropriately (it doesn't want/need session state)
         //
@@ -49,8 +52,9 @@ exports.createApiRequestProcessorAsync = function(params, callback)
             return;
         }
 
+        var responseObject = {};
+
         var session = null;
-        var newSessionCreated = false;
         var sessionId = request.headers[SynchroApiSessionIdHeader];
         if (sessionId)
         {
@@ -73,6 +77,8 @@ exports.createApiRequestProcessorAsync = function(params, callback)
                 // any other kind of update.  By setting the Mode to "Page", we will effectively be forcing a 
                 // silent reload of the current page (as new, with a "new" ViewwModel).
                 //
+                // Also: The WebSocket handler version of this should do something equivalent.
+                //
                 if (request.body.Mode != "Page")
                 {
                     logger.info("Session matching client session ID could not be found, forcing page reload");
@@ -81,20 +87,24 @@ exports.createApiRequestProcessorAsync = function(params, callback)
             }
             logger.info("Creating new session");
             session = sessionStore.createSession();
-            newSessionCreated = true;
-        }
-            
-        var responseObject = apiProcess(session, request.body);
-
-        sessionStore.putSession(session);
-
-        if (newSessionCreated)
-        {
-            logger.info("Returning new session id: " + session.id);
             responseObject.NewSessionId = session.id;
         }
+        
+        logger.info("Posting read for session id: " + session.id);
+        readerWriter.readAsync(session.id, function(err, responseObject)
+        {
+            if (responseObject.Update !== "Partial")
+            {
+                sessionStore.putSession(session);
+            }
 
-        callback(null, responseObject);
+            callback(err, responseObject);
+        });
+
+        if (requestObject.Mode !== "Continue")
+        {
+            apiProcess(session, requestObject, responseObject);
+        }
     }
 
     // This is called when the websocket connection is initiated.  The "state" returned is passed in to each
@@ -125,9 +135,7 @@ exports.createApiRequestProcessorAsync = function(params, callback)
     //
     function internalProcessWebSocketMessage(ws, requestObject, state)
     {
-        logger.info("API - processing websocket request");
-
-        logger.info('message - Mode: ', requestObject.Mode);
+        logger.info("API Processing websocket request - mode: " + requestObject.Mode);
 
         // See if this is an AppDefinition request and process appropriately
         //
@@ -139,17 +147,28 @@ exports.createApiRequestProcessorAsync = function(params, callback)
             return;
         }
 
-        var responseObject = apiProcess(state.session, requestObject);
-
-        sessionStore.putSession(state.session);
-
+        var responseObject = {};
         if (state.newSession)
         {
             logger.info("API - returning new session id: " + state.session.id);
             responseObject.NewSessionId = state.session.id;
             state.newSession = false;
         }
-        ws.send(JSON.stringify(responseObject));
+
+        readerWriter.readAsync(session.id, function(err, responseObject)
+        {
+            if (responseObject.Update !== "Partial")
+            {
+                sessionStore.putSession(state.session);
+            }
+
+            ws.send(JSON.stringify(responseObject));
+        });        
+
+        if (requestObject.Mode !== "Continue")
+        {
+            apiProcess(state.session, requestObject, responseObject);
+        }
     }
 
     // Public API functions may be called either in-proc or cross-process.
