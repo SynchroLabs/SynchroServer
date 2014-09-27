@@ -24,7 +24,7 @@ exports.createApiRequestProcessorAsync = function(params, callback)
     var readerWriter = new ReaderWriter();
 
     var ApiProcessor = require('./api');
-    var api = new ApiProcessor(moduleManager, readerWriter);
+    var api = new ApiProcessor(moduleManager, sessionStore, readerWriter);
     logger.info("Loading API request processor");
     api.load();
     logger.info("Done loading API request processor");
@@ -44,7 +44,7 @@ exports.createApiRequestProcessorAsync = function(params, callback)
 
         // See if this is an AppDefinition request and process appropriately (it doesn't want/need session state)
         //
-        if (request.body.Mode === "AppDefinition")
+        if (requestObject.Mode === "AppDefinition")
         {
             var appDefinition = api.getAppDefinition();
             logger.info("AppDefinition requested: " + appDefinition);
@@ -90,12 +90,13 @@ exports.createApiRequestProcessorAsync = function(params, callback)
             responseObject.NewSessionId = session.id;
         }
         
-        logger.info("Posting read for session id: " + session.id);
-        readerWriter.readAsync(session.id, function(err, responseObject)
+        var channelId = session.id + ":" + requestObject.Sequence;
+        logger.info("Posting read for session:sequence - " + channelId);
+        readerWriter.readAsync(channelId, function(err, responseObject)
         {
-            if (responseObject.Update !== "Partial")
+            if (err)
             {
-                sessionStore.putSession(session);
+                logger.error("readAsync err: " + err);
             }
 
             callback(err, responseObject);

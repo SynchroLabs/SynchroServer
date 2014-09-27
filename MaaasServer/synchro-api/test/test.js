@@ -1,6 +1,9 @@
 // Module-wide test pre-processing
 //
-global.defaultLogLevel = "ERROR";
+global.defaultLogLevel = "INFO"; // "ERROR";
+
+var assert = require("assert");
+var assertHelper = require("./assert-helper");
 
 var log4js = require('log4js');
 log4js.setGlobalLogLevel(global.defaultLogLevel);
@@ -21,6 +24,16 @@ before(function()
 
 after(function()
 {
-	logger.info("API tests cpmplete");
+	logger.info("API tests complete");
+});
+*/
+
+// This is a place you can stick one-off tests until you find a home for them....
+/*
+describe("Test", function()
+{
+	it("should do something", function()
+	{
+	});
 });
 */

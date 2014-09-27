@@ -4,6 +4,20 @@ var lodash = require("lodash");
 
 var logger = require('log4js').getLogger("util");
 
+
+// This handy method allows you to completely repopulate an object with new contents (removing/replacing any
+// previous contents).  This is particularly useful for doing a poor-mans pass-by-reference when using an
+// object param.
+//
+exports.assignNewContents = function(obj, contents)
+{
+    lodash.each(obj, function(v, k) 
+    {
+        delete obj[k];
+    });
+    lodash.assign(obj, contents);
+}
+
 exports.jsonHash = function(obj)
 {
    return crypto.createHash('sha1').update(JSON.stringify(obj)).digest("hex");

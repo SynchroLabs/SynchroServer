@@ -5,6 +5,8 @@
 //
 var uuid = require('node-uuid');
 
+var logger = require('log4js').getLogger("memory-session-store");
+
 module.exports = function(params)
 {
     // Process params into locals
@@ -22,9 +24,9 @@ module.exports = function(params)
 
         getSession: function(sessionId)
         {
-            if (sessionId)
+            if (sessionId && sessions[sessionId])
             {
-                return sessions[sessionId];
+                return JSON.parse(JSON.stringify(sessions[sessionId]));
             }
             return null;
         },
@@ -35,7 +37,8 @@ module.exports = function(params)
             // updated version (if doing a read of the stored session, plus the compare, and the occasional write is actually
             // faster than just always doing a write).
             //
-            sessions[session.id] = session;
+            sessions[session.id] = JSON.parse(JSON.stringify(session));
+            logger.info("Wrote session: " + JSON.stringify(session, null, 4));
         },
 
         deleteSession: function(sessionId)

@@ -7,6 +7,27 @@ var util = require("../lib/util");
 
 describe("Util", function () 
 {
+	describe("assignNewContents", function()
+	{
+		it("should populate object with new contents, removing any previous contents", function()
+		{
+			var src = { foo: "bar" };
+			util.assignNewContents(src, { count: 69 });
+
+			assert.objectsEqual(src, { count: 69 });
+		});
+
+		it("should not replace object with new object", function()
+		{
+			var src = { foo: "bar" };
+			var src2 = src;
+			util.assignNewContents(src, { count: 69 });
+
+			assert.objectsEqual(src, { count: 69 });
+			assert.equal(src2, src);
+		});
+	});
+
 	describe("getObjectProperty", function () 
 	{
 		it("should be undefined when property not found", function()
