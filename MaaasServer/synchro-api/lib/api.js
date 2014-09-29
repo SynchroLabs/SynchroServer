@@ -9,10 +9,10 @@ var wait = require('wait.for');
 
 var filter = require('./filter');
 
-
-// Instance id: Monotonically increasing value used to identify a module instance
-// Instance version: Monotonically increasing value, starting at 1, used to identify the version of the module instance view model
-
+// Transaction id:   Monotonically increasing value, client generated, used to identify a given request or chain of requests
+// Instance id:      Monotonically increasing value, server generated, used to identify a module instance
+// Instance version: Monotonically increasing value, server generated, starting at 1, used to identify the version of the module instance view model
+//
 // Roadmap of members for Session and context
 // ----------------------------------------------
 //
@@ -75,8 +75,9 @@ function UserCodeError(method, error)
     this.name = 'UserCodeError';
     this.method = method,
     this.error = error;
-}
 
+    logger.error(this.message);
+}
 UserCodeError.prototype.__proto__ = Error.prototype;
 
 // Used for logical client errors (essentially, client bugs - conditions caused by the client that should
@@ -89,9 +90,24 @@ function ClientError(msg)
     Error.captureStackTrace(this, arguments.callee);
     this.message = "Client error - " + msg;
     this.name = 'ClientError';
-}
 
+    logger.error(this.message);
+}
 ClientError.prototype.__proto__ = Error.prototype;
+
+// Used for client/server sync errors
+//
+function SyncError(msg, request)
+{
+    Error.call(this);
+    Error.captureStackTrace(this, arguments.callee);
+    this.message = "Sync error - " + msg;
+    this.name = 'SyncError';
+    this.request = request;
+
+    logger.error(this.message);
+}
+SyncError.prototype.__proto__ = Error.prototype;
 
 
 function getViewModel(routeModule, context, session, params)
@@ -247,7 +263,12 @@ function sendUpdate(synchroApi, context, isInterim)
 
             if (!context.response.Error)
             {
-                if (isCurrentModuleInstance(context, context.LocalViewModel.instanceId))
+                if (context.request.Mode == "Resync")
+                {
+                    logger.info("Resync - sending current view model");
+                    context.response.ViewModel = context.session.ModuleInstance.ClientViewModel.ViewModel
+                }
+                else if (isCurrentModuleInstance(context, context.LocalViewModel.instanceId))
                 {
                     if (context.session.ModuleInstance.ClientViewModel.instanceVersion == 0)
                     {
@@ -435,18 +456,20 @@ SynchroApi.prototype.process = function(session, requestObject, responseObject)
 
     try
     {
-        if (context.request.Mode == "Page") // Initial page request on app start
+        if ((context.request.Mode == "Page") || (context.request.Mode == "Resync"))
         {
+            // Page and Resync requests do not rely on matching current InstanceId
+            //
             if (context.request.Path)
             {
                 route = context.request.Path;            
             }
             else
             {
-                throw new ClientError("Received Mode: Page request with no Path");
+                throw new ClientError("Received Mode: " + context.request.Mode + " request with no Path");
             }
         }
-        else if (context.request.InstanceId)
+        else if (context.request.InstanceId >= 0)
         {
             if (context.session.ModuleInstance)
             {
@@ -486,59 +509,55 @@ SynchroApi.prototype.process = function(session, requestObject, responseObject)
                         //     what version of the view model the client has.  A more sophisticated example is that we are doing an
                         //     asynchronous operation that is sending periodic interim view model updates to show percent completion.
                         //     If the user hits the "cancel" button, we want the cancel command to get through whether or not the 
-                        //     view model was current at the time they hit it.
+                        //     view model on the client was current at the time they hit it.
                         //
-                        //     We won't see Page requests here. LoadPage requests can only be triggered by a response that includes
+                        //     We won't see Page requests here. And LoadPage requests can only be triggered by a response that includes
                         //     the initial view model for the page, so they can never be out of sync.  We are talking about Update, 
                         //     ViewUpdate, and Command requests.  Update requests will always contain view model updates.  ViewUpdate
                         //     and Command requests may or may not contain view model updates.  We might distinguish between requests
                         //     which contain view model updates and those that do not when deciding how to handle this situation.
                         //
-                        //     Right now, this request is just being processed.
+                        //     We could also expose the version mismatch to the user code (perhaps via a Synchro.isCurrentVersion)
+                        //     and pass the responsibility of handling this condition to the user.  If so, we'd need to also make 
+                        //     sure the user code could trigger a resync or take whatever other action might be appropriate.
                         //
-                        logger.error("Received request for previous version of current instance (request version: " +
+                        //     Right now, this request will just being processed...
+                        //
+                        logger.warn("Received request for previous version of current instance (request version: " +
                             context.request.InstanceVersion  + ", current version: " +  context.session.ModuleInstance.ClientViewModel.instanceVersion);
                     }
                 }
                 else
                 {
-                    // !!! This request has an InstanceId and it doesn't match the current instanceId in the session, so
-                    //     this is an obsolete request (for an instance that has been navigated away from).
+                    // This request has an InstanceId but it doesn't match the current instanceId in the session, so
+                    // this is an obsolete request (for an instance that has been navigated away from).
                     //
-                    //     There are two possible cases where this could happen.  One is that a processor could have navigated 
-                    //     to a new page/instance, but before the response could get back to the client and be processed by the
-                    //     client, the client sent an additional request.  The simplest case of this might be the user clicking
-                    //     a button that triggered a navigation command two or more times in quick succession.  The first request
-                    //     gets processed, and navigates to a new page.  If a subsequent request is launched before the response 
-                    //     to the first request has been received and processed by the client, it will be for the previous instance,
-                    //     and in this case, could be safely ignored.
+                    // There are two types of cases where this could happen.  One is that a processor could have navigated 
+                    // to a new page/instance, but before the response could get back to the client and be processed by the
+                    // client, the client sent an additional request.  The simplest case of this might be the user clicking
+                    // a button that triggered a navigation command two or more times in quick succession.  The first request
+                    // gets processed, and navigates to a new page.  If a subsequent request is sent before the response 
+                    // to the first request has been received and processed by the client, then that request will be for the
+                    // previous instance.  This is a case that could be safely ignored, but only the client can know that.
                     //
-                    //     But consider a case where the client submits a request that results in navigation to a new page,
-                    //     but for whatever reason, that response never reaches the client.  Now the server thinks it's on the
-                    //     new page, but the client is actually on the old page.  We need a way to detect this condition and 
-                    //     resynchronize (perhaps re-getting that page, which would require init params?).
+                    // Also consider a case where the client submits a request that results in navigation to a new page,
+                    // but for whatever reason, that response never reaches the client.  Now the server thinks it's on the
+                    // new page, but the client is actually on the old page.  If the client detects this condition, it can
+                    // recover by requesting a "Resync".
                     //
-                    //     Note also the case where (context.session.ModuleInstance.ClientViewModel.instanceVersion == 0), which
-                    //     means that we will be navigating to a new page, but haven't actually sent that new instance to the
-                    //     client yet (this should be relatively rare, as async processing in user code after navigation is
-                    //     strongly discouraged).
-                    //
-                    //     !!! The above is probably a good argument for not incrementing the ClientViewModel.instanceId past
-                    //         0 until we've confirmed that the client received the response (do we ever really know that?).
-                    //         Alternatively, we could use the presence of a subsequent request with a valid instanceId as the
-                    //         confirmation of receipt (though that could come much later).
-                    //
-                    logger.error("Received request for non-current instance id: " + context.request.InstanceId);     
+                    throw new SyncError("Received request for non-current instance id: " + context.request.InstanceId, context.request);
                 }
             }
             else
             {
-                // !!! The client provided an InstanceId, but the server doesn't have an active instance. The only way we should
-                //     be able to arrive at this situation (apart from client error) is if the sesssion has been lost/corrupted.
-                //     The only real way to recover safely from that situation is probably app-level reset (tell the client we're
-                //     out of sync so it can clear any client state and "restart the app" by requesting the main app entry page).
+                // The client provided an InstanceId, but the server doesn't have an active instance. The only way we should
+                // be able to arrive at this situation (apart from client error) is if the sesssion has been lost/corrupted.
+                // The only real way to recover safely from this situation is for the client to initiate an app-level reset.
+                // The response from this error will allow the client to detect this condition (based on the lack of an 
+                // InstanceId), which should cause the client to clear any client state and "restart the app" by requesting
+                // the main app entry page).
                 //
-                logger.error("Received request for instance id: " + context.request.InstanceId + ", but server has no active instance");     
+                throw new SyncError("Received request for instance id: " + context.request.InstanceId + ", but server has no active instance", context.request);
             }
         }
         else
@@ -633,6 +652,27 @@ SynchroApi.prototype.process = function(session, requestObject, responseObject)
                 logger.info("Page request for: " + route);
                 populateNewPageResponse(this, route, routeModule, context);
                 initLocalViewModel(context);
+            }
+            break;
+
+            case "Resync":
+            {
+                logger.info("Resync request for: " + route);
+                if ((context.request.InstanceId >= 0) && (context.request.InstanceVersion >= 0))
+                {
+                    // Current view model will be assigned to response in sendUpdate() below
+                    //
+                    if (!isCurrentModuleInstance(context, context.request.InstanceId))
+                    {
+                        // Client has obsolete instance, so it also needs a new view...
+                        //
+                        context.response.View = getView(routeModule, context, context.session, context.session.ModuleInstance.ClientViewModel.ViewModel);
+                    }
+                }
+                else
+                {
+                    throw new ClientError("Resync request did not contain InstanceID and InstanceVersion");
+                }
             }
             break;
 
@@ -787,12 +827,6 @@ SynchroApi.prototype.process = function(session, requestObject, responseObject)
     }
     catch (e)
     {
-        // !!! At this point we can tell if this error is UserCodeError, ClientError, or something else, and we
-        //     might want to handle this or compose the response differently depending.  For example, if it's a
-        //     UserCodeError and we're in a test/debug mode, we might want to log the details of the inner exception,
-        //     and/or pass those back to the client as part of the response.
-        //
-
         // If a user code error wraps an assertion, we need to rethrow the assertion (in order to be able to test
         // user code).
         //
@@ -800,7 +834,30 @@ SynchroApi.prototype.process = function(session, requestObject, responseObject)
         {
             throw e.error;
         }
-        context.response.Error = e.message;
+
+        context.response.Error = 
+        {
+            name: e.name,
+            message: e.message
+        };
+
+        if (e instanceof SyncError)
+        {
+            // Add instanceId and instanceVersion to response (if we have them)
+            //
+            if (context.session.ModuleInstance)
+            {
+                context.response.InstanceId = context.session.ModuleInstance.instanceId;
+                if (context.session.ModuleInstance.ClientViewModel)
+                {
+                    context.response.InstanceVersion = context.session.ModuleInstance.ClientViewModel.instanceVersion;
+                }                
+            }
+
+            // Give the client back the request so it can analyze it (and potentially replay it)
+            //
+            context.response.Error.Request = e.request;
+        }
     }
 
     sendUpdate(this, context, false);
@@ -929,7 +986,9 @@ SynchroApi.prototype.interimUpdate = function(context)
     sendUpdate(this, context, true);
 }
 
-SynchroApi.prototype.isActiveInstance = function(context) // !!! Test
+// Exposed via Synchro.isActiveInstance()
+//
+SynchroApi.prototype.isActiveInstance = function(context)
 {
     return isCurrentModuleInstance(context, context.LocalViewModel.instanceId);
 }

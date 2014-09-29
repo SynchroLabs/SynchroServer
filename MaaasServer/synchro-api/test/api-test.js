@@ -1288,7 +1288,7 @@ describe("API Processor", function()
 		});
 	});
 
-	describe("Partial ViewModel updates xxx", function(done)
+	describe("Partial ViewModel updates", function(done)
 	{
     	var Synchro = null;
 
@@ -1697,6 +1697,253 @@ describe("API Processor", function()
 		});
 	});
 
+	describe("Sync Errors", function()
+	{
+		it("should fail with sync error when server has no active instance (session corrupt)", function(done)
+		{
+			var modules =
+			{
+				menu:
+				{
+					View:
+					{
+					    title: "Menu",
+					    elements: 
+					    [
+					        { control: "button", caption: "Counter", binding: "goToCounter" },
+					    ]
+					},
+
+					InitializeViewModel: function(context, session)
+					{
+					    var viewModel =
+					    {
+					        foo: "bar"
+					    }
+					    return viewModel;
+					},
+				}
+			}
+
+			var apiProcessor = createApiProcessor(modules);
+
+			var session = sessionStore.createSession();
+			var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4");
+
+	        // Initial page request
+			var requestObject = 
+			{ 
+				Path: "foo", 
+				TransactionId: 0, 
+				InstanceId: 0,
+				InstanceVersion: 0,
+				Mode: "Command", 
+			};
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
+
+			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+			{
+				var expectedResponse = 
+				{
+					Path: "foo",
+					Error:
+					{
+						name: "SyncError",
+			            message: "Sync error - Received request for instance id: 0, but server has no active instance",
+			            Request: requestObject,
+					},
+					TransactionId: 0
+				}
+
+				assert.objectsEqual(responseObject, expectedResponse);
+				done();
+			});
+		});
+
+		it("should fail with sync error when client instance less than server instance xxx", function(done)
+		{
+			var modules =
+			{
+				menu:
+				{
+					View:
+					{
+					    title: "Menu",
+					    elements: 
+					    [
+					        { control: "button", caption: "Counter", binding: "goToCounter" },
+					    ]
+					},
+
+					InitializeViewModel: function(context, session)
+					{
+					    var viewModel =
+					    {
+					        foo: "bar"
+					    }
+					    return viewModel;
+					},
+				}
+			}
+
+			var apiProcessor = createApiProcessor(modules);
+
+			var session = sessionStore.createSession();
+			var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4");
+
+	        // Initial page request
+			var requestObject = 
+			{ 
+				Mode: "Page", 
+				Path: "menu", 
+				TransactionId: 0, 
+			};
+			var response = {};
+			apiProcessor.process(session, requestObject, response);
+			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+			{
+				// Ignore response
+			});
+
+			requestObject = 
+			{ 
+				Mode: "Command", 
+				Path: "menu", 
+				InstanceId: 0, 
+				InstanceVersion: 1, 
+				TransactionId: 1, 
+				Command: "foo" 
+			};
+			response = {};
+			apiProcessor.process(session, requestObject, response);
+
+			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
+			{
+				var expectedResponse = 
+				{
+					Path: "menu",
+					Error: 
+					{
+			            name: "SyncError",
+			            message: "Sync error - Received request for non-current instance id: 0",
+			            Request: requestObject,
+			        },
+			        InstanceId: 1,
+			        InstanceVersion: 1,
+					TransactionId: 1
+				}
+				assert.objectsEqual(responseObject, expectedResponse);
+				done();
+			});
+		});
+	});
+
+	describe("Resync", function()
+	{
+		var modules =
+		{
+			menu:
+			{
+				View:
+				{
+				    title: "Menu",
+				    elements: 
+				    [
+				        { control: "button", caption: "Counter", binding: "goToCounter" },
+				    ]
+				},
+
+				InitializeViewModel: function(context, session)
+				{
+				    var viewModel =
+				    {
+				        foo: "bar"
+				    }
+				    return viewModel;
+				},
+			}
+		}
+
+		var apiProcessor = createApiProcessor(modules);
+
+		var session = sessionStore.createSession();
+		var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4");
+
+        // Initial page request
+		var requestObject = 
+		{ 
+			Mode: "Page", 
+			Path: "menu", 
+			TransactionId: 0, 
+		};
+		var response = {};
+		apiProcessor.process(session, requestObject, response);
+		readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+		{
+			// Ignore response
+		});
+
+		it("should provide view and view model on resync when instance id is not current", function(done)
+		{
+			requestObject = 
+			{ 
+				Mode: "Resync", 
+				Path: "menu", 
+				InstanceId: 0, 
+				InstanceVersion: 0, 
+				TransactionId: 1, 
+			};
+			response = {};
+			apiProcessor.process(session, requestObject, response);
+
+			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
+			{
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.objectsEqual(responseObject.TransactionId, 1);
+				assert.objectsEqual(responseObject.InstanceId, 1);
+				assert.objectsEqual(responseObject.InstanceVersion, 1);
+				assert.objectsEqual(responseObject.View, modules.menu.View);
+				var expectedViewModel = 
+				{
+					foo: "bar"
+				};
+				assert.objectsEqual(responseObject.ViewModel, expectedViewModel);
+				done();
+			});
+		});
+
+		it("should provide only view model on resync when instance id is current", function(done)
+		{
+			requestObject = 
+			{ 
+				Mode: "Resync", 
+				Path: "menu", 
+				InstanceId: 1, 
+				InstanceVersion: 0, 
+				TransactionId: 2, 
+			};
+			response = {};
+			apiProcessor.process(session, requestObject, response);
+
+			readerWriter.readAsync(session.id + ":2", function(err, responseObject)
+			{
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.objectsEqual(responseObject.TransactionId, 2);
+				assert.objectsEqual(responseObject.InstanceId, 1);
+				assert.objectsEqual(responseObject.InstanceVersion, 1);
+				assert.objectsEqual(responseObject.View, undefined);
+				var expectedViewModel = 
+				{
+					foo: "bar"
+				};
+				assert.objectsEqual(responseObject.ViewModel, expectedViewModel);
+				done();
+			});
+
+		});
+	});
+
 	describe("Client Errors", function()
 	{
 		it("should fail with appropriate message when requesting page/route that does not exist", function(done)
@@ -1747,7 +1994,11 @@ describe("API Processor", function()
 				var expectedResponse = 
 				{
 					Path: "foo",
-					Error: "Client error - No route found for path: foo",
+					Error:
+					{
+						name: "ClientError",
+						message: "Client error - No route found for path: foo"
+					},
 					TransactionId: 0
 				}
 
@@ -1805,7 +2056,15 @@ describe("API Processor", function()
 
 			apiProcessor.process(session, requestObject, response);
 
-			requestObject = { Mode: "Command", Path: "menu", InstanceId: 1, InstanceVersion: 1, TransactionId: 1, Command: "foo" };
+			requestObject = 
+			{ 
+				Mode: "Command", 
+				Path: "menu", 
+				InstanceId: 1, 
+				InstanceVersion: 1, 
+				TransactionId: 1, 
+				Command: "foo" 
+			};
 			response = {};
 			apiProcessor.process(session, requestObject, response);
 
@@ -1814,7 +2073,11 @@ describe("API Processor", function()
 				var expectedResponse = 
 				{
 					Path: "menu",
-					Error: "Client error - Command not found: foo", 
+					Error:
+					{
+					    name: "ClientError",
+					    message: "Client error - Command not found: foo",
+					},
 					TransactionId: 1
 				}
 				assert.objectsEqual(responseObject, expectedResponse);
@@ -1882,7 +2145,15 @@ describe("API Processor", function()
 
 			apiProcessor.process(session, requestObject, response);
 
-			requestObject = { Mode: "Command", Path: "menu", InstanceId: 1, InstanceVersion: 1, TransactionId: 1, Command: "nowhere" };
+			requestObject = 
+			{ 
+				Mode: "Command", 
+				Path: "menu", 
+				InstanceId: 1, 
+				InstanceVersion: 1, 
+				TransactionId: 1, 
+				Command: "nowhere" 
+			};
 			response = {};
 			apiProcessor.process(session, requestObject, response);
 
@@ -1891,15 +2162,17 @@ describe("API Processor", function()
 				var expectedResponse = 
 				{
 					Path: "menu",
-					Error: "UserCode error in method: Command.nowhere - Attempted to navigate to page that does not exist: nowhere", 
+					Error: 
+					{
+						name: "UserCodeError",
+						message: "UserCode error in method: Command.nowhere - Attempted to navigate to page that does not exist: nowhere", 
+					},
 					TransactionId: 1
 				}
 				assert.objectsEqual(responseObject, expectedResponse);
 				done();
 			});
 		});
-
-
 	});
 });
 
