@@ -318,7 +318,7 @@ function sendUpdate(synchroApi, context, isInterim)
                         // want to send any changes that it might have made to its own view model, and instead just send the view 
                         // model for the page to which it navigated.
                         //
-                        logger.error("Sending view model for page navigated to, not applying local client changes");
+                        logger.info("Sending view model for page navigated to, not applying local client changes");
                         context.response.ViewModel = lodash.cloneDeep(context.session.ModuleInstance.ClientViewModel.ViewModel);
                         context.session.ModuleInstance.ClientViewModel.instanceVersion = 1;
                     }

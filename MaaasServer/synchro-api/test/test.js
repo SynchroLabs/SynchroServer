@@ -1,6 +1,6 @@
 // Module-wide test pre-processing
 //
-global.defaultLogLevel = "INFO"; // "ERROR";
+global.defaultLogLevel = "ERROR";
 
 var assert = require("assert");
 var assertHelper = require("./assert-helper");

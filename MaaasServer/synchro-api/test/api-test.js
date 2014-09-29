@@ -1350,7 +1350,6 @@ describe("API Processor", function()
 				    Synchro.waitFor(context, Synchro.waitInterval, 100);
 				    viewModel.count = 3;
 				    viewModel.loading = false;
-				    console.log("view model: " + JSON.stringify(viewModel, null, 4));
 				},
 
 				Commands:
@@ -1359,10 +1358,7 @@ describe("API Processor", function()
 				    {
 				        while (viewModel.count > 0)
 				        {
-				        	console.log("vm before wait: " + JSON.stringify(viewModel, null, 4));
-				        	console.log("context vm before wait: " + JSON.stringify(context.LocalViewModel.ViewModel, null, 4));
 				            Synchro.waitFor(context, Synchro.waitInterval, 50);
-				        	console.log("vm after wait: " + JSON.stringify(viewModel, null, 4));
 				            viewModel.count--;
 				            Synchro.interimUpdate(context);
 				        }
@@ -1409,7 +1405,7 @@ describe("API Processor", function()
 
 				function onResponse(err, responseObject)
 				{
-					logger.error("Resp[" + plan.count + "]: " + JSON.stringify(responseObject, null, 4));
+					logger.info("Resp[" + plan.count + "]: " + JSON.stringify(responseObject, null, 4));
 					assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
 
 					switch (plan.count)
@@ -1479,7 +1475,7 @@ describe("API Processor", function()
 
 				function onResponse(err, responseObject)
 				{
-					logger.error("Resp[" + plan.count + "]: " + JSON.stringify(responseObject, null, 4));
+					logger.info("Resp[" + plan.count + "]: " + JSON.stringify(responseObject, null, 4));
 					assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
 
 					switch (plan.count)
@@ -1609,7 +1605,7 @@ describe("API Processor", function()
 
 				function onResponse(err, responseObject)
 				{
-					logger.error("Resp[" + plan.count + "]: " + JSON.stringify(responseObject, null, 4));
+					logger.info("Resp[" + plan.count + "]: " + JSON.stringify(responseObject, null, 4));
 					assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
 
 					switch (plan.count)

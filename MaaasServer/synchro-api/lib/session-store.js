@@ -38,7 +38,6 @@ module.exports = function(params)
             // faster than just always doing a write).
             //
             sessions[session.id] = JSON.parse(JSON.stringify(session));
-            logger.info("Wrote session: " + JSON.stringify(session, null, 4));
         },
 
         deleteSession: function(sessionId)
