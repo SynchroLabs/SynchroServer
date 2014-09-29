@@ -33,7 +33,7 @@ function createApiProcessor(testModules)
 //     ensure that session synchronization is happening correctly throughout.
 //
 
-describe("API Processor xxx", function()
+describe("API Processor", function()
 {
 	beforeEach(function()
 	{
@@ -1288,12 +1288,41 @@ describe("API Processor xxx", function()
 		});
 	});
 
-	describe("Partial ViewModel updates", function(done)
+	describe("Partial ViewModel updates xxx", function(done)
 	{
     	var Synchro = null;
 
 		var modules =
 		{
+			menu:
+			{
+				View:
+				{
+				    title: "Menu",
+				    elements: 
+				    [
+				        { control: "button", caption: "Counter", binding: "goToCounter" },
+				    ]
+				},
+
+				InitializeViewModel: function(context, session)
+				{
+				    var viewModel =
+				    {
+				        foo: "bar"
+				    }
+				    return viewModel;
+				},
+
+				Commands:
+				{
+				    goToCountdown: function(context, session, viewModel, params)
+				    {
+				        return Synchro.navigateToView(context, "countdown");
+				    },
+				}
+			},
+
 			countdown:
 			{
 				View:
@@ -1439,7 +1468,113 @@ describe("API Processor xxx", function()
         	});
 		});
 
-		it("should give partial response after InitializeViewModel, followed by complete response after LoadViewModel, when navigated to");
+		it("should give partial response after InitializeViewModel, followed by complete response after LoadViewModel, when navigated to", function(done) 
+        {
+        	// Run in fiber because Synchro.waitFor needs to be in fiber (called inside of apiProcessor.process)
+        	wait.launchFiber(function()
+        	{
+				var nextRequest;
+
+				var plan = new assertHelper.Plan(4, done);
+
+				function onResponse(err, responseObject)
+				{
+					logger.error("Resp[" + plan.count + "]: " + JSON.stringify(responseObject, null, 4));
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+
+					switch (plan.count)
+					{
+						case 0:
+						{
+							var expectedViewModel = 
+							{
+								count: 0,
+								loading: true
+							};
+							assert.equal(responseObject.TransactionId, 1);
+							assert.equal(responseObject.InstanceId, 2);
+							assert.equal(responseObject.InstanceVersion, 1);
+							assert.objectsEqual(responseObject.NextRequest, undefined);
+							assert.objectsEqual(responseObject.ViewModel, { foo: "bar" });
+							plan.ok(true);
+						}
+						break;
+
+						case 1:
+						{
+							var expectedNextRequest =
+							{
+								Path: "countdown",
+								TransactionId: 2,
+								InstanceId: 3,
+								InstanceVersion: 1,
+								Mode: "LoadPage"
+							};
+							var expectedViewModel = 
+							{
+								count: 0,
+								loading: true
+							};
+							assert.equal(responseObject.TransactionId, 2);
+							assert.equal(responseObject.InstanceId, 3);
+							assert.equal(responseObject.InstanceVersion, 1);
+							assert.objectsEqual(responseObject.NextRequest, expectedNextRequest);
+							assert.objectsEqual(responseObject.ViewModel, expectedViewModel);
+							plan.ok(true);
+
+							nextRequest = responseObject.NextRequest;
+							readerWriter.readAsync(session.id + ":2", onResponse);
+						}
+						break;
+
+						case 2:
+						{
+							assert.equal(responseObject.NextRequest, undefined);
+							var expectedDeltas = 
+							[
+							    { path: "count", change: "update", value: 3 },
+							    { path: "loading", change: "update", value: false }
+							];
+							assert.equal(responseObject.TransactionId, 2);
+							assert.equal(responseObject.InstanceId, 3);
+							assert.equal(responseObject.InstanceVersion, 2);
+							assert.objectsEqual(responseObject.ViewModelDeltas, expectedDeltas);
+							plan.ok(true);
+						}
+						break;
+					}
+				}
+
+				var menuRequestObject = 
+				{ 
+					Mode: "Page", 
+					Path: "menu", 
+					TransactionId: 1, 
+					DeviceMetrics: metrics.DeviceMetrics, 
+					ViewMetrics: metrics.ViewMetrics 
+				};
+				var response = {};
+
+				readerWriter.readAsync(session.id + ":1", onResponse);
+				apiProcessor.process(session, menuRequestObject, response);
+
+				var countdownRequestObject = 
+				{ 
+					Mode: "Page", 
+					Path: "countdown", 
+					TransactionId: 2, 
+					DeviceMetrics: metrics.DeviceMetrics, 
+					ViewMetrics: metrics.ViewMetrics 
+				};
+
+				readerWriter.readAsync(session.id + ":2", onResponse);
+				apiProcessor.process(session, countdownRequestObject, response);
+				apiProcessor.process(session, nextRequest, {});
+
+				assert.equal(readerWriter.isWritePending(session.id + ":0"), false, "Pending writes still waiting");
+				plan.ok(true);
+        	});
+		});
 
         it("should return multiple partial responses, followed by complete response, on command using Synchro.interimUpdate", function(done) 
         {
@@ -1453,9 +1588,9 @@ describe("API Processor xxx", function()
 				{ 
 					Mode: "Command", 
 					Path: "countdown", 
-					InstanceId: 1, 
+					TransactionId: 3, 
+					InstanceId: 3, 
 					InstanceVersion: 2, 
-					TransactionId: 0, 
 					Command: "countdown" 
 				};
 				var response = {};
@@ -1468,8 +1603,8 @@ describe("API Processor xxx", function()
 				{
 					Path: "countdown",
 					Mode: "Continue",
-					TransactionId: 0,
-					InstanceId: 1
+					TransactionId: 3,
+					InstanceId: 3
 				};
 
 				function onResponse(err, responseObject)
@@ -1481,8 +1616,8 @@ describe("API Processor xxx", function()
 					{
 						case 0:
 						{
-							assert.equal(responseObject.TransactionId, 0);
-							assert.equal(responseObject.InstanceId, 1);
+							assert.equal(responseObject.TransactionId, 3);
+							assert.equal(responseObject.InstanceId, 3);
 							assert.equal(responseObject.InstanceVersion, 3);
 							expectedNextRequest.InstanceVersion = 3;
 							assert.objectsEqual(responseObject.NextRequest, expectedNextRequest);
@@ -1494,14 +1629,14 @@ describe("API Processor xxx", function()
 							plan.ok(true);
 
 							nextRequest = responseObject.NextRequest;
-							readerWriter.readAsync(session.id + ":0", onResponse);
+							readerWriter.readAsync(session.id + ":3", onResponse);
 						}
 						break;
 
 						case 1:
 						{
-							assert.equal(responseObject.TransactionId, 0);
-							assert.equal(responseObject.InstanceId, 1);
+							assert.equal(responseObject.TransactionId, 3);
+							assert.equal(responseObject.InstanceId, 3);
 							assert.equal(responseObject.InstanceVersion, 4);
 							expectedNextRequest.InstanceVersion = 4;
 							assert.objectsEqual(responseObject.NextRequest, expectedNextRequest);
@@ -1513,14 +1648,14 @@ describe("API Processor xxx", function()
 							plan.ok(true);
 
 							nextRequest = responseObject.NextRequest;
-							readerWriter.readAsync(session.id + ":0", onResponse);
+							readerWriter.readAsync(session.id + ":3", onResponse);
 						}
 						break;
 
 						case 2:
 						{
-							assert.equal(responseObject.TransactionId, 0);
-							assert.equal(responseObject.InstanceId, 1);
+							assert.equal(responseObject.TransactionId, 3);
+							assert.equal(responseObject.InstanceId, 3);
 							assert.equal(responseObject.InstanceVersion, 5);
 							expectedNextRequest.InstanceVersion = 5;
 							assert.objectsEqual(responseObject.NextRequest, expectedNextRequest);
@@ -1532,7 +1667,7 @@ describe("API Processor xxx", function()
 							plan.ok(true);
 
 							nextRequest = responseObject.NextRequest;
-							readerWriter.readAsync(session.id + ":0", onResponse);
+							readerWriter.readAsync(session.id + ":3", onResponse);
 						}
 						break;
 
@@ -1542,8 +1677,8 @@ describe("API Processor xxx", function()
 							// completion (this response) in this particular test app, so the response is pretty much
 							// empty and just needed to break the long-poll chain on the client.
 							//
-							assert.equal(responseObject.TransactionId, 0);
-							assert.equal(responseObject.InstanceId, 1);
+							assert.equal(responseObject.TransactionId, 3);
+							assert.equal(responseObject.InstanceId, 3);
 							assert.equal(responseObject.InstanceVersion, 5);
 							assert.objectsEqual(responseObject.NextRequest, undefined);
 							assert.objectsEqual(responseObject.ViewModelDeltas, undefined);
@@ -1553,10 +1688,10 @@ describe("API Processor xxx", function()
 					}
 				}
 
-				readerWriter.readAsync(session.id + ":0", onResponse);
+				readerWriter.readAsync(session.id + ":3", onResponse);
 				apiProcessor.process(session, requestObject, response);
 
-				assert.equal(readerWriter.isWritePending(session.id + ":0"), false, "Pending writes still waiting");
+				assert.equal(readerWriter.isWritePending(session.id + ":3"), false, "Pending writes still waiting");
 				plan.ok(true);
 			});
 		});
@@ -1686,6 +1821,85 @@ describe("API Processor xxx", function()
 				done();
 			});
 		});
+
+		it("should fail with appropriate message when trying to navigate to a page does not exist from user code", function(done)
+		{
+	    	var Synchro = null;
+
+			var modules =
+			{
+				menu:
+				{
+					View:
+					{
+					    title: "Menu",
+					    elements: 
+					    [
+					        { control: "button", caption: "Counter", binding: "goToCounter" },
+					    ]
+					},
+
+					InitializeViewModel: function(context, session)
+					{
+					    var viewModel =
+					    {
+					        foo: "bar"
+					    }
+					    return viewModel;
+					},
+
+					Commands:
+					{
+					    nowhere: function(context, session, viewModel)
+					    {
+					        return Synchro.navigateToView(context, "nowhere");
+					    },
+					}					
+				}
+			}
+
+			var apiProcessor = createApiProcessor(modules);
+	    	Synchro = require("../lib/app-services")(apiProcessor, null);
+
+			var session = sessionStore.createSession();
+			var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4");
+
+	        // Initial page request
+			var requestObject = 
+			{ 
+				Mode: "Page", 
+				Path: "menu", 
+				TransactionId: 0, 
+				DeviceMetrics: metrics.DeviceMetrics, 
+				ViewMetrics: metrics.ViewMetrics 
+			};
+			var response = {};
+
+			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+			{
+				// Ignore response
+			});
+
+			apiProcessor.process(session, requestObject, response);
+
+			requestObject = { Mode: "Command", Path: "menu", InstanceId: 1, InstanceVersion: 1, TransactionId: 1, Command: "nowhere" };
+			response = {};
+			apiProcessor.process(session, requestObject, response);
+
+			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
+			{
+				var expectedResponse = 
+				{
+					Path: "menu",
+					Error: "UserCode error in method: Command.nowhere - Attempted to navigate to page that does not exist: nowhere", 
+					TransactionId: 1
+				}
+				assert.objectsEqual(responseObject, expectedResponse);
+				done();
+			});
+		});
+
+
 	});
 });
 

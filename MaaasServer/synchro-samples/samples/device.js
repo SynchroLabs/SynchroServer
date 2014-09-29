@@ -60,9 +60,9 @@ exports.InitializeViewModel = function(context, session)
     return viewModel;
 }
 
-exports.OnViewMetricsChange = function(context, session, viewModel)
+exports.OnViewMetricsChange = function(context, session, viewModel, metrics)
 {
-    viewModel.orientation = session.ViewMetrics.orientation;
+    viewModel.orientation = metrics.ViewMetrics.orientation;
 }
 
 exports.Commands = 

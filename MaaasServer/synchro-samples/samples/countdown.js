@@ -47,7 +47,6 @@ exports.Commands =
         while (viewModel.isCounting && (viewModel.count > 0))
         {
             Synchro.waitFor(context, waitInterval, 1000);
-            viewModel = context.session.ViewModel;
             if (viewModel.isCounting)
             {
                 viewModel.count--;            

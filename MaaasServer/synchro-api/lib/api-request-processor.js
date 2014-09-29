@@ -90,7 +90,7 @@ exports.createApiRequestProcessorAsync = function(params, callback)
             responseObject.NewSessionId = session.id;
         }
         
-        var channelId = session.id + ":" + requestObject.Sequence;
+        var channelId = session.id + ":" + requestObject.TransactionId;
         logger.info("Posting read for session:sequence - " + channelId);
         readerWriter.readAsync(channelId, function(err, responseObject)
         {
