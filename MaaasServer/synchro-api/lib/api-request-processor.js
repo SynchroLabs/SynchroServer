@@ -46,8 +46,11 @@ exports.createApiRequestProcessorAsync = function(params, callback)
         //
         if (requestObject.Mode === "AppDefinition")
         {
-            var appDefinition = api.getAppDefinition();
-            logger.info("AppDefinition requested: " + appDefinition);
+            var appDefinition = 
+            {
+                App: api.getAppDefinition()
+            }
+            logger.info("AppDefinition requested, returning: " + JSON.stringify(appDefinition, null, 4));
             callback(null, appDefinition);
             return;
         }

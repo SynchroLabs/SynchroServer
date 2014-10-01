@@ -154,11 +154,14 @@ describe("Synchro API module", function ()
 				{
 					var expectedAppDefinition = 
 					{
-						"name": "synchro-test",
-						"version": "0.0.0",
-						"description": "Synchro API Test",
-						"mainPage": "launch",
-						"author": "Bob Dickinson <bob@synchro.io> (http://synchro.io/)"
+						App:
+						{
+							"name": "synchro-test",
+							"version": "0.0.0",
+							"description": "Synchro API Test",
+							"mainPage": "launch",
+							"author": "Bob Dickinson <bob@synchro.io> (http://synchro.io/)"							
+						}
 					};
 
 					assert.objectsEqual(data, expectedAppDefinition);
