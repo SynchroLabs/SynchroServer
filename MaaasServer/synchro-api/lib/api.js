@@ -109,6 +109,14 @@ function SyncError(msg, request)
 }
 SyncError.prototype.__proto__ = Error.prototype;
 
+// We use a custom "Context" object type so that we can validate the parameter when passed in from user code
+//
+function Context(session, request, response)
+{
+    this.session = session;
+    this.request = request;
+    this.response = response;
+};
 
 function getViewModel(routeModule, context, session, params)
 {
@@ -419,6 +427,11 @@ var SynchroApi = function(moduleManager, sessionStore, readerWriter)
     this.readerWriter = readerWriter;
 }
 
+SynchroApi.prototype.isValidContext = function(context)
+{
+    return (context instanceof Context);
+}
+
 SynchroApi.prototype.load = function(err, appDefinition)
 {
     this.appDefinition = this.moduleManager.loadModules(this);
@@ -443,12 +456,7 @@ SynchroApi.prototype.process = function(session, requestObject, responseObject)
     logger.info("Processing request: " + JSON.stringify(requestObject, null, 4));
     session.UserData = session.UserData || {};
 
-    var context = 
-    {
-        session: session,
-        request: requestObject,
-        response: responseObject 
-    };
+    var context = new Context(session, requestObject, responseObject);
 
     context.response.Path = context.request.Path;
 

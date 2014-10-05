@@ -60,7 +60,7 @@ exports.Commands =
     },
     location: function(context, session, viewModel)
     {
-        return Synchro.navigateToView(context, "propx_list");
+        return Synchro.navigateToView(context, "propx_list", { searchTerm: "Soho"});
     },
     previousSearch: function(context, session, viewModel, params)
     {

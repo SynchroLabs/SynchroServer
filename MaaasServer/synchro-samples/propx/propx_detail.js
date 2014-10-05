@@ -29,6 +29,6 @@ exports.Commands =
 {
     exit: function(context)
     {
-        return Synchro.navigateToView(context, "propx_list");
+        return Synchro.navigateToView(context, "propx_list", { fromDetail: true });
     },
 }

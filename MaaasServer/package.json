@@ -1,21 +1,22 @@
 {
-    "name": "synchro-server",
-    "version": "0.0.0",
-    "description": "Synchro Server",
-    "main": "app.js",
-    "homepage": "http://synchro.io/",
-    "dependencies": {
-        "express": "~3.4.8",
-        "faye-websocket": "~0.7.0",
-        "wait.for": "~0.6.3",
-        "express-hbs": "^0.7.9",
-        "log4js": "^0.6.12",
-        "commander": "^2.3.0",
-        "async": "^0.9.0",
-        "nconf": "^0.6.9"
-    },
-    "scripts": {
-        "test": "npm run test-api",
-        "test-api": "mocha synchro-api/test"
-    }
+  "name": "synchro-server",
+  "version": "0.0.0",
+  "description": "Synchro Server",
+  "main": "app.js",
+  "homepage": "http://synchro.io/",
+  "dependencies": {
+    "express": "~3.4.8",
+    "faye-websocket": "~0.7.0",
+    "wait.for": "~0.6.3",
+    "express-hbs": "^0.7.9",
+    "log4js": "^0.6.12",
+    "commander": "^2.3.0",
+    "async": "^0.9.0",
+    "nconf": "^0.6.9",
+    "request": "^2.44.0"
+  },
+  "scripts": {
+    "test": "npm run test-api",
+    "test-api": "mocha synchro-api/test"
+  }
 }

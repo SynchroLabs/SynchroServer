@@ -2,6 +2,7 @@ require('./test');
 
 var assert = require("assert");
 var assertHelper = require("./assert-helper");
+var util = require('../lib/util');
 
 var ApiProcessor = require("../lib/api");
 var ReaderWriter = require("../lib/reader-writer");
@@ -584,7 +585,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 		        // Verify response contains correct view and viewModel
 		        var expectedView = 
@@ -620,7 +621,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 		        // Verify response contains correct view and viewModel
 		        var expectedView = 
@@ -703,7 +704,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 		        // Verify response contains correct view and viewModel
 		        var expectedView = 
@@ -739,7 +740,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 		        // Verify response contains correct view and viewModel
 		        var expectedView = 
@@ -799,7 +800,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 		        // Verify response contains correct view and viewModel
 		        var expectedView = 
@@ -835,7 +836,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 		        // Verify response does not send back an updated view (or view model changes)
 				assert.objectsEqual(responseObject.View, undefined);
@@ -988,7 +989,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 				var expectedSessionTest = 
 				{
@@ -1028,7 +1029,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 				var expectedSessionTest = 
 				{
@@ -1070,7 +1071,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 				var expectedSessionTest = 
 				{
@@ -1112,7 +1113,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 				var expectedSessionTest = 
 				{
@@ -1157,7 +1158,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 				var expectedSessionTest = 
 				{
@@ -1202,7 +1203,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 				var expectedSessionTest = 
 				{
@@ -1239,7 +1240,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 				var expectedSessionTest = 
 				{
@@ -1274,7 +1275,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 				var expectedSessionTest = 
 				{
@@ -1406,7 +1407,7 @@ describe("API Processor", function()
 				function onResponse(err, responseObject)
 				{
 					logger.info("Resp[" + plan.count + "]: " + JSON.stringify(responseObject, null, 4));
-					assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 					switch (plan.count)
 					{
@@ -1476,7 +1477,7 @@ describe("API Processor", function()
 				function onResponse(err, responseObject)
 				{
 					logger.info("Resp[" + plan.count + "]: " + JSON.stringify(responseObject, null, 4));
-					assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 					switch (plan.count)
 					{
@@ -1606,7 +1607,7 @@ describe("API Processor", function()
 				function onResponse(err, responseObject)
 				{
 					logger.info("Resp[" + plan.count + "]: " + JSON.stringify(responseObject, null, 4));
-					assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 					switch (plan.count)
 					{
@@ -1895,7 +1896,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 				assert.objectsEqual(responseObject.TransactionId, 1);
 				assert.objectsEqual(responseObject.InstanceId, 1);
 				assert.objectsEqual(responseObject.InstanceVersion, 1);
@@ -1924,7 +1925,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":2", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 				assert.objectsEqual(responseObject.TransactionId, 2);
 				assert.objectsEqual(responseObject.InstanceId, 1);
 				assert.objectsEqual(responseObject.InstanceVersion, 1);
@@ -1937,6 +1938,241 @@ describe("API Processor", function()
 				done();
 			});
 
+		});
+	});
+
+	describe("services method parameter validation", function()
+	{
+    	var Synchro = null;
+
+		var modules =
+		{
+			test:
+			{
+				View:
+				{
+				    title: "Page",
+				    elements: 
+				    [
+				        { control: "text", value: "placeholder", font: 12 },
+				    ]
+				},
+
+				InitializeViewModel: function(context, session)
+				{
+				    var viewModel =
+				    {
+				    	foo: "bar",
+				    }
+				    return viewModel;
+				},
+
+				Commands:
+				{
+				    testNavigateToView: function(context)
+				    {
+				    	Synchro.navigateToView();
+				    },
+				    testShowMessage: function(context)
+				    {
+				    	Synchro.showMessage();
+				    },
+				    testWaitFor: function(context)
+				    {
+				    	Synchro.waitFor();
+				    },
+				    testInterimUpdate: function(context)
+				    {
+				    	Synchro.interimUpdate();
+				    },
+				    testIsActiveInstance: function(context)
+				    {
+				    	Synchro.isActiveInstance();
+				    },
+				    testGetMetrics: function(context)
+				    {
+				    	Synchro.getMetrics();
+				    },
+				}
+			}
+		}
+
+        var session;
+        var apiProcessr;
+		var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4");
+
+		var requestObject = 
+		{ 
+			Mode: "Command", 
+			Path: "test", 
+			InstanceId: 1, 
+			InstanceVersion: 1, 
+			TransactionId: 1, 
+		};
+		var response = {};
+
+		beforeEach(function() 
+		{
+			apiProcessor = createApiProcessor(modules);
+	    	Synchro = require("../lib/app-services")(apiProcessor, null);
+
+		    session = sessionStore.createSession();
+
+	        // Initial page request
+			var requestObject = 
+			{
+				Mode: "Page", 
+				Path: "test", 
+				TransactionId: 0, 
+				DeviceMetrics: metrics.DeviceMetrics, 
+				ViewMetrics: metrics.ViewMetrics 
+			};
+			var response = {};
+
+			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+			{
+				// Ignore response
+			});
+
+			apiProcessor.process(session, requestObject, response);
+		});
+
+		it("should fail if invalid context passed to navigateToView", function(done) 
+		{
+			requestObject.Command = "testNavigateToView";
+			apiProcessor.process(session, requestObject, response);
+
+			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
+			{
+				var expectedResponse = 
+				{
+					Path: "test",
+					Error:
+					{
+						name: "UserCodeError",
+						message: "UserCode error in method: Command.testNavigateToView - A valid context must be the first parameter to Synchro.navigateToView()"
+					},
+					TransactionId: 1
+				}
+
+				assert.objectsEqual(responseObject, expectedResponse);
+				done();
+			});
+		});
+
+		it("should fail if invalid context passed to showMessage", function(done) 
+		{
+			requestObject.Command = "testShowMessage";
+			apiProcessor.process(session, requestObject, response);
+
+			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
+			{
+				var expectedResponse = 
+				{
+					Path: "test",
+					Error:
+					{
+						name: "UserCodeError",
+						message: "UserCode error in method: Command.testShowMessage - A valid context must be the first parameter to Synchro.showMessage()"
+					},
+					TransactionId: 1
+				}
+
+				assert.objectsEqual(responseObject, expectedResponse);
+				done();
+			});
+		});
+
+		it("should fail if invalid context passed to waitFor", function(done) 
+		{
+			requestObject.Command = "testWaitFor";
+			apiProcessor.process(session, requestObject, response);
+
+			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
+			{
+				var expectedResponse = 
+				{
+					Path: "test",
+					Error:
+					{
+						name: "UserCodeError",
+						message: "UserCode error in method: Command.testWaitFor - A valid context must be the first parameter to Synchro.waitFor()"
+					},
+					TransactionId: 1
+				}
+
+				assert.objectsEqual(responseObject, expectedResponse);
+				done();
+			});
+		});
+
+		it("should fail if invalid context passed to interimUpdate", function(done) 
+		{
+			requestObject.Command = "testInterimUpdate";
+			apiProcessor.process(session, requestObject, response);
+
+			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
+			{
+				var expectedResponse = 
+				{
+					Path: "test",
+					Error:
+					{
+						name: "UserCodeError",
+						message: "UserCode error in method: Command.testInterimUpdate - A valid context must be the first parameter to Synchro.interimUpdate()"
+					},
+					TransactionId: 1
+				}
+
+				assert.objectsEqual(responseObject, expectedResponse);
+				done();
+			});
+		});
+
+		it("should fail if invalid context passed to isActiveInstance", function(done) 
+		{
+			requestObject.Command = "testIsActiveInstance";
+			apiProcessor.process(session, requestObject, response);
+
+			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
+			{
+				var expectedResponse = 
+				{
+					Path: "test",
+					Error:
+					{
+						name: "UserCodeError",
+						message: "UserCode error in method: Command.testIsActiveInstance - A valid context must be the first parameter to Synchro.isActiveInstance()"
+					},
+					TransactionId: 1
+				}
+
+				assert.objectsEqual(responseObject, expectedResponse);
+				done();
+			});
+		});
+
+		it("should fail if invalid context passed to getMetrics", function(done) 
+		{
+			requestObject.Command = "testGetMetrics";
+			apiProcessor.process(session, requestObject, response);
+
+			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
+			{
+				var expectedResponse = 
+				{
+					Path: "test",
+					Error:
+					{
+						name: "UserCodeError",
+						message: "UserCode error in method: Command.testGetMetrics - A valid context must be the first parameter to Synchro.getMetrics()"
+					},
+					TransactionId: 1
+				}
+
+				assert.objectsEqual(responseObject, expectedResponse);
+				done();
+			});
 		});
 	});
 

@@ -5,6 +5,11 @@ var lodash = require("lodash");
 var logger = require('log4js').getLogger("util");
 
 
+exports.formatJSON = function(obj)
+{
+    return JSON.stringify(obj, null, 4);
+}
+
 // This handy method allows you to completely repopulate an object with new contents (removing/replacing any
 // previous contents).  This is particularly useful for doing a poor-mans pass-by-reference when using an
 // object param.

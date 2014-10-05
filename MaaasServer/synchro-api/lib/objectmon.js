@@ -79,7 +79,6 @@ exports.getChangeList = function(basePath, originalObject, newObject)
 {
     // Doing "own properties" prevents inspection of prototype functions (among other things)
     var diffs = objectDiff.diffOwnProperties(originalObject, newObject);
-    logger.debug("Diffs: ", JSON.stringify(diffs, null, 4));
 
     var changes = [];
     recordChanges(basePath, diffs, function (changeType, path, value)
