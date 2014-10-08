@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "WrapPanel",
-    onBack: "exit",
     elements:
     [
         { control: "stackpanel", orientation: "Vertical", width: "*", height: "*", contents: [
@@ -44,9 +43,5 @@ exports.Commands =
     setOrientation: function(context, session, viewModel, params)
     {
         viewModel.orientation = params.orientation;
-    },
-    exit: function (context)
-    {
-        return Synchro.navigateToView(context, "menu");
     },
 }

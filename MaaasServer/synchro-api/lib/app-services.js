@@ -11,13 +11,40 @@ module.exports = function(apiProcessor, resourceResolver)
 		    return resourceResolver.getResourceUrl(resource);
 		},
 
-		navigateToView: function(context, route, params)
+		navigateTo: function(context, route, params)
 		{
 			if (!apiProcessor.isValidContext(context))
 			{
-				throw new Error("A valid context must be the first parameter to Synchro.navigateToView()");
+				throw new Error("A valid context must be the first parameter to Synchro.navigateTo()");
 			}
-		    apiProcessor.navigateToView(context, route, params);
+		    apiProcessor.navigateTo(context, route, params);
+		},
+
+		pushAndNavigateTo: function(context, route, params, state)
+		{
+			if (!apiProcessor.isValidContext(context))
+			{
+				throw new Error("A valid context must be the first parameter to Synchro.pushAndNavigateTo()");
+			}
+		    apiProcessor.pushAndNavigateTo(context, route, params, state);
+		},
+
+		pop: function(context)
+		{
+			if (!apiProcessor.isValidContext(context))
+			{
+				throw new Error("A valid context must be the first parameter to Synchro.pop()");
+			}
+		    apiProcessor.pop(context);
+		},
+
+		popTo: function(context, route)
+		{
+			if (!apiProcessor.isValidContext(context))
+			{
+				throw new Error("A valid context must be the first parameter to Synchro.popTo()");
+			}
+		    apiProcessor.popTo(context, route);
 		},
 
 		showMessage: function(context, messageBox)

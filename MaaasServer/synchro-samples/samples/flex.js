@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "Flex",
-    onBack: "exit",
     elements:
     [
         // We're looking for this:
@@ -61,12 +60,4 @@ exports.InitializeViewModel = function (context, session)
     {
     }
     return viewModel;
-}
-
-exports.Commands =
-{
-    exit: function (context) 
-    {
-        return Synchro.navigateToView(context, "menu");
-    },
 }

@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "List Click",
-    onBack: "exit",
     elements:
     [
         { control: "stackpanel", orientation: "Horizontal", contents: [
@@ -43,9 +42,5 @@ exports.Commands =
     itemClicked: function(context, session, viewModel, params)
     {
         viewModel.lastClicked = params.itemData;
-    },
-    exit: function(context)
-    {
-        return Synchro.navigateToView(context, "menu");
     },
 }

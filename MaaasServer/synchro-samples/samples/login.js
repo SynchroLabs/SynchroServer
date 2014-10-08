@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "Login",
-    onBack: "cancel",
     elements:
     [
         { control: "text", value: "Username", fontsize: 12, margin: { bottom: 0 } },
@@ -56,10 +55,6 @@ exports.Commands =
     },
     success: function(context)
     {
-        return Synchro.navigateToView(context, "counter");
-    },
-    cancel: function(context)
-    {
-        return Synchro.navigateToView(context, "menu");
+        return Synchro.navigateTo(context, "counter");
     },
 }

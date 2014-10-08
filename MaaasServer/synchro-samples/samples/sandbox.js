@@ -6,7 +6,6 @@ var profileImage = "http://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash3/c23.23.
 exports.View =
 {
     title: "Sandbox",
-    onBack: "exit",
     elements:
     [
         { control: "border", border: "White", borderthickness: "5", contents: [
@@ -43,9 +42,5 @@ exports.Commands =
         {
             viewModel.image = userImage;
         }
-    },
-    exit: function(context)
-    {
-        return Synchro.navigateToView(context, "menu");
     },
 }

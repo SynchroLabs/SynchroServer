@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "Property Details",
-    onBack: "exit",
     elements: 
     [
         { control: "stackpanel", width: "*", contents: [
@@ -23,12 +22,4 @@ exports.InitializeViewModel = function(context, session, params)
         property: params.property,
     }
     return viewModel;
-}
-
-exports.Commands = 
-{
-    exit: function(context)
-    {
-        return Synchro.navigateToView(context, "propx_list", { fromDetail: true });
-    },
 }

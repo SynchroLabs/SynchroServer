@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "Picker",
-    onBack: "exit",
     elements:
     [
         { control: "picker", width: 150, margin: { bottom: 10 }, binding: { 
@@ -53,9 +52,5 @@ exports.Commands =
     clicked: function(context, session, viewModel, params)
     {
         return Synchro.showMessage(context, { message: params.control + " selection changed, new color: " + params.colorName });
-    },
-    exit: function(context)
-    {
-        return Synchro.navigateToView(context, "menu");
     },
 }

@@ -51,6 +51,6 @@ exports.Commands =
 {
     goToView: function(context, session, viewModel, params)
     {
-        return Synchro.navigateToView(context, params.view);
+        return Synchro.pushAndNavigateTo(context, params.view);
     },
 }

@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "Font",
-    onBack: "exit",
     elements:
     [
         { control: "stackpanel", orientation: "Horizontal", contents: [
@@ -51,10 +50,5 @@ exports.Commands =
     setFace: function(context, session, viewModel, params)
     {
         viewModel.currFont.face = params.face;
-    },
-
-    exit: function(context)
-    {
-        return Synchro.navigateToView(context, "menu");
     },
 }

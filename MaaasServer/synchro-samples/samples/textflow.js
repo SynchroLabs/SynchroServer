@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "Text flow",
-    onBack: "exit",
     elements:
     [
         { control: "stackpanel", orientation: "Vertical", width: "*", contents: [
@@ -21,12 +20,4 @@ exports.InitializeViewModel = function (context, session) {
         userText: "Sample Text"
     }
     return viewModel;
-}
-
-exports.Commands =
-{
-    exit: function (context) 
-    {
-        return Synchro.navigateToView(context, "menu");
-    },
 }

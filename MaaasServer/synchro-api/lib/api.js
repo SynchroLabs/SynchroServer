@@ -118,7 +118,83 @@ function Context(session, request, response)
     this.response = response;
 };
 
-function getViewModel(routeModule, context, session, params)
+function BackStack(session)
+{
+    this.session = session;
+};
+
+BackStack.prototype.init = function(route)
+{
+    this.session.BackStack = [{ route: route }];
+}
+
+BackStack.prototype.getSize = function()
+{
+    return this.session.BackStack.length;
+}
+
+BackStack.prototype.getCurrent = function()
+{
+    if (this.session.BackStack.length > 0)
+    {
+        return this.session.BackStack[this.session.BackStack.length-1];
+    }
+
+    // Backstack is empty
+    //
+    return null;
+
+}
+
+BackStack.prototype.updateCurrent = function(route, params)
+{
+    this.session.BackStack[this.session.BackStack.length-1] = { route: route };
+    var current = this.getCurrent();
+    if (params)
+    {
+        current.params = lodash.cloneDeep(params);
+    }
+}
+
+BackStack.prototype.pushCurrentAndAddNew = function(route, params, state)
+{
+    var current = this.getCurrent();
+    if (state)
+    {
+        current.state = lodash.cloneDeep(state);
+    }
+    this.session.BackStack.push({ route: route });
+    var current = this.getCurrent();
+    if (params)
+    {
+        current.params = lodash.cloneDeep(params);
+    }
+}
+
+BackStack.prototype.pop = function()
+{
+    this.session.BackStack.pop();
+    return this.getCurrent();
+}
+
+BackStack.prototype.popTo = function(route)
+{
+    for (var n = this.session.BackStack.length - 1; n >= 0; n--)
+    {
+        if (this.session.BackStack[n].route == route)
+        {
+            this.session.BackStack = this.session.BackStack.slice(0, n + 1);
+            return this.getCurrent();
+        }
+    }
+
+    // route not found
+    //
+    return null;
+}
+
+
+function getViewModel(routeModule, context, session, params, state)
 {
     viewModel = {};
     if (routeModule.InitializeViewModel)
@@ -128,7 +204,7 @@ function getViewModel(routeModule, context, session, params)
         try 
         {
             // USERCODE
-            viewModel = routeModule.InitializeViewModel(context, session.UserData, params);
+            viewModel = routeModule.InitializeViewModel(context, session.UserData, params, state);
         }
         catch (e)
         {
@@ -173,9 +249,9 @@ function isCurrentModuleInstance(context, instanceId)
     return (instanceId && (context.session.ModuleInstance.instanceId == instanceId));
 }
 
-function populateNewPageResponse(synchroApi, route, routeModule, context, params)
-{
-    var viewModel = getViewModel(routeModule, context, context.session, params);
+function populateNewPageResponse(synchroApi, route, routeModule, context, params, state)
+{    
+    var viewModel = getViewModel(routeModule, context, context.session, params, state);
     var view = getView(routeModule, context, context.session, viewModel);
 
     // Note: This will have the side-effect of removing the stored ServerViewModel, which is intentional and appropriate (as 
@@ -208,6 +284,12 @@ function populateNewPageResponse(synchroApi, route, routeModule, context, params
     //
     context.response.Path = route;
     context.response.View = view;
+
+    // Determine if "back" is available based on either an OnBack handler, or if not provided, whether
+    // the back stack supports pop.  Report that to client.
+    //
+    var backStack = new BackStack(context.session)
+    context.response.Back = ((routeModule.OnBack instanceof Function) || backStack.getSize() > 1);
 
     if (routeModule.LoadViewModel)
     {
@@ -658,6 +740,10 @@ SynchroApi.prototype.process = function(session, requestObject, responseObject)
             case "Page":
             {
                 logger.info("Page request for: " + route);
+
+                var backStack = new BackStack(context.session)
+                backStack.init(route);
+
                 populateNewPageResponse(this, route, routeModule, context);
                 initLocalViewModel(context);
             }
@@ -698,6 +784,29 @@ SynchroApi.prototype.process = function(session, requestObject, responseObject)
                     {
                         throw new UserCodeError("LoadViewModel", e);
                     }
+                }
+            }
+            break;
+
+            case "Back":
+            {
+                if (routeModule.OnBack)
+                {
+                    try 
+                    {
+                        // USERCODE
+                        routeModule.OnBack(context, context.session.UserData, context.LocalViewModel.ViewModel);
+                    }
+                    catch (e)
+                    {
+                        throw new UserCodeError("OnBack", e);
+                    }
+                }
+                else
+                {
+                    // default "pop"
+                    //
+                    this.pop(context);
                 }
             }
             break;
@@ -881,20 +990,24 @@ SynchroApi.prototype.showMessage = function(context, messageBox)
     context.response.MessageBox = messageBox;
 }
 
-// Exposed via Synchro.navigateToView()
+// Exposed via Synchro.navigateTo()
 //
 // context - the current context
 // route - the route to the new view
 // params - option dictionary of params, if provided is passed to InitializeViewModel
 //
-SynchroApi.prototype.navigateToView = function(context, route, params)
+SynchroApi.prototype.navigateTo = function(context, route, params)
 {
     var routeModule = this.moduleManager.getModule(route);
     if (routeModule)
     {
         if (!context.obsoleteProcessor)
         {
-            logger.info("Found route module and navigating to: " + route);
+            logger.info("Found route module - navigating to: " + route);
+
+            var backStack = new BackStack(context.session);
+            backStack.updateCurrent(route, params);
+
             populateNewPageResponse(this, route, routeModule, context, params);            
         }
         else
@@ -904,7 +1017,7 @@ SynchroApi.prototype.navigateToView = function(context, route, params)
             // but if it does, we're going to fail/ignore that (since the client has moved on, down a different path, and
             // abandoned the transaction that spawned this processor).
             //
-            logger.error("Attempt to navigate to new view from abandoned processor");
+            logger.error("Attempt to navigate via Synchro.navigateTo() after already navigating away from the current page");
         }
     }
     else
@@ -913,6 +1026,94 @@ SynchroApi.prototype.navigateToView = function(context, route, params)
         // code (which has appropriate context to understand which user code function caused this, etc).
         //
         throw new Error("Attempted to navigate to page that does not exist: " + route);
+    }
+}
+
+// Exposed via Synchro.pushAndNavigateTo()
+//
+// context - the current context
+// route - the route to the new view
+// params - option dictionary of params, if provided is passed to InitializeViewModel
+// state - any state associate with the module being navigated away from that it requires when being navigating back to.
+//
+SynchroApi.prototype.pushAndNavigateTo = function(context, route, params, state)
+{
+    var routeModule = this.moduleManager.getModule(route);
+    if (routeModule)
+    {
+        if (!context.obsoleteProcessor)
+        {
+            logger.info("Found route module - pushing to current page and navigating to: " + route);
+
+            var backStack = new BackStack(context.session);
+            backStack.pushCurrentAndAddNew(route, params, state);
+
+            populateNewPageResponse(this, route, routeModule, context, params);
+        }
+        else
+        {
+            logger.error("Attempt to navigate via Synchro.pushAndNavigateTo() after already navigating away from the current page");
+        }
+    }
+    else
+    {
+        // Assuming this gets out of user code, it will be caught and wrapped in a UserCodeError by the processing
+        // code (which has appropriate context to understand which user code function caused this, etc).
+        //
+        throw new Error("Attempted to navigate to page that does not exist: " + route);
+    }    
+}
+
+// Exposed via Synchro.pop()
+//
+// context - the current context
+//
+SynchroApi.prototype.pop = function(context)
+{
+    if (!context.obsoleteProcessor)
+    {    
+        var backStack = new BackStack(context.session);
+        var stackItem = backStack.pop();
+        if (stackItem == null)
+        {
+            throw new Error("Attempted to navigate via Synchro.pop() when back stack is empty");
+        }
+        else
+        {
+            var routeModule = this.moduleManager.getModule(stackItem.route); // Should never fail for item on backstack
+            populateNewPageResponse(this, stackItem.route, routeModule, context, stackItem.params, stackItem.state);
+        }
+    }
+    else
+    {
+        logger.error("Attempt to navigate via Synchro.pop() after already navigating away from the current page");
+    }
+}
+
+// Exposed via Synchro.popTo()
+//
+// context - the current context
+// route - the route to the new view to be popped to
+//
+SynchroApi.prototype.popTo = function(context, route)
+{
+    if (!context.obsoleteProcessor)
+    {    
+        var backStack = new BackStack(context.session);
+        var stackItem = backStack.popTo(route);
+        if (stackItem == null)
+        {
+            throw new Error("Attempted to navigate to route '" + route + "'' via Synchro.popTo() when route is not on back stack");
+        }
+        else
+        {
+            var routeModule = this.moduleManager.getModule(stackItem.route); // Should never fail for item on backstack
+            populateNewPageResponse(this, stackItem.route, routeModule, context, stackItem.params, stackItem.state);
+        }
+    }
+    else
+    {
+        logger.error("Attempt to navigate via Synchro.popTo() after already navigating away from the current page");
     }
 }
 

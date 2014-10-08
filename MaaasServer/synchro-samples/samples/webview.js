@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "Webview",
-    onBack: "exit",
     elements:
     [
         { control: "border", border: "Blue", borderThickness: "5", contents: [
@@ -22,12 +21,4 @@ exports.InitializeViewModel = function(context, session)
     {
     }
     return viewModel;
-}
-
-exports.Commands =
-{
-    exit: function(context)
-    {
-        return Synchro.navigateToView(context, "menu");
-    },
 }

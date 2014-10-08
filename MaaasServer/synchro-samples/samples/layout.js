@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "Border",
-    onBack: "exit",
     elements:
     [
         { control: "stackpanel", orientation: "Horizontal", contents: [
@@ -41,12 +40,4 @@ exports.InitializeViewModel = function(context, session)
         content: 150,
     }
     return viewModel;
-}
-
-exports.Commands =
-{
-    exit: function(context)
-    {
-        return Synchro.navigateToView(context, "menu");
-    },
 }

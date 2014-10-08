@@ -56,18 +56,18 @@ exports.Commands =
 {
     search: function(context, session, viewModel)
     {
-        return Synchro.navigateToView(context, "propx_list", { searchTerm: viewModel.search });
+        return Synchro.pushAndNavigateTo(context, "propx_list", { searchTerm: viewModel.search });
     },
     location: function(context, session, viewModel)
     {
-        return Synchro.navigateToView(context, "propx_list", { searchTerm: "Soho"});
+        return Synchro.pushAndNavigateTo(context, "propx_list", { searchTerm: "Soho"});
     },
     previousSearch: function(context, session, viewModel, params)
     {
-        return Synchro.navigateToView(context, "propx_list", { searchTerm: params.searchTerm });
+        return Synchro.pushAndNavigateTo(context, "propx_list", { searchTerm: params.searchTerm });
     },
     favs: function(context, session, viewModel)
     {
-        return Synchro.navigateToView(context, "propx_favs");
+        return Synchro.pushAndNavigateTo(context, "propx_favs");
     }
 }

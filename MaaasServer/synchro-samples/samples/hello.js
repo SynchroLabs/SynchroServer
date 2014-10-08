@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "Hello World",
-    onBack: "exit",
     elements:
     [
         { control: "stackpanel", orientation: "Horizontal", contents: [
@@ -27,12 +26,4 @@ exports.InitializeViewModel = function(context, session)
         lastName: "Earth",
     }
     return viewModel;
-}
-
-exports.Commands =
-{
-    exit: function(context)
-    {
-        return Synchro.navigateToView(context, "menu");
-    },
 }

@@ -102,7 +102,7 @@ describe("API Processor", function()
 			apiProcessor.process(session, requestObject, response);
 			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 				assert.objectsEqual(responseObject.View, modules.menu.View);
 				assert.objectsEqual(responseObject.ViewModel, { foo: "bar" });
 				done();
@@ -127,11 +127,71 @@ describe("API Processor", function()
 				    ]
 				},
 
+				InitializeViewModel: function(context, session, params, state)
+				{
+				    var viewModel =
+				    {
+				        initParams: params,
+				        initState: state
+				    }
+				    return viewModel;
+				},
+
 				Commands:
 				{
+				    goToIntermediate: function(context, session, viewModel, params)
+				    {
+				        return Synchro.pushAndNavigateTo(context, "intermediate");
+				    },
+				    goToIntermediateWithParams: function(context, session, viewModel, params)
+				    {
+				        return Synchro.pushAndNavigateTo(context, "intermediate", {name: "bob"});
+				    },
 				    goToCounter: function(context, session, viewModel, params)
 				    {
-				        return Synchro.navigateToView(context, "counter");
+				        return Synchro.pushAndNavigateTo(context, "counter");
+				    },
+				    goToCounterWithState: function(context, session, viewModel, params)
+				    {
+				        return Synchro.pushAndNavigateTo(context, "counter", null, {foo: "bar"});
+				    },
+				}
+			},
+
+			intermediate:
+			{
+				View:
+				{
+				    title: "intermediate Page",
+				    elements: 
+				    [
+				        { control: "text", value: "Intermediate page", foreground: "{fontColor}", font: 24 },
+				    ]
+				},
+
+				InitializeViewModel: function(context, session, params, state)
+				{
+				    var viewModel =
+				    {
+				        initParams: params,
+				        initState: state
+				    }
+				    return viewModel;
+				},
+
+				Commands:
+				{
+				    goToCounterSkipOnBack: function(context, session, viewModel)
+				    {
+				        return Synchro.navigateTo(context, "counter");
+				    },
+				    goToCounter: function(context, session, viewModel)
+				    {
+				        return Synchro.pushAndNavigateTo(context, "counter");
+				    },
+				    doPop: function(context, session, viewModel)
+				    {
+				        return Synchro.pop(context);
 				    },
 				}
 			},
@@ -141,7 +201,6 @@ describe("API Processor", function()
 				View:
 				{
 				    title: "Counter Page",
-				    onBack: "exit",
 				    elements: 
 				    [
 				        { control: "text", value: "Count: {count}", foreground: "{fontColor}", font: 24 },
@@ -160,25 +219,39 @@ describe("API Processor", function()
 
 				Commands:
 				{
-				    exit: function(context, session, viewModel)
+				    doPop: function(context, session, viewModel)
 				    {
-				        return Synchro.navigateToView(context, "menu");
+				        return Synchro.pop(context);
 				    },
+				    doPopToMenu: function(context, session, viewModel)
+				    {
+				        return Synchro.popTo(context, "menu");
+				    },
+				},
+
+				OnBack: function(context, session, viewModel)
+				{
+					session.counterOnBack = true;
+					Synchro.popTo(context, "menu");
 				}
 			}
 		}
 
-		var apiProcessor = createApiProcessor(testModules);
-    	Synchro = require("../lib/app-services")(apiProcessor, null);
+		var apiProcessor;
 
-		var session = sessionStore.createSession();
+		var session;
 		var metrics = devices.setSessionDeviceAndViewMetrics({}, "iPhone4");
 
-        it("should return menu page and view model when requesting menu page", function(done) 
-        {
+		function startAtMenu() 
+		{
+			apiProcessor = createApiProcessor(testModules);
+	    	Synchro = require("../lib/app-services")(apiProcessor, null);
+
+		    session = sessionStore.createSession();
+
 	        // Initial page request
 			var requestObject = 
-			{ 
+			{
 				Mode: "Page", 
 				Path: "menu", 
 				TransactionId: 0, 
@@ -186,70 +259,653 @@ describe("API Processor", function()
 				ViewMetrics: metrics.ViewMetrics 
 			};
 			var response = {};
-			apiProcessor.process(session, requestObject, response);
 
 			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
-				assert.objectsEqual(response.View, testModules.menu.View);
-				assert.objectsEqual(response.ViewModel, {});
-				done();
+				// Ignore response
 			});
-		});
 
-        it("should return counter page and view model after menu page command goToCounter", function(done) 
-        {
-	        // Command: navigate to counter
-			var requestObject = 
-			{ 
-				Mode: "Command", 
-				Path: "menu", 
-				InstanceId: 1, 
-				InstanceVersion: 1, 
-				TransactionId: 0, 
-				Command: "goToCounter" 
-			};
-			var response = {};
 			apiProcessor.process(session, requestObject, response);
+		}
 
-			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
-			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
-				assert.objectsEqual(responseObject.View, testModules.counter.View);
-				var expectedViewModel = 
-				{
-					count: 0,
-					fontColor: "Green"
+		describe("push, pop", function()
+		{
+	        it("should navigate to counter page on push", function(done) 
+	        {
+	        	startAtMenu();
+
+		        // Command: navigate to counter
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "menu", 
+					InstanceId: 1, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "goToCounter" 
 				};
-				assert.objectsEqual(responseObject.ViewModel, expectedViewModel);
-				done();
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.counter.View);
+					var expectedViewModel = 
+					{
+						count: 0,
+						fontColor: "Green"
+					};
+					assert.objectsEqual(responseObject.ViewModel, expectedViewModel);
+					done();
+				});
+
 			});
 
+	        it("should navigate back to menu page on pop", function(done) 
+	        {
+		        // Command: exit
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "counter", 
+					InstanceId: 2, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "doPop" 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.menu.View);
+					assert.objectsEqual(responseObject.ViewModel, {});
+					done();
+				});
+			});
 		});
 
-        it("should return menu page and view model after counter page exit command", function(done) 
-        {
-	        // Command: exit
-			var requestObject = 
-			{ 
-				Mode: "Command", 
-				Path: "counter", 
-				InstanceId: 2, 
-				InstanceVersion: 1, 
-				TransactionId: 0, 
-				Command: "exit" 
-			};
-			var response = {};
-			apiProcessor.process(session, requestObject, response);
+		describe("push, navigate, pop", function()
+		{
+	        it("should navigate to intermediate page on push", function(done) 
+	        {
+	        	startAtMenu();
 
-			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+		        // Command: navigate to counter
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "menu", 
+					InstanceId: 1, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "goToIntermediate" 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.intermediate.View);
+					assert.objectsEqual(responseObject.ViewModel, {});
+					done();
+				});
+
+			});
+
+	        it("should navigate to counter on navigate", function(done) 
+	        {
+		        // Command: exit
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "intermediate", 
+					InstanceId: 2, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "goToCounterSkipOnBack" 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.counter.View);
+					var expectedViewModel = 
+					{
+						count: 0,
+						fontColor: "Green"
+					};
+					assert.objectsEqual(responseObject.ViewModel, expectedViewModel);
+					done();
+				});
+			});
+
+	        it("should navigate back to menu, skipping intermediate page, on pop", function(done) 
+	        {
+		        // Command: exit
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "counter", 
+					InstanceId: 3, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "doPop" 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.menu.View);
+					assert.objectsEqual(responseObject.ViewModel, {});
+					done();
+				});
+			});
+		});
+
+		describe("push, push, pop, pop", function()
+		{
+	        it("should navigate to intermediate page on push", function(done) 
+	        {
+	        	startAtMenu();
+
+		        // Command: navigate to counter
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "menu", 
+					InstanceId: 1, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "goToIntermediate" 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.intermediate.View);
+					assert.objectsEqual(responseObject.ViewModel, {});
+					done();
+				});
+
+			});
+
+	        it("should navigate to counter on push", function(done) 
+	        {
+		        // Command: exit
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "intermediate", 
+					InstanceId: 2, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "goToCounter" 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.counter.View);
+					var expectedViewModel = 
+					{
+						count: 0,
+						fontColor: "Green"
+					};
+					assert.objectsEqual(responseObject.ViewModel, expectedViewModel);
+					done();
+				});
+			});
+
+	        it("should navigate back to intermediate page on pop", function(done) 
+	        {
+		        // Command: exit
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "counter", 
+					InstanceId: 3, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "doPop" 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.intermediate.View);
+					assert.objectsEqual(responseObject.ViewModel, {});
+					done();
+				});
+			});
+
+	        it("should navigate back to menu on pop", function(done) 
+	        {
+		        // Command: exit
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "intermediate", 
+					InstanceId: 4, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "doPop" 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.menu.View);
+					assert.objectsEqual(responseObject.ViewModel, {});
+					done();
+				});
+			});
+		});
+
+		describe("push, push, popTo", function()
+		{
+	        it("should navigate to intermediate page on push", function(done) 
+	        {
+	        	startAtMenu();
+
+		        // Command: navigate to counter
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "menu", 
+					InstanceId: 1, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "goToIntermediate" 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.intermediate.View);
+					assert.objectsEqual(responseObject.ViewModel, {});
+					done();
+				});
+
+			});
+
+	        it("should navigate to counter on push", function(done) 
+	        {
+		        // Command: exit
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "intermediate", 
+					InstanceId: 2, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "goToCounter" 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.counter.View);
+					var expectedViewModel = 
+					{
+						count: 0,
+						fontColor: "Green"
+					};
+					assert.objectsEqual(responseObject.ViewModel, expectedViewModel);
+					done();
+				});
+			});
+
+	        it("should navigate back to menu on popTo", function(done) 
+	        {
+		        // Command: exit
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "counter", 
+					InstanceId: 3, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "doPopToMenu" 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.menu.View);
+					assert.objectsEqual(responseObject.ViewModel, {});
+					done();
+				});
+			});
+		});
+
+		describe("push with params, push, pop", function()
+		{
+	        it("should navigate to intermediate page on push with params", function(done) 
+	        {
+	        	startAtMenu();
+
+		        // Command: navigate to counter
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "menu", 
+					InstanceId: 1, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "goToIntermediateWithParams" 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.intermediate.View);
+					var expectedViewModel =
+					{
+						initParams:
+						{
+							name: "bob"
+						}
+					}
+					assert.objectsEqual(responseObject.ViewModel, expectedViewModel);
+					done();
+				});
+
+			});
+
+	        it("should navigate to counter on push", function(done) 
+	        {
+		        // Command: exit
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "intermediate", 
+					InstanceId: 2, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "goToCounter" 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.counter.View);
+					var expectedViewModel = 
+					{
+						count: 0,
+						fontColor: "Green"
+					};
+					assert.objectsEqual(responseObject.ViewModel, expectedViewModel);
+					done();
+				});
+			});
+
+	        it("should navigate back to intermediate page with params on pop", function(done) 
+	        {
+		        // Command: exit
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "counter", 
+					InstanceId: 3, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "doPop" 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.intermediate.View);
+					var expectedViewModel =
+					{
+						initParams:
+						{
+							name: "bob"
+						}
+					}
+					assert.objectsEqual(responseObject.ViewModel, expectedViewModel);
+					done();
+				});
+			});
+		});
+
+		describe("push with state, pop", function()
+		{
+	        it("should navigate to intermediate page on push with params", function(done) 
+	        {
+	        	startAtMenu();
+
+		        // Command: navigate to counter
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "menu", 
+					InstanceId: 1, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "goToCounterWithState" 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.counter.View);
+					var expectedViewModel = 
+					{
+						count: 0,
+						fontColor: "Green"
+					};
+					assert.objectsEqual(responseObject.ViewModel, expectedViewModel);
+					done();
+				});
+
+			});
+
+	        it("should navigate back to menu with state on pop", function(done) 
+	        {
+		        // Command: exit
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "counter", 
+					InstanceId: 2, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "doPop" 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.menu.View);
+					var expectedViewModel = 
+					{
+						initState:
+						{
+							foo: "bar"
+						} 
+					};
+					assert.objectsEqual(responseObject.ViewModel, expectedViewModel);
+					done();
+				});
+			});
+		});
+
+		describe("back supported", function()
+		{
+			it("should be false on top-level page with no OnBack handler", function(done) 
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
-				assert.objectsEqual(responseObject.View, testModules.menu.View);
-				assert.objectsEqual(responseObject.ViewModel, {});
-				done();
+				apiProcessor = createApiProcessor(testModules);
+		    	Synchro = require("../lib/app-services")(apiProcessor, null);
+
+			    session = sessionStore.createSession();
+
+		        // Initial page request
+				var requestObject = 
+				{
+					Mode: "Page", 
+					Path: "menu", 
+					TransactionId: 0, 
+					DeviceMetrics: metrics.DeviceMetrics, 
+					ViewMetrics: metrics.ViewMetrics 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.menu.View);
+					assert.objectsEqual(responseObject.ViewModel, {});
+					assert.equal(responseObject.Back, false);
+					done();
+				});
 			});
-		});
+
+	        it("should be true when back stack supports pop and no OnBack", function(done) 
+	        {
+	        	startAtMenu();
+
+		        // Command: navigate to counter
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "menu", 
+					InstanceId: 1, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "goToIntermediate" 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.intermediate.View);
+					assert.objectsEqual(responseObject.ViewModel, {});
+					assert.equal(responseObject.Back, true);
+					done();
+				});
+
+			});
+
+	        it("should navigate back to menu on 'Mode: Back' transaction", function(done) 
+	        {
+		        // Command: exit
+				var requestObject = 
+				{ 
+					Mode: "Back", 
+					Path: "intermediate", 
+					InstanceId: 2, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.menu.View);
+					assert.objectsEqual(responseObject.ViewModel, {});
+					assert.equal(responseObject.Back, false);
+					done();
+				});
+			});
+
+
+	        it("should be true when OnBack provided", function(done) 
+	        {
+	        	startAtMenu();
+
+		        // Command: navigate to counter
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "menu", 
+					InstanceId: 1, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+					Command: "goToCounter" 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.counter.View);
+					var expectedViewModel = 
+					{
+						count: 0,
+						fontColor: "Green"
+					};
+					assert.objectsEqual(responseObject.ViewModel, expectedViewModel);
+					assert.equal(responseObject.Back, true);
+					done();
+				});
+
+			});
+
+	        it("should navigate back to menu on 'Mode: Back' transaction using OnBack", function(done) 
+	        {
+				var requestObject = 
+				{ 
+					Mode: "Back", 
+					Path: "counter", 
+					InstanceId: 2, 
+					InstanceVersion: 1, 
+					TransactionId: 0, 
+				};
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":0", function(err, responseObject)
+				{
+					assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
+					assert.objectsEqual(responseObject.View, testModules.menu.View);
+					assert.objectsEqual(responseObject.ViewModel, {});
+					assert.equal(session.UserData.counterOnBack, true);
+					assert.equal(responseObject.Back, false);
+					done();
+				});
+			});
+
+
+		});		
 	});
 
 	describe("ViewModel updates from command", function(done)
@@ -261,7 +917,6 @@ describe("API Processor", function()
 				View:
 				{
 				    title: "Counter Page",
-				    onBack: "exit",
 				    elements: 
 				    [
 				        { control: "text", value: "Count: {count}", foreground: "{fontColor}", font: 24 },
@@ -317,7 +972,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 				var expectedViewModel = 
 				{
 					count: 0,
@@ -346,7 +1001,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 				var expectedDeltas = 
 				[
 				    { path: "count", change: "update", value: 12 },
@@ -401,7 +1056,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 		        // Verify response contains correct view and viewModel
 		        var expectedView = 
@@ -458,7 +1113,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 		        // Verify response contains correct view and viewModel
 		        var expectedView = 
@@ -494,7 +1149,7 @@ describe("API Processor", function()
 
 			readerWriter.readAsync(session.id + ":0", function(err, responseObject)
 			{
-				assert.equal(responseObject.Error, undefined, "Unexpected error: " + responseObject.Error);
+				assert.equal(responseObject.Error, undefined, "Unexpected error: " + util.formatJSON(responseObject.Error));
 
 		        // Verify response contains correct view and viewModel
 		        var expectedView = 
@@ -1319,7 +1974,7 @@ describe("API Processor", function()
 				{
 				    goToCountdown: function(context, session, viewModel, params)
 				    {
-				        return Synchro.navigateToView(context, "countdown");
+				        return Synchro.navigateTo(context, "countdown");
 				    },
 				}
 			},
@@ -1329,7 +1984,6 @@ describe("API Processor", function()
 				View:
 				{
 				    title: "Countdown Page",
-				    onBack: "exit",
 				    elements: 
 				    [
 				        { control: "text", value: "Count: {count}", font: 24 },
@@ -1969,9 +2623,21 @@ describe("API Processor", function()
 
 				Commands:
 				{
-				    testNavigateToView: function(context)
+				    testNavigateTo: function(context)
 				    {
-				    	Synchro.navigateToView();
+				    	Synchro.navigateTo();
+				    },
+				    testPushAndNavigateTo: function(context)
+				    {
+				    	Synchro.pushAndNavigateTo();
+				    },
+				    testPop: function(context)
+				    {
+				    	Synchro.pop();
+				    },
+				    testPopTo: function(context)
+				    {
+				    	Synchro.popTo();
 				    },
 				    testShowMessage: function(context)
 				    {
@@ -2037,9 +2703,9 @@ describe("API Processor", function()
 			apiProcessor.process(session, requestObject, response);
 		});
 
-		it("should fail if invalid context passed to navigateToView", function(done) 
+		it("should fail if invalid context passed to navigateTo", function(done) 
 		{
-			requestObject.Command = "testNavigateToView";
+			requestObject.Command = "testNavigateTo";
 			apiProcessor.process(session, requestObject, response);
 
 			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
@@ -2050,7 +2716,76 @@ describe("API Processor", function()
 					Error:
 					{
 						name: "UserCodeError",
-						message: "UserCode error in method: Command.testNavigateToView - A valid context must be the first parameter to Synchro.navigateToView()"
+						message: "UserCode error in method: Command.testNavigateTo - A valid context must be the first parameter to Synchro.navigateTo()"
+					},
+					TransactionId: 1
+				}
+
+				assert.objectsEqual(responseObject, expectedResponse);
+				done();
+			});
+		});
+
+		it("should fail if invalid context passed to pushAndNavigateTo", function(done) 
+		{
+			requestObject.Command = "testPushAndNavigateTo";
+			apiProcessor.process(session, requestObject, response);
+
+			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
+			{
+				var expectedResponse = 
+				{
+					Path: "test",
+					Error:
+					{
+						name: "UserCodeError",
+						message: "UserCode error in method: Command.testPushAndNavigateTo - A valid context must be the first parameter to Synchro.pushAndNavigateTo()"
+					},
+					TransactionId: 1
+				}
+
+				assert.objectsEqual(responseObject, expectedResponse);
+				done();
+			});
+		});
+
+		it("should fail if invalid context passed to pop", function(done) 
+		{
+			requestObject.Command = "testPop";
+			apiProcessor.process(session, requestObject, response);
+
+			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
+			{
+				var expectedResponse = 
+				{
+					Path: "test",
+					Error:
+					{
+						name: "UserCodeError",
+						message: "UserCode error in method: Command.testPop - A valid context must be the first parameter to Synchro.pop()"
+					},
+					TransactionId: 1
+				}
+
+				assert.objectsEqual(responseObject, expectedResponse);
+				done();
+			});
+		});
+
+		it("should fail if invalid context passed to popTo", function(done) 
+		{
+			requestObject.Command = "testPopTo";
+			apiProcessor.process(session, requestObject, response);
+
+			readerWriter.readAsync(session.id + ":1", function(err, responseObject)
+			{
+				var expectedResponse = 
+				{
+					Path: "test",
+					Error:
+					{
+						name: "UserCodeError",
+						message: "UserCode error in method: Command.testPopTo - A valid context must be the first parameter to Synchro.popTo()"
 					},
 					TransactionId: 1
 				}
@@ -2347,7 +3082,7 @@ describe("API Processor", function()
 					{
 					    nowhere: function(context, session, viewModel)
 					    {
-					        return Synchro.navigateToView(context, "nowhere");
+					        return Synchro.navigateTo(context, "nowhere");
 					    },
 					}					
 				}

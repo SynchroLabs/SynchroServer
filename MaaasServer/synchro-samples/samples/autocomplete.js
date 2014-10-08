@@ -14,7 +14,6 @@ var states =
 exports.View =
 {
     title: "Auto-Complete",
-    onBack: "exit",
     elements:
     [
         { control: "text", value: "Enter a State", fontsize: 12, margin: { bottom: 0 } },
@@ -78,9 +77,5 @@ exports.Commands =
         {
             return Synchro.showMessage(context, { message: "It looks like '{searchText}' is a not state, sorry." });
         }
-    },
-    exit: function(context)
-    {
-        return Synchro.navigateToView(context, "menu");
     },
 }

@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "StackPanel",
-    onBack: "exit",
     elements:
     [
         { control: "stackpanel", orientation: "Horizontal", contents: [
@@ -68,9 +67,5 @@ exports.Commands =
     setHAlign: function(context, session, viewModel, params)
     {
         viewModel.alignContentH = params.align;
-    },
-    exit: function(context)
-    {
-        return Synchro.navigateToView(context, "menu");
     },
 }

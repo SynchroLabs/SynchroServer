@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "Device Metrics",
-    onBack: "exit",
     elements: 
     [
         { control: "text", value: "OS: {deviceMetrics.os}", fontsize: 12 },
@@ -63,12 +62,4 @@ exports.InitializeViewModel = function(context, session)
 exports.OnViewMetricsChange = function(context, session, viewModel, metrics)
 {
     viewModel.orientation = metrics.ViewMetrics.orientation;
-}
-
-exports.Commands = 
-{
-    exit: function(context)
-    {
-        return Synchro.navigateToView(context, "menu");
-    },
 }

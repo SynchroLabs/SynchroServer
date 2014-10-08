@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "List example",
-    onBack: "exit",
     elements:
     [
         { control: "stackpanel", orientation: "Horizontal", contents: [
@@ -48,9 +47,5 @@ exports.Commands =
     {
         viewModel.items.remove(viewModel.selectedItems);
         viewModel.selectedItems = [];
-    },
-    exit: function(context)
-    {
-        return Synchro.navigateToView(context, "menu");
     },
 }

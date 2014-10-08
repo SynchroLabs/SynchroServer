@@ -5,7 +5,6 @@
 exports.View =
 {
     title: "Contacts example",
-    onBack: "exit",
     elements:
     [
         { control: "stackpanel", orientation: "Horizontal", contents: [
@@ -83,9 +82,5 @@ exports.Commands =
     {
         viewModel.contacts.remove(viewModel.selectedContacts);
         viewModel.selectedContacts = [];
-    },
-    exit: function(context)
-    {
-        return Synchro.navigateToView(context, "menu");
     },
 }

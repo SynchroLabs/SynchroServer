@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "Binding",
-    onBack: "exit",
     elements:
     [
         // This demonstrates binding to something that doesn't exist in the model at startup, and that the
@@ -57,9 +56,5 @@ exports.Commands =
     undefine: function(context, session, viewModel)
     {
         delete viewModel.notDefined;
-    },
-    exit: function(context)
-    {
-        return Synchro.navigateToView(context, "menu");
     },
 }

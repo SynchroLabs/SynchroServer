@@ -5,7 +5,6 @@ var request = require('request');
 exports.View =
 {
     title: "Properties",
-    onBack: "exit",
     elements: 
     [
         { select: "First", contents: [
@@ -75,7 +74,7 @@ function searchForProperties(placename, callback)
     });
 }
 
-exports.InitializeViewModel = function(context, session, params)
+exports.InitializeViewModel = function(context, session, params, state)
 {    
     var viewModel =
     {
@@ -89,11 +88,10 @@ exports.InitializeViewModel = function(context, session, params)
     // If we are coming back to the list page from a detail page, we restore the saved property list (to save us
     // from having to go get it again)
     //
-    if (params && params.fromDetail && session.foundProperties)
+    if (state)
     {
-        viewModel.location = session.foundProperties.location;
-        viewModel.properties = session.foundProperties.properties;
-        delete session.foundProperties;
+        viewModel.location = state.location;
+        viewModel.properties = state.properties;
         viewModel.isSearching = false;
     }
 
@@ -138,12 +136,8 @@ exports.Commands =
     {
         // Stash the property list in the session so we can pull it back it when we navigate back here.
         //
-        session.foundProperties = { location: viewModel.location, properties: viewModel.properties };
+        var state = { location: viewModel.location, properties: viewModel.properties };
 
-        return Synchro.navigateToView(context, "propx_detail", { property: params.property });
-    },
-    exit: function(context)
-    {
-        return Synchro.navigateToView(context, "propx_main");
+        return Synchro.pushAndNavigateTo(context, "propx_detail", { property: params.property }, state);
     },
 }

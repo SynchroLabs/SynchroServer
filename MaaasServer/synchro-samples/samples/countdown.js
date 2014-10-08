@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "Countdown",
-    onBack: "exit",
     elements: 
     [
         { control: "text", value: "Loading...", foreground: "Red", font: { size: 24, bold: true }, visibility: "{isLoading}" },
@@ -59,9 +58,5 @@ exports.Commands =
     stop: function(context, session, viewModel, params)
     {
         viewModel.isCounting = false;
-    },
-    exit: function(context, session, viewModel)
-    {
-        return Synchro.navigateToView(context, "menu");
     },
 }

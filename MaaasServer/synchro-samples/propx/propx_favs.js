@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "Favorites",
-    onBack: "exit",
     elements: 
     [
     ]
@@ -22,9 +21,5 @@ exports.Commands =
 {
     details: function(context, session, viewModel)
     {
-    },
-    exit: function(context)
-    {
-        return Synchro.navigateToView(context, "propx_main");
     },
 }

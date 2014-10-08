@@ -3,7 +3,6 @@
 exports.View =
 {
     title: "Flex 2",
-    onBack: "exit",
     elements:
     [
         { control: "stackpanel", orientation: "Horizontal", width: "*", contents: [
@@ -26,12 +25,4 @@ exports.InitializeViewModel = function (context, session)
     {
     }
     return viewModel;
-}
-
-exports.Commands =
-{
-    exit: function (context) 
-    {
-        return Synchro.navigateToView(context, "menu");
-    },
 }

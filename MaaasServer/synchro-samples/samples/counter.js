@@ -9,7 +9,6 @@ var fontStyle =
 exports.View =
 {
     title: "Click Counter",
-    onBack: "exit",
     elements: 
     [
         { control: "text", value: "Count: {count}", foreground: "{font.color}", font: { size: 24, bold: "{font.isBold}" } },
@@ -88,4 +87,9 @@ exports.Commands =
         console.log("Updated session count to: " + session.count);
         return Synchro.navigateToView(context, "menu");
     },
+}
+
+exports.OnBack = function(context, session, viewModel)
+{
+    Synchro.popTo(context, "menu");
 }
