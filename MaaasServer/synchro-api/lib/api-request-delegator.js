@@ -10,23 +10,24 @@
 //     processWebSocket(request, socket, body);
 //     
 var wait = require('wait.for');
+var util = require('./util');
 
 var log4js = require('log4js');
 var logger = require('log4js').getLogger("api-request-delegator");
 
-function createForkedRequestProcessorAsync(params, debugPort, onCreated)
+function createForkedRequestProcessorAsync(params, debugPort, loggingConfig, onCreated)
 {
     // This ref to the processor proxy is so we can call the http post processing in-proc
     var apiRequestProcessorProxy = require("./api-request-processor-proxy"); 
 
-    var args = [JSON.stringify(params), global.defaultLogLevel]; // argv[2] in child process
+    var args = [JSON.stringify(params), JSON.stringify(loggingConfig)]; // args passed to child process (will start at argv[2] in child process)
     var options = {};
     if (debugPort)
     {
         options['execArgv'] = ['--debug=' + debugPort];
     }
     options['silent'] = true;
-
+            
     logger.info("Launching child process...");
 
     var childProcess = require('child_process').fork(__dirname + '/api-request-processor-proxy.js', args, options);
@@ -175,7 +176,7 @@ function createInProcRequestProcessorAsync(params, onCreated)
     onCreated(null, requestProcessor);
 }
 
-module.exports = function(sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, fork, debugPort, onCreated)
+module.exports = function(sessionStoreSpec, moduleStoreSpec, resourceResolverSpec, fork, debugPort, loggingConfig, onCreated)
 { 
     var params = 
     {
@@ -186,7 +187,7 @@ module.exports = function(sessionStoreSpec, moduleStoreSpec, resourceResolverSpe
 
     if (fork)
     {
-        createForkedRequestProcessorAsync(params, debugPort, onCreated);
+        createForkedRequestProcessorAsync(params, debugPort, loggingConfig, onCreated);
     }
     else
     {

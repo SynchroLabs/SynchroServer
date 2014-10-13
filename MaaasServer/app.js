@@ -7,13 +7,7 @@ var wait = require('wait.for');
 var WebSocket = require('faye-websocket');
 var async = require('async');
 var netutil = require('./netutil');
-
 var log4js = require('log4js');
-// Redirect console.log to log4js, turn off color coding
-log4js.configure({ appenders: [ { type: "console", layout: { type: "basic" } } ], replaceConsole: true })
-
-var logger = log4js.getLogger("app");
-logger.info("Synchro server loading...");
 
 // Process command line params
 //
@@ -22,6 +16,7 @@ commander.version('0.0.1');
 commander.option('-n, --nofork', 'Do not fork api processors (run inproc)');
 commander.option('-p, --port <n>', 'Server port', parseInt);
 commander.option('-s, --services <value>', 'Run with specified services configuration');
+commander.option('-l, --logconfig <value>', 'Configure logging using specified logging configuration file');
 commander.parse(process.argv);
 
 // Load config - precendence: command line, environment, config.json, default
@@ -35,6 +30,10 @@ if (commander.port)
 if (commander.services)
 {
     overrides.SERVICES_CONFIG = commander.services;
+}
+if (commander.logconfig)
+{
+    overrides.LOG4JS_CONFIG = commander.logconfig;
 }
 nconf.overrides(overrides);
 nconf.env();
@@ -55,15 +54,33 @@ nconf.defaults(
     [
         { "uriPath": "samples", "container": "samples" },
         { "uriPath": "propx", "container": "propx" }
-    ]
+    ],
+    'LOG4JS_CONFIG': 
+    { 
+        // Redirect console.log to log4js, turn off color coding
+        appenders:
+        [ 
+            { type: "console", layout: { type: "basic" } } 
+        ],
+        replaceConsole: true,
+        levels: 
+        {
+            '[all]': 'INFO'
+        }
+    }
 });
+
+log4js.configure(nconf.get('LOG4JS_CONFIG'));
+
+var logger = log4js.getLogger("app");
+logger.info("Synchro server loading...");
 
 // Create Synchro API processor manager
 //
 var synchroApi = require('./synchro-api');
 var synchroApiUrlPrefix = nconf.get("API_PATH_PREFIX");
 
-var apiManager = synchroApi.createApiProcessorManager(nconf.get('DEBUG_BASE_PORT'));
+var apiManager = synchroApi.createApiProcessorManager(nconf.get('DEBUG_BASE_PORT'), nconf.get('LOG4JS_CONFIG'));
 
 // Create Synchro studio
 //

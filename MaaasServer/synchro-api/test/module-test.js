@@ -53,7 +53,7 @@ describe("Synchro API module", function ()
 
 	describe("Processor Manager", function() 
 	{
-		var apiProcessorManager = synchroApiModule.createApiProcessorManager(6969);
+		var apiProcessorManager = synchroApiModule.createApiProcessorManager(6969, {});
 		var inprocProcessor;
 		var forkedProcessor;
 

@@ -26,7 +26,7 @@ exports.createServiceFromSpec = function(serviceSpec)
     }
 }
 
-exports.createApiProcessorManager = function(baseDebugPort)
+exports.createApiProcessorManager = function(baseDebugPort, loggingConfig)
 {
     logger.info("Getting API manager with base debug port: " + baseDebugPort);
     var currentDebugPort = baseDebugPort;
@@ -50,7 +50,7 @@ exports.createApiProcessorManager = function(baseDebugPort)
             }
 
             logger.info("Creating managed API processor for appPath: " + appPath + ", debug port is: " + debugPort);
-            var apiProcessor = require("./lib/api-request-delegator")(services.sessionStoreSpec, services.moduleStoreSpec, services.resourceResolverSpec, runForked, debugPort, function(err, apiProcessor)
+            var apiProcessor = require("./lib/api-request-delegator")(services.sessionStoreSpec, services.moduleStoreSpec, services.resourceResolverSpec, runForked, debugPort, loggingConfig, function(err, apiProcessor)
             {
                 if (!err)
                 {

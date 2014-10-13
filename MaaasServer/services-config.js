@@ -1,6 +1,8 @@
 var path = require('path');
 var nconf = require('nconf');
 
+var logger = require('log4js').getLogger("services-config");
+
 exports.getServicesConfig = function(config, directory)
 {
 	var servicesConfig;

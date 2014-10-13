@@ -51,10 +51,11 @@ exports.View =
 
 exports.InitializeViewModel = function(context, session)
 {
+    var metrics = Synchro.getMetrics(context);
     var viewModel =
     {
-        deviceMetrics: session.DeviceMetrics,
-        orientation: session.ViewMetrics.orientation,
+        deviceMetrics: metrics.DeviceMetrics,
+        orientation: metrics.ViewMetrics.orientation,
     }
     return viewModel;
 }

@@ -55,12 +55,6 @@ exports.postProcessHttpRequest = function(request, response, err, data)
 //
 if (!module.parent)
 {
-	// Need to reconfigure log4js here (log4js config is at the process level and not inherited)
-	var log4js = require('log4js');
-
-	// Redirect console.log to log4js, turn off color coding
-	log4js.configure({ appenders: [ { type: "console", layout: { type: "basic" } } ], replaceConsole: true })
-
 	// Maybe we just hook stdout/stderr when we're running user modules, so we can pipe just that to the debugger.
 	//
 	// https://gist.github.com/pguillory/729616
@@ -78,14 +72,11 @@ if (!module.parent)
 	var filename = process.argv[1];           // argv[1] is the filename of this file
 	var params = JSON.parse(process.argv[2]); // argv[2] is the params we passed in (JSON encoded)
 
-	// Probably should use a log4js config that we get from parent process.  For now, we just get the global log 
-	// level, if any, from the parent and apply it here.
-	//
-	var defaultLogLevel = process.argv[3];
-	if (defaultLogLevel)
-	{
-		log4js.setGlobalLogLevel(defaultLogLevel);
-	}
+	// Need to reconfigure log4js here (log4js config is at the process level and not inherited)
+	var log4js = require('log4js');
+
+	var loggingParams = JSON.parse(process.argv[3]); // argv[3] is the logging config we passed from the parent process (JSON encoded)
+	log4js.configure(loggingParams);
 
 	logger.info("Forked API child process started started: " + filename);
 
