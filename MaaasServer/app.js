@@ -75,6 +75,11 @@ log4js.configure(nconf.get('LOG4JS_CONFIG'));
 var logger = log4js.getLogger("app");
 logger.info("Synchro server loading...");
 
+if (nconf.get("SERVICES_CONFIG") == "local")
+{
+    logger.info("Using local services, reasource prefix: " + nconf.get("LOCAL_RESOURCE_PREFIX"));
+}
+
 // Create Synchro API processor manager
 //
 var synchroApi = require('./synchro-api');

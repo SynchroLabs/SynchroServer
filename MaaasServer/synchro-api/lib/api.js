@@ -249,6 +249,15 @@ function isCurrentModuleInstance(context, instanceId)
     return (instanceId && (context.session.ModuleInstance.instanceId == instanceId));
 }
 
+function isBackAvailable(context, routeModule)
+{
+    // Determine if "back" is available based on either an OnBack handler, or if not provided, whether
+    // the back stack supports pop.  Report that to client.
+    //
+    var backStack = new BackStack(context.session)
+    return ((routeModule.OnBack instanceof Function) || backStack.getSize() > 1);
+}
+
 function populateNewPageResponse(synchroApi, route, routeModule, context, params, state)
 {    
     var viewModel = getViewModel(routeModule, context, context.session, params, state);
@@ -284,12 +293,7 @@ function populateNewPageResponse(synchroApi, route, routeModule, context, params
     //
     context.response.Path = route;
     context.response.View = view;
-
-    // Determine if "back" is available based on either an OnBack handler, or if not provided, whether
-    // the back stack supports pop.  Report that to client.
-    //
-    var backStack = new BackStack(context.session)
-    context.response.Back = ((routeModule.OnBack instanceof Function) || backStack.getSize() > 1);
+    context.response.Back = isBackAvailable(context, routeModule);
 
     if (routeModule.LoadViewModel)
     {
@@ -434,6 +438,7 @@ function sendUpdate(synchroApi, context, isInterim)
                 context.response.InstanceVersion = context.session.ModuleInstance.ClientViewModel.instanceVersion;
             }
 
+            // logger.debug("Sending response: " + util.formatJSON(context.response));
             writeData(context.response);
 
             if (!context.response.Error)
@@ -546,18 +551,23 @@ SynchroApi.prototype.process = function(session, requestObject, responseObject)
 
     try
     {
-        if ((context.request.Mode == "Page") || (context.request.Mode == "Resync"))
+        if (context.request.Mode == "Page")
         {
-            // Page and Resync requests do not rely on matching current InstanceId
-            //
             if (context.request.Path)
             {
                 route = context.request.Path;            
             }
             else
             {
-                throw new ClientError("Received Mode: " + context.request.Mode + " request with no Path");
+                throw new ClientError("Received Mode: Page request with no Path");
             }
+        }
+        else if (context.request.Mode == "Resync")
+        {
+            // A resync is always going to get the ViewModel, or View and ViewModel, of the current instance, so the 
+            // active path/route for this request will be set to that of the current instance for the Resync.
+            //
+            route = context.session.ModuleInstance.path;
         }
         else if (context.request.InstanceId >= 0)
         {
@@ -760,7 +770,9 @@ SynchroApi.prototype.process = function(session, requestObject, responseObject)
                     {
                         // Client has obsolete instance, so it also needs a new view...
                         //
+                        context.response.Path = route;
                         context.response.View = getView(routeModule, context, context.session, context.session.ModuleInstance.ClientViewModel.ViewModel);
+                        context.response.Back = isBackAvailable(context, routeModule);
                     }
                 }
                 else
@@ -915,10 +927,10 @@ SynchroApi.prototype.process = function(session, requestObject, responseObject)
                     //
                     if (context.session.ModuleInstance.dynamic)
                     {
-                        // Note: getView() will call InitializeView if present, and that could potentially navigate to another
-                        // page, though that would be a dick move.  But anyway, that's why we have to do the path check again
-                        // below, before we update the ViewModel.
+                        // !!! Note: getView() will call InitializeView if present, and that could potentially navigate to another
+                        //     page, though that would be a dick move.  Should probably check for that and handle (user error?).
                         //
+
                         var view = getView(routeModule, context, context.session, context.LocalViewModel.ViewModel, true);
 
                         // See if the View actually changed, and if so, send the updated View back...
@@ -934,6 +946,7 @@ SynchroApi.prototype.process = function(session, requestObject, responseObject)
                             //
                             context.session.ModuleInstance.viewHash = viewHash;
                             context.response.View = view;
+                            context.response.Back = isBackAvailable(context, routeModule);
                         }
                     }
                 }

@@ -24,11 +24,8 @@ exports.View =
             ] },
 
             { select: "First", contents: [
-                { select: "All", filter: { deviceMetric: "os", is: "Windows" }, contents: [
-                    { control: "commandBar.button", text: "Favs", icon: "Stop", commandBar: "Bottom", binding: "favs" },
-                    ]},
-                { select: "All", filter: { deviceMetric: "os", is: "WinPhone" }, contents: [
-                    { control: "appBar.button", text: "Favs", icon: "add", binding: "favs" },
+                { select: "All", filter: { deviceMetric: "os", is: ["Windows", "WinPhone"] }, contents: [
+                    { control: "commandBar.button", text: "Favs", icon: "Favorite", commandBar: "Bottom", binding: "favs" },
                     ]},
                 { select: "All", filter: { deviceMetric: "os", is: "Android" }, contents: [
                     { control: "actionBar.item", text: "Favs", showAsAction: "IfRoom", binding: "favs" },

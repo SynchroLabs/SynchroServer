@@ -18,16 +18,10 @@ exports.View =
         // Toolbar support for ther various platforms
         //
         { select: "First", contents: [
-            { select: "All", filter: { deviceMetric: "os", is: "Windows" }, contents: [
+            { select: "All", filter: { deviceMetric: "os", is: ["Windows", "WinPhone"] }, contents: [
                 { control: "commandBar.button", text: "Add", icon: "Add", commandBar: "Bottom", commandType: "Secondary", binding: { command: "vary", amount: 1 } },
                 { control: "commandBar.button", text: "Subtract", icon: "Remove", commandBar: "Bottom", commandType: "Secondary", binding: { command: "vary", amount: -1 }, enabled: "{count}" },
-                { control: "commandBar.button", text: "Reset", icon: "Stop", commandBar: "Bottom", binding: "reset" },
-                ]
-            },
-            { select: "All", filter: { deviceMetric: "os", is: "WinPhone" }, contents: [
-                { control: "appBar.button", text: "Add", icon: "add", binding: { command: "vary", amount: 1 } },
-                { control: "appBar.button", text: "Subtract", icon: "minus", binding: { command: "vary", amount: -1 }, enabled: "{count}" },
-                { control: "appBar.button", text: "Reset", icon: "refresh", binding: "reset" },
+                { control: "commandBar.button", text: "Reset", icon: "Delete", commandBar: "Bottom", binding: "reset" },
                 ]
             },
             { select: "All", filter: { deviceMetric: "os", is: "Android" }, contents: [
