@@ -19,6 +19,6 @@
     <AzureStorageAccountName>synchroncus</AzureStorageAccountName>
     <AzureAppendTimestampToDeploymentLabel>True</AzureAppendTimestampToDeploymentLabel>
     <EnableRemoteDebugger>True</EnableRemoteDebugger>
-    <RemoteDebuggerConnectorCertificateThumbprint>466A7D5A3E7FA1F2CE03C1829E5CB7A85976F61D</RemoteDebuggerConnectorCertificateThumbprint>
+    <RemoteDebuggerConnectorCertificateThumbprint>996C3F25069B114F69AA66641B67EEA7E0A74C8F</RemoteDebuggerConnectorCertificateThumbprint>
   </PropertyGroup>
 </Project>
