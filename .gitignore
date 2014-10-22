@@ -158,11 +158,14 @@ $RECYCLE.BIN/
 # RDD - iisnode log files (not sure why they get sprayed into the project
 /MaaasServer/iisnode
 
+# RDD - Include all node_modules contents
+!**/node_modules/**/*
+
 # RDD - Enable "debug" package inside connect/express
-!node_modules/*/debug/
+#!node_modules/*/debug/
 
 # RDD - We want to check in the pre-built binaries for the "fibers" node_module
-!/MaaasServer/node_modules/wait.for/node_modules/fibers/bin
+#!/MaaasServer/node_modules/wait.for/node_modules/fibers/bin
 
 # RDD - Sublime editor 
 *.sublime-project
@@ -170,3 +173,5 @@ $RECYCLE.BIN/
 
 # RDD - Exclude config
 /MaaasServer/config.json
+
+/packages/**
