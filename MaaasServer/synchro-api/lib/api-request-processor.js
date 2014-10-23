@@ -4,7 +4,6 @@
 //
 var synchroApi = require('../index'); // This is our own 'synchro-api' module
 var wait = require('wait.for');
-var WebSocket = require('faye-websocket');
 
 var ReaderWriter = require("../lib/reader-writer");
 
@@ -80,8 +79,6 @@ exports.createApiRequestProcessorAsync = function(params, callback)
                 // any other kind of update.  By setting the Mode to "Page", we will effectively be forcing a 
                 // silent reload of the current page (as new, with a "new" ViewwModel).
                 //
-                // Also: The WebSocket handler version of this should do something equivalent.
-                //
                 if (request.body.Mode != "Page")
                 {
                     logger.info("Session matching client session ID could not be found, forcing page reload");
@@ -111,70 +108,6 @@ exports.createApiRequestProcessorAsync = function(params, callback)
         }
     }
 
-    // This is called when the websocket connection is initiated.  The "state" returned is passed in to each
-    // processWebSocketMessage() call.
-    //
-    function internalProcessWebSocket(ws, request)
-    {
-        var sessionId = request.headers[SynchroApiSessionIdHeader];
-        logger.info("API request session ID: " + sessionId);
-
-        var newSession = false;
-        var session = sessionStore.getSession(sessionId);
-        if (!session)
-        {
-            session = sessionStore.createSession();
-            newSession = true;
-        }
-            
-        var state = 
-        {
-            session: session,
-            newSession: newSession
-        }
-        return state;
-    }
-
-    // The web socket request processor (always running in a fiber)
-    //
-    function internalProcessWebSocketMessage(ws, requestObject, state)
-    {
-        logger.info("API Processing websocket request - mode: " + requestObject.Mode);
-
-        // See if this is an AppDefinition request and process appropriately
-        //
-        if (requestObject.Mode === "AppDefinition")
-        {
-            var appDefinition = api.getAppDefinition();
-            logger.info("AppDefinition requested: " + appDefinition);
-            ws.send(JSON.stringify(appDefinition));
-            return;
-        }
-
-        var responseObject = {};
-        if (state.newSession)
-        {
-            logger.info("API - returning new session id: " + state.session.id);
-            responseObject.NewSessionId = state.session.id;
-            state.newSession = false;
-        }
-
-        readerWriter.readAsync(session.id, function(err, responseObject)
-        {
-            if (responseObject.Update !== "Partial")
-            {
-                sessionStore.putSession(state.session);
-            }
-
-            ws.send(JSON.stringify(responseObject));
-        });        
-
-        if (requestObject.Mode !== "Continue")
-        {
-            apiProcess(state.session, requestObject, responseObject);
-        }
-    }
-
     // Public API functions may be called either in-proc or cross-process.
     //
     var publicApi =
@@ -183,38 +116,6 @@ exports.createApiRequestProcessorAsync = function(params, callback)
         {
             logger.info("Launching API http request processor on a fiber...");
             wait.launchFiber(internalProcessHttpRequest, request, callback); //handle in a fiber
-        },
-
-        processWebSocket: function(request, socket, body)
-        {
-            var ws = new WebSocket(request, socket, body);
-            logger.info("API processor initialized WebSocket");
-
-            var state = null;
-
-            ws.on('message', function(event) 
-            {        
-                logger.info("API got WebSocket message: " + event.data);
-                logger.info("Launching API web socket request processor on a fiber...");
-
-                var requestObject = JSON.parse(event.data);
-
-                if ((state == null) && (event.data.Mode === "AppDefinition"))
-                {
-                    // Establish the WebSocket "state" (session binding) if it hasn't been set yet and this
-                    // is not the AppDefinition request, which is session-less.
-                    //
-                    state = internalProcessWebSocket(ws, request);
-                }
-
-                wait.launchFiber(internalProcessWebSocketMessage, ws, requestObject, state); //handle in a fiber
-            });
-
-            ws.on('close', function(event) 
-            {
-                logger.info('API WebSocket close', event.code, event.reason);
-                ws = null;
-            });
         },
 
         // Module reloader (always already running in a fiber)

@@ -4,7 +4,6 @@ var http = require('http');
 var path = require('path');
 var url = require('url');
 var wait = require('wait.for');
-var WebSocket = require('faye-websocket');
 var async = require('async');
 var netutil = require('./netutil');
 var log4js = require('log4js');
@@ -174,25 +173,11 @@ var server = http.createServer(app);
 
 server.on('upgrade', function(request, socket, body) 
 {
-    if (netutil.isWebSocket(request)) // was: if (WebSocket.isWebSocket(request))
+    if (netutil.isWebSocket(request))
     {
         var path = url.parse(request.url).pathname; 
 
-        if (path.indexOf(synchroApiUrlPrefix + "/") == 0)
-        {
-            // !!! Running the API processor as a forked process on Azure does not work with a WebSocket
-            //     connection. Node.js has a concept of being able to pass a "handle" (a socket in this 
-            //     case) from the parent process to the child process, which is how the main processor 
-            //     dispatches API request to the API processor when using WebSockets.  On Azure, the socket
-            //     you get is on a named pipe, and on Windows you cannot pass a named pipe socket handle
-            //     over the IPC mechanism (which is also a named pipe).
-            //
-            //     This is the main Node/libuv bug: https://github.com/joyent/libuv/issues/480
-            //
-            var appPath = path.substring(synchroApiUrlPrefix.length + 1);
-            apiManager.processWebSocket(appPath, request, socket, body);
-        }
-        else if (path === synchroStudioUrlPrefix) // !!! Web session auth (maybe inside websocket processor - to get/use session)
+        if (path === synchroStudioUrlPrefix) // !!! Web session auth (maybe inside websocket processor - to get/use session)
         {
             synchroStudio.processWebSocket(request, socket, body);
         }

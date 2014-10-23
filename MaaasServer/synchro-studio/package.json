@@ -4,6 +4,7 @@
   "description": "Synchro Studio",
   "homepage": "http://synchro.io/",
   "dependencies": {
-    "express-hbs": "^0.7.9"
+    "express-hbs": "^0.7.9",
+    "faye-websocket": "^0.7.3"
   }
 }

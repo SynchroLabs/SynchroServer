@@ -106,19 +106,6 @@ exports.createApiProcessorManager = function(baseDebugPort, loggingConfig)
                 // !!! BAD - No apiProcessor found at appPath
             }
         },
-
-        processWebSocket: function(appPath, request, socket, body)
-        {
-            var apiProcessor = apiProcessors[appPath];
-            if (apiProcessor)
-            {
-                apiProcessor.processWebSocket(request, response);
-            }
-            else
-            {
-                // !!! BAD - No apiProcessor found at appPath
-            }
-        }
     }
 
     return apiManager;

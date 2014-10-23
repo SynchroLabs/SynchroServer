@@ -7,7 +7,6 @@
 //
 //     debugPort
 //     processHttpRequest(request, response);
-//     processWebSocket(request, socket, body);
 //     
 var wait = require('wait.for');
 var util = require('./util');
@@ -91,12 +90,6 @@ function createForkedRequestProcessorAsync(params, debugPort, loggingConfig, onC
             childProcess.send({cmd: "processHttpRequest", id: id, request: getRequestDataObject(request)});
         },
 
-        processWebSocket: function(request, socket, body)
-        {
-            logger.info("Process forked child web socket");
-            childProcess.send({cmd: "processWebSocket", request: getRequestDataObject(request), body: body}, socket);
-        },
-
         reloadModule: function(moduleName)
         {
             // !!! Also need a way to get signalled that it got done?
@@ -159,12 +152,6 @@ function createInProcRequestProcessorAsync(params, onCreated)
             {
                 apiRequestProcessorModule.postProcessHttpRequest(request, response, err, data);
             });
-        },
-
-        processWebSocket: function(request, socket, body)
-        {
-            logger.info("Process in-proc child web socket");
-            apiRequestProcessor.processWebSocket(request, socket, body);
         },
 
         reloadModule: function(moduleName)

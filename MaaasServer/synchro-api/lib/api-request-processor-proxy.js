@@ -27,11 +27,6 @@ function createApiRequestProcessor(params)
 	            });
 	            break;
 
-	        case "processWebSocket":
-	            message.request.socket = handle;
-	            apiRequestProcessor.processWebSocket(message.request, handle, message.body);
-	            break;
-
 	        case "reloadModule":
 	            wait.launchFiber(apiRequestProcessor.reloadModule, message.moduleName); //handle in a fiber
 	            break;
