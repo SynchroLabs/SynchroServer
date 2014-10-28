@@ -1,5 +1,7 @@
 ﻿// Property Cross main page
 //
+// https://github.com/tastejs/PropertyCross/tree/master/specification
+//
 exports.View =
 {
     title: "PropertyCross",
@@ -41,6 +43,8 @@ exports.View =
 
 exports.InitializeViewModel = function(context, session)
 {
+    session.favs = session.favs || [];
+
     var viewModel =
     {
         search: "",

@@ -1,6 +1,12 @@
 // Property Cross - property list page
 //
 var request = require('request');
+var lodash = require("lodash");
+
+exports.Test = function()
+{
+    console.log("Test");
+}
 
 exports.View =
 {
@@ -32,7 +38,7 @@ exports.View =
                             { control: "text", value: "{price_formatted}", font: { bold: true, size: 14 } },
                             { control: "text", value: "{title}", width: "*", ellipsize: true, fontsize: 12 },
                             { control: "image", resource: "{img_url}", horizontalAlignment: "Left", margin: { top: 10, bottom: 10 }, height: 300, width: 400 },
-                            { control: "text", value: "{beds} bedroom, {baths} bath", fontsize: 12 },
+                            { control: "text", value: "{bedroom_number} bedroom, {bathroom_number} bath", fontsize: 12 },
                             { control: "text", value: "{summary}", width: "*", font: { italic: true, size: 10 } },
                         ] },
                     ] },
@@ -61,6 +67,7 @@ exports.View =
 
 function searchForProperties(placename, callback)
 {
+    // http://www.nestoria.co.uk/help/api-search-listings
     var options = 
     {
         url: "http://api.nestoria.co.uk/api?country=uk&pretty=1&action=search_listings&place_name=" + placename + "&encoding=json&listing_type=buy",
@@ -104,27 +111,51 @@ exports.LoadViewModel = function(context, session, viewModel)
     //
     if (viewModel.properties === null)
     {
-        var props = Synchro.waitFor(context, searchForProperties, viewModel.searchTerm);
-
-        console.log("Got " + props.response.listings.length + " listings");
-        viewModel.location = props.response.locations[0].title;
-
         viewModel.properties = [];
 
-        // Since we're going to be serializing the property list to the session, we don't want to copy any properties
-        // that we aren't going to use.
-        //
-        props.response.listings.forEach(function(listing){
-            viewModel.properties.push({
-                guid: listing.guid,
-                title: listing.title,
-                summary: listing.summary,
-                price_formatted: listing.price_formatted, 
-                img_url: listing.img_url,
-                beds: listing.bedroom_number,
-                baths: listing.bathroom_number
-            });
-        });
+        try
+        {
+            var props = Synchro.waitFor(context, searchForProperties, viewModel.searchTerm);
+
+            // console.log("Got JSON response: " + JSON.stringify(props, null, 4));
+
+            var resp_code = parseInt(props.response.application_response_code);
+            if (resp_code < 200) // Successfully returned listings
+            {
+                viewModel.location = props.response.locations[0].title;
+                console.log("Got " + props.response.listings.length + " listings");
+
+                // Since we're going to be serializing the property list to the session (via the viewModel and possibly the nav stack),
+                // we don't want to copy any properties that we aren't going to use.
+                //
+                props.response.listings.forEach(function(listing)
+                {
+                    viewModel.properties.push(
+                        lodash.pick(listing, "guid", "title", "summary", "price_formatted", "img_url", "bedroom_number", "bathroom_number")
+                        );
+                });            
+            }
+            else if ((resp_code === 200) || (resp_code === 202))
+            {
+                // !!! Ambiguous/misspelled location, one or more locations provided in props.response.locations
+                console.log("Ambiguous/misspelled location");
+            }            
+            else if (resp_code === 201)
+            {
+                // !!! Location could not be found
+                console.log("Location not found");
+            }
+            else
+            {
+                // !!! Error
+                console.log("Error searching for properties");
+            }
+        }
+        catch(err)
+        {
+            // !!! Request error
+            console.log("Network error searching for properties");
+        }
 
         viewModel.isSearching = false;
     }
