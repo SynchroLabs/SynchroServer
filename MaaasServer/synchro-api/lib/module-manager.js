@@ -145,6 +145,11 @@ module.exports = function(moduleStore, resourceResolver)
 
         reloadModule: function(moduleName, source) 
         {
+            if (source)
+            {
+                moduleStore.putModuleSource(moduleName, source);
+            }
+
             var filename = path.resolve(moduleDir, moduleName);
 
             // Delete from cache to allow us to re-require the module...

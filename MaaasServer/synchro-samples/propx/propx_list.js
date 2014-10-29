@@ -122,8 +122,14 @@ exports.LoadViewModel = function(context, session, viewModel)
             var resp_code = parseInt(props.response.application_response_code);
             if (resp_code < 200) // Successfully returned listings
             {
-                viewModel.location = props.response.locations[0].title;
                 console.log("Got " + props.response.listings.length + " listings");
+
+                viewModel.location = props.response.locations[0].title;
+
+                // Put this search on top of the recent searches list (removing previous references to it, and trunctating the list)
+                session.searches.remove(viewModel.location);
+                session.searches = session.searches.splice(0, 3);
+                session.searches.unshift(viewModel.location);
 
                 // Since we're going to be serializing the property list to the session (via the viewModel and possibly the nav stack),
                 // we don't want to copy any properties that we aren't going to use.

@@ -1165,7 +1165,17 @@ SynchroApi.prototype.waitFor = function(moduleObject, context, args)
     // Session data may have changed while we were yielding (that is the only time that can happen, given the single-
     // threaded nature of the environment).
     //
+    // This UserData assignment/update logic below bears some explanation.  User code functions that receive a "session"
+    // parameter are actually receiving context.session.UserData.  Those functions have a reference to this object,
+    // which they typically refer to as "session".  It is imperitave that when we return from this method, the object
+    // to which they have the reference is still the object to which context.session.UserData refers, otherwise local
+    // changes to their "session" would be lost.  This is slightly complex, as we are reloading the session itself
+    // below.
+    //
+    var originalUserDataObject = context.session.UserData;
     context.session = this.sessionStore.getSession(context.session.id); // !!! Async, could temp fail
+    util.assignNewContents(originalUserDataObject, context.session.UserData);
+    context.session.UserData = originalUserDataObject;
 
     // If we are still processing the current instance, get our local view model state back (note that it may have
     // been updated by another processor).

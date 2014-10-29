@@ -16,11 +16,11 @@ exports.View =
                 { control: "button", caption: "My location", verticalAlignment: "Center", binding: "location" },
             ] },
 
-            { control: "stackpanel", margin: { top: 10 }, height: "*", contents: [
+            { control: "stackpanel", margin: { top: 10 }, height: "*", visibility: "{previousSearches}", contents: [
                 { control: "text", value: "Recent searches", fontsize: 12 },
-                { control: "listview", select: "None", height: "*", width: 460, margin: { bottom: 0 }, binding: { items: "previousSearches", onItemClick: { command: "previousSearch", searchTerm: "{data}" } }, itemTemplate:
+                { control: "listview", select: "None", height: "*", width: 460, margin: { bottom: 0 }, binding: { items: "previousSearches", onItemClick: { command: "previousSearch", searchTerm: "{$data}" } }, itemTemplate:
                     { control: "stackpanel", orientation: "Horizontal", padding: 5, contents: [
-                        { control: "text", value: "{title}" },
+                        { control: "text", value: "{$data}", fontsize: 10 },
                     ] },
                 },
             ] },
@@ -44,11 +44,12 @@ exports.View =
 exports.InitializeViewModel = function(context, session)
 {
     session.favs = session.favs || [];
+    session.searches = session.searches || [];
 
     var viewModel =
     {
         search: "",
-        previousSearches: [],
+        previousSearches: session.searches,
     }
     return viewModel;
 }

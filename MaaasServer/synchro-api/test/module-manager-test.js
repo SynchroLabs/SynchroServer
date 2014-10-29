@@ -15,6 +15,8 @@ describe("Module Manager", function()
 
     logger.info("moduleDirectory: " + moduleDirectory);
 
+    var moduleSources = {};
+
     var moduleStore = 
     {
         getAppDefinition: function()
@@ -32,18 +34,23 @@ describe("Module Manager", function()
             
         getModuleSource: function(moduleFilename)
         {
-            var moduleFilePath = path.resolve(moduleDirectory, moduleFilename);
-            var content = util.removeBOM(fs.readFileSync(moduleFilePath, 'utf8'));
-            return content;
+            if (!moduleSources[moduleFilename])
+            {
+                var moduleFilePath = path.resolve(moduleDirectory, moduleFilename);
+                moduleSources[moduleFilename] = util.removeBOM(fs.readFileSync(moduleFilePath, 'utf8'));
+            }
+            return moduleSources[moduleFilename];
         },
             
         putModuleSource: function(moduleFilename, content)
         {
+            moduleSources[moduleFilename] = content;
         },
             
         removeModuleSource: function (moduleFilename)
         {
-        }
+            delete moduleSources[moduleFilename];
+        },
     };
 
     var resourceResolver =
@@ -145,6 +152,11 @@ describe("Module Manager", function()
 
     it("should update already loaded module instance with module content from module store on reloadModule", function()
     {
+        // Reset module store so it will reload modules from the file system (otherwise reloaded counter from previous
+        // test would already be loaded).
+        //
+        moduleSources = {};
+
         var counter = moduleManager.getModule("counter");
         var counterViewModel = counter.InitializeViewModel({}, {});
         assert.objectsEqual(counterViewModel, { count: 0 });

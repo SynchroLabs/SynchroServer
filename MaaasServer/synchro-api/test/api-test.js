@@ -2018,6 +2018,17 @@ describe("API Processor", function()
 				            Synchro.interimUpdate(context);
 				        }
 				    },
+				    countup: function(context, session, viewModel)
+				    {
+				    	session.count = viewModel.count;
+				    	viewModel.count++;
+				    	session.count++;
+
+				        Synchro.waitFor(context, Synchro.waitInterval, 50);
+
+				    	viewModel.count++;
+				    	session.count++;
+				    },
 				}
 			}
 		}
@@ -2346,6 +2357,54 @@ describe("API Processor", function()
 				plan.ok(true);
 			});
 		});
+
+        it("should record view model and session updates from before and after a call to Synchro.waitFor()", function(done)
+        {
+        	// Run in fiber because Synchro.waitFor needs to be in fiber (called inside of apiProcessor.process)
+        	wait.launchFiber(function()
+        	{
+				var plan = new assertHelper.Plan(2, done);
+
+				// Need to read session back from store (in-memory local copy doesn't contain changes)
+        		session = sessionStore.getSession(session.id);
+
+				var requestObject = 
+				{ 
+					Mode: "Command", 
+					Path: "countdown", 
+					TransactionId: 4, 
+					InstanceId: 3, 
+					InstanceVersion: 5, 
+					Command: "countup" 
+				};
+
+				assert.equal(session.UserData.count, undefined);
+
+				var response = {};
+				apiProcessor.process(session, requestObject, response);
+
+				readerWriter.readAsync(session.id + ":4", function(err, responseObject)
+			    {
+					assert.equal(responseObject.TransactionId, 4);
+					assert.equal(responseObject.InstanceId, 3);
+					assert.equal(responseObject.InstanceVersion, 6);
+					assert.objectsEqual(responseObject.NextRequest, undefined);
+					var expectedDeltas = 
+					[
+					    { path: "count", change: "update", value: 2 },
+					];
+					assert.objectsEqual(responseObject.ViewModelDeltas, expectedDeltas);
+					plan.ok(true);
+			    });
+
+				// We have to check the session after the response is posted (the session update in the processor happens
+				// after it posts the response).
+				//
+			   	session = sessionStore.getSession(session.id);
+				assert.equal(session.UserData.count, 2);
+				plan.ok(true);
+			});
+		});
 	});
 
 	describe("Sync Errors", function()
@@ -2412,7 +2471,7 @@ describe("API Processor", function()
 			});
 		});
 
-		it("should fail with sync error when client instance less than server instance xxx", function(done)
+		it("should fail with sync error when client instance less than server instance", function(done)
 		{
 			var modules =
 			{
