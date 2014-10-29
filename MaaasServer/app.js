@@ -22,6 +22,10 @@ commander.parse(process.argv);
 //
 var nconf = require('nconf');
 var overrides = {};
+if (commander.nofork)
+{
+    overrides.NOFORK = true;
+}
 if (commander.port)
 {
     overrides.PORT = commander.port;
@@ -41,6 +45,7 @@ nconf.defaults(
 {
     'PORT': 1337,
     'SERVICES_CONFIG': 'local',
+    'NOFORK': false,
     'API_PATH_PREFIX': "/api",
     'STUDIO_PATH_PREFIX': "/studio",
     'DEBUG_BASE_PORT': 6969,
@@ -203,7 +208,7 @@ function loadApiProcessorsAsync(callback)
         var bFork = true;   // Run API processor forked
         var bDebug = true;  // Enable debugging of API processor (only valid if running forked)
 
-        if (commander.nofork)
+        if (nconf.get('NOFORK'))
         {
             // This situation is typically for when you want to run this "app" itself under a local debugger, and
             // you want to be able to debug the api processor and actual Synchro module code also.
