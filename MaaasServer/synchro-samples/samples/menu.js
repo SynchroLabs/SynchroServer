@@ -35,6 +35,7 @@ exports.InitializeViewModel = function (context, session)
             { caption: "Fill", view: "fill" },
             { caption: "Flex", view: "flex" },
             { caption: "Flex 2", view: "flexflex" },
+            { caption: "Flex 3", view: "flex3" },
             { caption: "Text Flow", view: "textflow" },
             { caption: "Image", view: "image" },
             { caption: "Font", view: "font" },

@@ -18,9 +18,9 @@ exports.View =
 
             { control: "stackpanel", margin: { top: 10 }, height: "*", visibility: "{previousSearches}", contents: [
                 { control: "text", value: "Recent searches", fontsize: 12 },
-                { control: "listview", select: "None", height: "*", width: 460, margin: { bottom: 0 }, binding: { items: "previousSearches", onItemClick: { command: "previousSearch", searchTerm: "{$data}" } }, itemTemplate:
+                { control: "listview", select: "None", height: "*", width: 460, margin: { bottom: 0 }, binding: { items: "previousSearches", onItemClick: { command: "previousSearch", location: "{$data}" } }, itemTemplate:
                     { control: "stackpanel", orientation: "Horizontal", padding: 5, contents: [
-                        { control: "text", value: "{$data}", fontsize: 10 },
+                        { control: "text", value: "{title}", fontsize: 10 },
                     ] },
                 },
             ] },
@@ -66,7 +66,7 @@ exports.Commands =
     },
     previousSearch: function(context, session, viewModel, params)
     {
-        return Synchro.pushAndNavigateTo(context, "propx_list", { searchTerm: params.searchTerm });
+        return Synchro.pushAndNavigateTo(context, "propx_list", { location: params.location });
     },
     favs: function(context, session, viewModel)
     {

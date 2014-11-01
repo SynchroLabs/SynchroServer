@@ -1511,6 +1511,7 @@
     <Compile Include="synchro-samples\samples\device.js" />
     <Compile Include="synchro-samples\samples\fill.js" />
     <Compile Include="synchro-samples\samples\flex.js" />
+    <Compile Include="synchro-samples\samples\flex3.js" />
     <Compile Include="synchro-samples\samples\flexflex.js" />
     <Compile Include="synchro-samples\samples\font.js" />
     <Compile Include="synchro-samples\samples\hello.js" />

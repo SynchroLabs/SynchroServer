@@ -13,7 +13,7 @@ exports.View =
                 // Tablet in landscape - list with details panel for selected item 
                 { control: "stackpanel", orientation: "Horizontal", width: "*", height: "*", contents: [
                     { control: "stackpanel", width: "480", height: "*", contents: [
-                        { control: "text", value: "{message}", fontsize: 12, visibility: "{message}" },
+                        { control: "text", value: "{message}", width: "*", fontsize: 12, visibility: "{message}" },
 
                         { control: "listview", select: "Single", height: "*", width: 460, margin: { bottom: 0 }, binding: { items: "properties", selection: "selectedProperty" }, itemTemplate:
                             { control: "stackpanel", orientation: "Horizontal", padding: { top: 5, bottom: 5 }, contents: [
@@ -41,7 +41,7 @@ exports.View =
             { select: "All", contents: [
                 // Otherwise (phone, or tablet in portrait)
                 { control: "stackpanel", width: "*", height: "*", contents: [
-                    { control: "text", value: "{message}", fontsize: 12, visibility: "{message}" },
+                    { control: "text", value: "{message}", width: "*", fontsize: 12, visibility: "{message}" },
 
                     { control: "listview", select: "None", height: "*", width: "*", margin: { bottom: 0 }, binding: { items: "properties", onItemClick: { command: "propertySelected", property: "{$data}" } }, itemTemplate:
                         { control: "stackpanel", orientation: "Horizontal", padding: { top: 5, bottom: 5 }, contents: [
@@ -78,6 +78,7 @@ exports.InitializeViewModel = function(context, session, params, state)
 {
     var viewModel =
     {
+        message: null,
         properties: null,
         selectedProperty: null
     }
@@ -98,7 +99,6 @@ exports.InitializeViewModel = function(context, session, params, state)
             }
 
             viewModel.properties = state.properties;
-            viewModel.isLoading = false;
         }
         else
         {
