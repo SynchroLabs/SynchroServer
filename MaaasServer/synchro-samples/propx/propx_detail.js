@@ -11,8 +11,19 @@ exports.View =
             { control: "image", resource: "{property.img_url}", horizontalAlignment: "Left", margin: { top: 10, bottom: 10 }, height: 300, width: 400 },
             { control: "text", value: "{property.bedroom_number} bedroom, {property.bathroom_number} bath", fontsize: 12 },
             { control: "text", value: "{property.summary}", width: "*", font: { italic: true, size: 10 } },
-            { control: "toggle", binding: { value: "fav", onToggle: "favToggled" }, header: "Favorite", fontsize: 12 },
-        ] }
+            { select: "First", contents: [
+                { select: "All", filter: { deviceMetric: "os", is: ["Windows", "WinPhone"] }, contents: [
+                    { control: "commandBar.toggle", text: "Favorite", icon: "Favorite", binding: { value: "fav", onToggle: "favToggled" } },
+                    ]},
+                { select: "All", filter: { deviceMetric: "os", is: "Android" }, contents: [
+                    { control: "actionBar.toggle", checkedicon: "ic_action_important", uncheckedicon: "ic_action_not_important", showAsAction: "IfRoom", binding: { value: "fav", onToggle: "favToggled" } },
+                    ]},
+                { select: "All", filter: { deviceMetric: "os", is: "iOS" }, contents: [
+                    { control: "navBar.toggle", checkedicon: "bookmark-small-mini", uncheckedicon: "bookmark-small-empty-mini" , binding: { value: "fav", onToggle: "favToggled" } },
+                    ]},
+            ] },
+        ] },
+
     ]
 }
 

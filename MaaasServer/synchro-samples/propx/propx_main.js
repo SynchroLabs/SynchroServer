@@ -27,10 +27,10 @@ exports.View =
 
             { select: "First", contents: [
                 { select: "All", filter: { deviceMetric: "os", is: ["Windows", "WinPhone"] }, contents: [
-                    { control: "commandBar.button", text: "Favs", icon: "Favorite", commandBar: "Bottom", binding: "favs" },
+                    { control: "commandBar.button", text: "Favorites", icon: "Favorite", commandBar: "Bottom", binding: "favs" },
                     ]},
                 { select: "All", filter: { deviceMetric: "os", is: "Android" }, contents: [
-                    { control: "actionBar.item", text: "Favs", showAsAction: "IfRoom", binding: "favs" },
+                    { control: "actionBar.item", text: "Favorites", showAsAction: "IfRoom", binding: "favs" },
                     ]},
                 { select: "All", filter: { deviceMetric: "os", is: "iOS" }, contents: [
                     { control: "navBar.button", text: "Favs", binding: "favs" },
