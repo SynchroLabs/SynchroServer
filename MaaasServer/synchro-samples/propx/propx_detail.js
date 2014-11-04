@@ -19,7 +19,7 @@ exports.View =
                     { control: "actionBar.toggle", checkedicon: "ic_action_important", uncheckedicon: "ic_action_not_important", showAsAction: "IfRoom", binding: { value: "fav", onToggle: "favToggled" } },
                     ]},
                 { select: "All", filter: { deviceMetric: "os", is: "iOS" }, contents: [
-                    { control: "navBar.toggle", checkedicon: "bookmark-small-mini", uncheckedicon: "bookmark-small-empty-mini" , binding: { value: "fav", onToggle: "favToggled" } },
+                    { control: "navBar.toggle", checkedicon: "star-mini", uncheckedicon: "star-empty-mini" , binding: { value: "fav", onToggle: "favToggled" } },
                     ]},
             ] },
         ] },
