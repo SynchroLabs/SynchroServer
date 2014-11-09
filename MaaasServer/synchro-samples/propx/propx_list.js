@@ -13,14 +13,20 @@ exports.View =
             { control: "text", value: "{message}", width: "*", fontsize: 12, visibility: "{message}" },
 
             { control: "stackpanel", width: "*", height: "*", visibility: "{properties}", contents: [    
-                { control: "listview", select: "None", height: "*", width: "*", margin: { bottom: 0 }, binding: { items: "properties", onItemClick: { command: "propertySelected", property: "{$data}" } }, itemTemplate:
-                    { control: "stackpanel", orientation: "Horizontal", padding: { top: 5, bottom: 5 }, contents: [
-                        { control: "image", resource: "{img_url}", height: 90, width: 120 },
-                        { control: "stackpanel", orientation: "Vertical", width: "*", padding: { left: 5 }, contents: [
-                            { control: "text", value: "{price_formatted}", font: { bold: true, size: 10 } },
-                            { control: "text", value: "{title}", fontsize: 8 },
+                { control: "listview", select: "None", height: "*", width: "*", margin: { bottom: 0 }, binding: { items: "properties", onItemClick: { command: "propertySelected", property: "{$data}" } }, 
+                    itemTemplate:
+                        { control: "stackpanel", orientation: "Horizontal", padding: { top: 5, bottom: 5 }, contents: [
+                            { control: "image", resource: "{img_url}", height: 90, width: 120 },
+                            { control: "stackpanel", orientation: "Vertical", padding: { left: 5 }, contents: [
+                                { control: "text", value: "{price_formatted}", font: { bold: true, size: 10 } },
+                                { control: "text", value: "{title}", fontsize: 8 },
+                            ] },
                         ] },
-                    ] },
+                    footer:
+                        { control: "stackpanel", orientation: "Vertical", contents: [
+                            { control: "text", value: "Showing {properties} of {totalProperties} properties", fontsize: 10 },
+                            { control: "button", caption: "Load more...", binding: "loadMore", horizontalAlignment: "Center", visibility: "{isMore}" },
+                        ] }
                 },
             ] },
 
@@ -34,13 +40,18 @@ exports.View =
     ]
 }
 
-function searchForProperties(placename, callback)
+function searchForProperties(placename, page, callback)
 {
     // http://www.nestoria.co.uk/help/api-search-listings
     var options = 
     {
         url: "http://api.nestoria.co.uk/api?country=uk&pretty=1&action=search_listings&place_name=" + placename + "&encoding=json&listing_type=buy",
         timeout: 5000
+    }
+
+    if (page)
+    {
+        options.url += "&page=" + page;
     }
 
     request(options, function(err, response, body)
@@ -57,6 +68,10 @@ exports.InitializeViewModel = function(context, session, params, state)
         message: null,
         location: null,
         properties: null,
+        page: 0,
+        totalPages: 0,
+        totalProperties: 0,
+        isMore: false,
         searchTerm: params && params.searchTerm,
     }
 
@@ -65,9 +80,8 @@ exports.InitializeViewModel = function(context, session, params, state)
         // If we are coming back to the list page from a detail page, we restore the saved property list (to save us
         // from having to go get it again)
         //
-        viewModel.location = state.location;
-        viewModel.properties = state.properties;
-        viewModel.message = "Found " + viewModel.properties.length + " listings in " + viewModel.location.title;
+        lodash.assign(viewModel, state);
+        viewModel.message = "Found " + viewModel.totalProperties + " listings in " + viewModel.location.title;
     }
     else
     {
@@ -85,11 +99,11 @@ exports.InitializeViewModel = function(context, session, params, state)
     return viewModel;
 }
 
-function findAndLoadProperties(context, session, viewModel, searchTerm)
+function findAndLoadProperties(context, session, viewModel, searchTerm, page)
 {
     try
     {
-        var props = Synchro.waitFor(context, searchForProperties, searchTerm);
+        var props = Synchro.waitFor(context, searchForProperties, searchTerm, page);
 
         var resp_code = parseInt(props.response.application_response_code);
         if (resp_code < 200) // Successfully returned listings
@@ -98,23 +112,32 @@ function findAndLoadProperties(context, session, viewModel, searchTerm)
 
             viewModel.location = lodash.pick(props.response.locations[0], "place_name", "title", "long_title");
 
+            viewModel.page = parseInt(props.response.page);
+            viewModel.totalPages = parseInt(props.response.total_pages);
+            viewModel.totalProperties = parseInt(props.response.total_results);
+
             // Put this search on top of the recent searches list (removing previous references to it, and trunctating the list)
             lodash.remove(session.searches, function(location){ return location.place_name == viewModel.location.place_name });
             session.searches = session.searches.splice(0, 3);
             session.searches.unshift(viewModel.location);
 
-            // Since we're going to be serializing the property list to the session (via the viewModel and possibly the nav stack),
-            // we don't want to copy any properties that we aren't going to use.
-            //
-            viewModel.properties = [];
+            if (viewModel.page == 1)
+            {
+                viewModel.properties = [];                
+            }
+
             props.response.listings.forEach(function(listing)
             {
+                // Since we're going to be serializing the property list to the session (via the viewModel and possibly the nav stack),
+                // we don't want to copy any properties that we aren't going to use.
+                //
                 viewModel.properties.push(
                     lodash.pick(listing, "guid", "title", "summary", "price_formatted", "img_url", "bedroom_number", "bathroom_number")
                     );
             });            
 
-            viewModel.message = "Found " + viewModel.properties.length + " listings in " + viewModel.location.title;
+            viewModel.message = "Found " + viewModel.totalProperties + " listings in " + viewModel.location.title;
+            viewModel.isMore = viewModel.properties.length < viewModel.totalProperties;
         }
         else if ((resp_code === 200) || (resp_code === 202))
         {
@@ -137,6 +160,8 @@ function findAndLoadProperties(context, session, viewModel, searchTerm)
         }
         else
         {
+            console.log("Error: resp_code: " + resp_code);
+            console.log("Resp: " + JSON.stringify(props, null, 4));
             viewModel.message = "Error searching for properties";
         }
     }
@@ -164,7 +189,7 @@ exports.Commands =
     {
         // Stash the property list in the session so we can pull it back it when we navigate back here.
         //
-        var state = { location: viewModel.location, properties: viewModel.properties };
+        var state = lodash.pick(viewModel, "location", "properties", "page", "totalPages", "totalProperties");
         return Synchro.pushAndNavigateTo(context, "propx_detail", { property: params.property }, state);
     },
 
@@ -174,5 +199,10 @@ exports.Commands =
         viewModel.message = "Searching listings in " + params.location.title;
         Synchro.interimUpdate(context);
         findAndLoadProperties(context, session, viewModel, params.location.place_name);
+    },
+
+    loadMore: function(context, session, viewModel, params)
+    {
+        findAndLoadProperties(context, session, viewModel, viewModel.location.place_name, viewModel.page + 1);
     },
 }

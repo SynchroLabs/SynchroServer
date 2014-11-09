@@ -18,8 +18,8 @@ exports.View =
                         ] },
                     ] },
                 footer:
-                    { control: "stackpanel", orientation: "Vertical", background: "LightBlue", visibility: "{showFooter}", contents: [
-                        { control: "text", value: "Displaying {presidents} presidents", fontsize: 12 },
+                    { control: "stackpanel", orientation: "Vertical", width: "*", background: "LightBlue", visibility: "{showFooter}", contents: [
+                        { control: "text", value: "Displaying {presidents} presidents of the United States", width: "*", fontsize: 12 },
                         { control: "button", caption: "Load more...", binding: "loadMore" },
                     ] }
             },

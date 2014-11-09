@@ -1,6 +1,4 @@
-﻿// Property Cross main page
-//
-// https://github.com/tastejs/PropertyCross/tree/master/specification
+﻿// Property Cross - main page
 //
 exports.View =
 {
@@ -25,19 +23,11 @@ exports.View =
                 },
             ] },
 
-            { select: "First", contents: [
-                { select: "All", filter: { deviceMetric: "os", is: ["Windows", "WinPhone"] }, contents: [
-                    { control: "commandBar.button", text: "Favorites", icon: "Favorite", commandBar: "Bottom", binding: "favs" },
-                    ]},
-                { select: "All", filter: { deviceMetric: "os", is: "Android" }, contents: [
-                    { control: "actionBar.item", text: "Favorites", showAsAction: "IfRoom", binding: "favs" },
-                    ]},
-                { select: "All", filter: { deviceMetric: "os", is: "iOS" }, contents: [
-                    { control: "navBar.button", text: "Favs", binding: "favs" },
-                    ]},
-                ]},
-            ] 
-        },
+            { filter: { deviceMetric: "os", is: ["Windows", "WinPhone"] }, control: "commandBar.button", text: "Favorites", icon: "Favorite", commandBar: "Bottom", binding: "favs" },
+            { filter: { deviceMetric: "os", is: "Android" }, control: "actionBar.item", text: "Favorites", showAsAction: "IfRoom", binding: "favs" },
+            { filter: { deviceMetric: "os", is: "iOS" }, control: "navBar.button", text: "Favs", binding: "favs" },
+
+        ] },
     ]
 }
 

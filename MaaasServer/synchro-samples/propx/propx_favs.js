@@ -1,4 +1,4 @@
-﻿// Property Cross favorites page
+﻿// Property Cross - favorites page
 //
 var request = require('request');
 var lodash = require("lodash");
@@ -74,7 +74,7 @@ exports.InitializeViewModel = function(context, session, params, state)
     else
     {
         viewModel.properties = [];
-        viewModel.message = "You have not added any properties to your favourites"
+        viewModel.message = "You have not added any properties to your favorites"
     }
 
     return viewModel;
