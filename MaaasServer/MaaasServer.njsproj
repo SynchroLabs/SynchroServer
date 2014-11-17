@@ -1521,6 +1521,7 @@
     <Compile Include="synchro-samples\samples\listclick.js" />
     <Compile Include="synchro-samples\samples\listview.js" />
     <Compile Include="synchro-samples\samples\listview2.js" />
+    <Compile Include="synchro-samples\samples\location.js" />
     <Compile Include="synchro-samples\samples\login.js" />
     <Compile Include="synchro-samples\samples\menu.js" />
     <Compile Include="synchro-samples\samples\picker.js" />

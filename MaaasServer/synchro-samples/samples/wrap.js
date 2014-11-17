@@ -11,17 +11,18 @@ exports.View =
                 { control: "button", caption: "Vertical", binding: { command: "setOrientation", orientation: "Vertical" } },
             ] },
 
-            { control: "wrappanel", width: "*", height: "*", itemHeight: 100, itemWidth: 100, padding: 10, background: "Gray", orientation: "{orientation}", contents: [
-                { control: "rectangle", width: 50, height: 50, margin: 10, fill: "Green" },
-                { control: "rectangle", width: 75, height: 50, margin: 10, fill: "Green" },
-                { control: "rectangle", width: 50, height: 75, margin: 10, fill: "Green" },
-                { control: "rectangle", width: 75, height: 75, margin: 10, fill: "Green" },
-                { control: "rectangle", width: 25, height: 50, margin: 10, fill: "Green" },
-                { control: "rectangle", width: 50, height: 50, margin: 10, fill: "Green" },
-                { control: "rectangle", width: 75, height: 50, margin: 10, fill: "Green" },
-                { control: "rectangle", width: 50, height: 75, margin: 10, fill: "Green" },
-                { control: "rectangle", width: 75, height: 75, margin: 10, fill: "Green" },
-                { control: "rectangle", width: 25, height: 50, margin: 10, fill: "Green" },
+            //{ control: "wrappanel", width: "*", height: "*", itemHeight: 100, itemWidth: 100, padding: 10, background: "Gray", orientation: "{orientation}", contents: [
+            { control: "wrappanel", width: "*", height: "*", padding: 12.5, background: "Gray", orientation: "{orientation}", contents: [
+                { control: "rectangle", width: 50, height: 50, margin: 12.5, fill: "Green", horizontalAlignment: "{itemHorizontalAlignment}", verticalAlignment: "{itemVerticalAlignment}" },
+                { control: "rectangle", width: 75, height: 50, margin: 12.5, fill: "Green", horizontalAlignment: "{itemHorizontalAlignment}", verticalAlignment: "{itemVerticalAlignment}" },
+                { control: "rectangle", width: 50, height: 75, margin: 12.5, fill: "Green", horizontalAlignment: "{itemHorizontalAlignment}", verticalAlignment: "{itemVerticalAlignment}" },
+                { control: "rectangle", width: 75, height: 75, margin: 12.5, fill: "Green", horizontalAlignment: "{itemHorizontalAlignment}", verticalAlignment: "{itemVerticalAlignment}" },
+                { control: "rectangle", width: 25, height: 50, margin: 12.5, fill: "Green", horizontalAlignment: "{itemHorizontalAlignment}", verticalAlignment: "{itemVerticalAlignment}" },
+                { control: "rectangle", width: 50, height: 50, margin: 12.5, fill: "Green", horizontalAlignment: "{itemHorizontalAlignment}", verticalAlignment: "{itemVerticalAlignment}" },
+                { control: "rectangle", width: 75, height: 50, margin: 12.5, fill: "Green", horizontalAlignment: "{itemHorizontalAlignment}", verticalAlignment: "{itemVerticalAlignment}" },
+                { control: "rectangle", width: 50, height: 75, margin: 12.5, fill: "Green", horizontalAlignment: "{itemHorizontalAlignment}", verticalAlignment: "{itemVerticalAlignment}" },
+                { control: "rectangle", width: 75, height: 75, margin: 12.5, fill: "Green", horizontalAlignment: "{itemHorizontalAlignment}", verticalAlignment: "{itemVerticalAlignment}" },
+                { control: "rectangle", width: 25, height: 50, margin: 12.5, fill: "Green", horizontalAlignment: "{itemHorizontalAlignment}", verticalAlignment: "{itemVerticalAlignment}" },
                 ]
             },
             ]
@@ -34,6 +35,8 @@ exports.InitializeViewModel = function (context, session)
     var viewModel =
     {
         orientation: "Horizontal",
+        itemVerticalAlignment: "Bottom",
+        itemHorizontalAlignment: "Right",
     }
     return viewModel;
 }

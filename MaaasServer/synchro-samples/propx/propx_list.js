@@ -10,7 +10,10 @@ exports.View =
     [
         { control: "stackpanel", orientation: "Vertical", width: "*", height: "*", contents: [
 
-            { control: "text", value: "{message}", width: "*", fontsize: 12, visibility: "{message}" },
+            { control: "stackpanel", orientation: "Horizontal", width: "*", contents: [
+                { control: "progressring", value: "{isLoading}", height: 40, width: 40, verticalAlignment: "Center", visibility: "{isLoading}" },
+                { control: "text", value: "{message}", width: "*", fontsize: 12, verticalAlignment: "Center", visibility: "{message}" },
+            ] },
 
             { control: "stackpanel", width: "*", height: "*", visibility: "{properties}", contents: [    
                 { control: "listview", select: "None", height: "*", width: "*", margin: { bottom: 0 }, binding: { items: "properties", onItemClick: { command: "propertySelected", property: "{$data}" } }, 
@@ -23,8 +26,12 @@ exports.View =
                             ] },
                         ] },
                     footer:
-                        { control: "stackpanel", orientation: "Vertical", contents: [
-                            { control: "text", value: "Showing {properties} of {totalProperties} properties", fontsize: 10 },
+                        { control: "stackpanel", orientation: "Vertical", height: 110, contents: [
+                            { control: "stackpanel", orientation: "Horizontal", contents: [
+                                { control: "progressring", value: "{isLoadingMore}", height: 30, width: 30, verticalAlignment: "Center", visibility: "{isLoadingMore}" },
+                                { control: "text", value: "Loading more properties", verticalAlignment: "Center", visibility: "{isLoadingMore}", margin: 5, fontsize: 10 },
+                            ] },
+                            { control: "text", value: "Showing {properties} of {totalProperties} properties", visibility: "{!isLoadingMore}", margin: 5, fontsize: 10 },
                             { control: "button", caption: "Load more...", binding: "loadMore", horizontalAlignment: "Center", visibility: "{isMore}" },
                         ] }
                 },
@@ -40,12 +47,12 @@ exports.View =
     ]
 }
 
-function searchForProperties(placename, page, callback)
+function searchForProperties(criteria, page, callback)
 {
     // http://www.nestoria.co.uk/help/api-search-listings
     var options = 
     {
-        url: "http://api.nestoria.co.uk/api?country=uk&pretty=1&action=search_listings&place_name=" + placename + "&encoding=json&listing_type=buy",
+        url: "http://api.nestoria.co.uk/api?country=uk&pretty=1&action=search_listings&" + criteria + "&encoding=json&listing_type=buy",
         timeout: 5000
     }
 
@@ -66,13 +73,16 @@ exports.InitializeViewModel = function(context, session, params, state)
     var viewModel =
     {
         message: null,
-        location: null,
         properties: null,
         page: 0,
         totalPages: 0,
         totalProperties: 0,
+        isLoading: false,
+        isLoadingMore: false,
         isMore: false,
-        searchTerm: params && params.searchTerm,
+        searchTerm: null,
+        searchLocation: null,
+        searchPosition: null,
     }
 
     if (state)
@@ -81,63 +91,117 @@ exports.InitializeViewModel = function(context, session, params, state)
         // from having to go get it again)
         //
         lodash.assign(viewModel, state);
-        viewModel.message = "Found " + viewModel.totalProperties + " listings in " + viewModel.location.title;
     }
-    else
+    else if (params)
     {
-        if (params && params.location)
+        if (params.searchTerm)
         {
-            viewModel.location = params.location;
-            viewModel.message = "Searching listings in " + viewModel.location.title;
-        }
-        else
-        {
+            viewModel.searchTerm = params.searchTerm;
             viewModel.message = "Searching listings in " + viewModel.searchTerm;
         }
-    }
+        else if (params.searchLocation)
+        {
+            viewModel.searchLocation = params.searchLocation;
+            viewModel.message = "Searching listings in " + viewModel.searchLocation.title;
+        }
+        else if (params.searchPosition)
+        {
+            viewModel.searchPosition = params.searchPosition;
+            viewModel.message = "Searching listings near current location";
+        }
+        viewModel.isLoading = true;
+    } 
 
     return viewModel;
 }
 
-function findAndLoadProperties(context, session, viewModel, searchTerm, page)
+function populateViewModelPropertiesFromResponse(viewModel, response)
+{
+    viewModel.page = parseInt(response.page);
+    viewModel.totalPages = parseInt(response.total_pages);
+    viewModel.totalProperties = parseInt(response.total_results);
+    if (viewModel.page == 1)
+    {
+        viewModel.properties = [];                
+    }
+
+    response.listings.forEach(function(listing)
+    {
+        // Since we're going to be serializing the property list to the session (via the viewModel and possibly the nav stack),
+        // we don't want to copy any properties that we aren't going to use.
+        //
+        viewModel.properties.push(
+            lodash.pick(listing, "guid", "title", "summary", "price_formatted", "img_url", "bedroom_number", "bathroom_number")
+            );
+    });
+    
+    viewModel.isMore = viewModel.properties.length < viewModel.totalProperties;
+}
+
+function findAndLoadPropertiesByProximity(context, session, viewModel, page)
 {
     try
     {
-        var props = Synchro.waitFor(context, searchForProperties, searchTerm, page);
+        var criteria = "centre_point=" + viewModel.searchPosition.latitude + "," + viewModel.searchPosition.longitude;
+        var props = Synchro.waitFor(context, searchForProperties, criteria, page);
+
+        viewModel.isLoading = false;
+        viewModel.isLoadingMore = false;
 
         var resp_code = parseInt(props.response.application_response_code);
         if (resp_code < 200) // Successfully returned listings
         {
             console.log("Got " + props.response.listings.length + " listings");
+            populateViewModelPropertiesFromResponse(viewModel, props.response);
+            viewModel.message = "Found " + viewModel.totalProperties + " listings near current location";
+        }
+        else if (resp_code === 210) // Coordinate error
+        {
+            viewModel.message = "Current location is not within the UK, no listings nearby";
+        }
+        else
+        {
+            console.log("Error: resp_code: " + resp_code);
+            console.log("Resp: " + JSON.stringify(props, null, 4));
+            viewModel.message = "Error searching for properties";
+        }
+    }
+    catch(err)
+    {
+        console.log("findAndLoadPropertiesByProximity err: " + err);
+        viewModel.message = "Network error searching for properties";
+    }
+}
 
-            viewModel.location = lodash.pick(props.response.locations[0], "place_name", "title", "long_title");
+function findAndLoadPropertiesByPlace(context, session, viewModel, page)
+{
+    try
+    {
+        var criteria = "place_name=" + (viewModel.searchLocation ? viewModel.searchLocation.place_name : viewModel.searchTerm);
+        var props = Synchro.waitFor(context, searchForProperties, criteria, page);
 
-            viewModel.page = parseInt(props.response.page);
-            viewModel.totalPages = parseInt(props.response.total_pages);
-            viewModel.totalProperties = parseInt(props.response.total_results);
+        viewModel.isLoading = false;
+        viewModel.isLoadingMore = false;
 
-            // Put this search on top of the recent searches list (removing previous references to it, and trunctating the list)
-            lodash.remove(session.searches, function(location){ return location.place_name == viewModel.location.place_name });
-            session.searches = session.searches.splice(0, 3);
-            session.searches.unshift(viewModel.location);
+        var resp_code = parseInt(props.response.application_response_code);
 
-            if (viewModel.page == 1)
+        if (resp_code < 200) // Successfully returned listings
+        {
+            console.log("Got " + props.response.listings.length + " listings");
+
+            if (!viewModel.searchLocation)
             {
-                viewModel.properties = [];                
+                viewModel.searchTerm = null;
+                viewModel.searchLocation = lodash.pick(props.response.locations[0], "place_name", "title", "long_title");                
             }
 
-            props.response.listings.forEach(function(listing)
-            {
-                // Since we're going to be serializing the property list to the session (via the viewModel and possibly the nav stack),
-                // we don't want to copy any properties that we aren't going to use.
-                //
-                viewModel.properties.push(
-                    lodash.pick(listing, "guid", "title", "summary", "price_formatted", "img_url", "bedroom_number", "bathroom_number")
-                    );
-            });            
+            // Put this search on top of the recent searches list (removing previous references to it, and trunctating the list)
+            lodash.remove(session.searches, function(location){ return location.place_name == viewModel.searchLocation.place_name });
+            session.searches = session.searches.splice(0, 3);
+            session.searches.unshift(viewModel.searchLocation);
 
-            viewModel.message = "Found " + viewModel.totalProperties + " listings in " + viewModel.location.title;
-            viewModel.isMore = viewModel.properties.length < viewModel.totalProperties;
+            populateViewModelPropertiesFromResponse(viewModel, props.response);
+            viewModel.message = "Found " + viewModel.totalProperties + " listings in " + viewModel.searchLocation.title;
         }
         else if ((resp_code === 200) || (resp_code === 202))
         {
@@ -152,7 +216,7 @@ function findAndLoadProperties(context, session, viewModel, searchTerm, page)
                     );
             });            
 
-            viewModel.message = "One or more locations found matching " + searchTerm;
+            viewModel.message = "One or more locations found matching " + viewModel.searchTerm;
         }            
         else if (resp_code === 201)
         {
@@ -167,7 +231,7 @@ function findAndLoadProperties(context, session, viewModel, searchTerm, page)
     }
     catch(err)
     {
-        console.log("findAndLoadProperties err: " + err);
+        console.log("findAndLoadPropertiesByPlace err: " + err);
         viewModel.message = "Network error searching for properties";
     }
 }
@@ -178,8 +242,14 @@ exports.LoadViewModel = function(context, session, viewModel)
     //
     if (viewModel.properties === null)
     {
-        var searchTerm = (viewModel.location && viewModel.location.place_name) || viewModel.searchTerm;
-        findAndLoadProperties(context, session, viewModel, searchTerm);
+        if (viewModel.searchPosition)
+        {
+            findAndLoadPropertiesByProximity(context, session, viewModel);
+        }
+        else
+        {
+            findAndLoadPropertiesByPlace(context, session, viewModel);
+        }
     }
 }
 
@@ -189,20 +259,33 @@ exports.Commands =
     {
         // Stash the property list in the session so we can pull it back it when we navigate back here.
         //
-        var state = lodash.pick(viewModel, "location", "properties", "page", "totalPages", "totalProperties");
+        var state = lodash.pick(viewModel, "searchLocation", "searchPosition", "message", "properties", "page", "totalPages", "totalProperties");
         return Synchro.pushAndNavigateTo(context, "propx_detail", { property: params.property }, state);
     },
 
     locationSelected: function(context, session, viewModel, params)
     {
         viewModel.locations = null;
-        viewModel.message = "Searching listings in " + params.location.title;
+        viewModel.searchTerm = null;
+        viewModel.searchLocation = params.location;
+        viewModel.message = "Searching listings in " + viewModel.searchLocation.title;
         Synchro.interimUpdate(context);
-        findAndLoadProperties(context, session, viewModel, params.location.place_name);
+        findAndLoadPropertiesByPlace(context, session, viewModel);
     },
 
     loadMore: function(context, session, viewModel, params)
     {
-        findAndLoadProperties(context, session, viewModel, viewModel.location.place_name, viewModel.page + 1);
+        viewModel.isMore = false; // Suppress "Load More..." while we're loading more
+        viewModel.isLoadingMore = true;
+        Synchro.interimUpdate(context);
+
+        if (viewModel.searchPosition)
+        {
+            findAndLoadPropertiesByProximity(context, session, viewModel, viewModel.page + 1);
+        }
+        else
+        {
+            findAndLoadPropertiesByPlace(context, session, viewModel, viewModel.page + 1);
+        }
     },
 }

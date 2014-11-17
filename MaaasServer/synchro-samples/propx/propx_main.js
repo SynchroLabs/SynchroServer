@@ -7,11 +7,13 @@ exports.View =
     [
         { control: "stackpanel", width: "*", height: "*", contents: [
 
+            { control: "location", binding: "position" },
+
             { control: "text", width: "*", value: "Use the form below to search for houses to buy. You can search by place-name, postcode, or click 'My Location' to search your current location", fontsize: 10 },
-            { control: "stackpanel", orientation: "Horizontal", margin: { top: 10 }, contents: [
-                { control: "edit", binding: "search", width: 200, verticalAlignment: "Center" },
-                { control: "button", caption: "Go", verticalAlignment: "Center", binding: "search", enabled: "{search}" },
-                { control: "button", caption: "My location", verticalAlignment: "Center", binding: "location" },
+            { control: "stackpanel", orientation: "Horizontal", margin: { top: 10 }, width: "*", contents: [
+                { control: "edit", binding: "searchTerm", width: "200", verticalAlignment: "Center" },
+                { control: "button", caption: "Go", verticalAlignment: "Center", binding: "placenameSearch", enabled: "{searchTerm}" },
+                { control: "button", caption: "My location", verticalAlignment: "Center", binding: "locationSearch", visibility: "{position.available}", enabled: "{position.coordinate}" },
             ] },
 
             { control: "stackpanel", margin: { top: 10 }, height: "*", visibility: "{previousSearches}", contents: [
@@ -38,25 +40,26 @@ exports.InitializeViewModel = function(context, session)
 
     var viewModel =
     {
-        search: "",
+        searchTerm: "",
         previousSearches: session.searches,
+        position: null,
     }
     return viewModel;
 }
 
 exports.Commands = 
 {
-    search: function(context, session, viewModel)
+    placenameSearch: function(context, session, viewModel)
     {
-        return Synchro.pushAndNavigateTo(context, "propx_list", { searchTerm: viewModel.search });
+        return Synchro.pushAndNavigateTo(context, "propx_list", { searchTerm: viewModel.searchTerm });
     },
-    location: function(context, session, viewModel)
+    locationSearch: function(context, session, viewModel)
     {
-        return Synchro.pushAndNavigateTo(context, "propx_list", { searchTerm: "Soho"});
+        return Synchro.pushAndNavigateTo(context, "propx_list", { searchPosition: viewModel.position.coordinate});
     },
     previousSearch: function(context, session, viewModel, params)
     {
-        return Synchro.pushAndNavigateTo(context, "propx_list", { location: params.location });
+        return Synchro.pushAndNavigateTo(context, "propx_list", { searchLocation: params.location });
     },
     favs: function(context, session, viewModel)
     {

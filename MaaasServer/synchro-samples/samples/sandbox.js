@@ -18,7 +18,6 @@ exports.View =
             { control: "image", top: 0, left: 0, resource: "{image}" },
         ] },
         { control: "button", caption: "Switch images", binding: "switchImages" },
-        { control: "location" },
     ]
 }
 
