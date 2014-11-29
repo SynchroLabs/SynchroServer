@@ -22,7 +22,7 @@ exports.View =
             { control: "slider", minimum: 0, maximum: 300, binding: "content", width: 300 },
         ] },
         { control: "border", border: "Red", borderThickness: "{border}", cornerRadius: "{radius}", padding: "{padding}", background: "Blue", contents: [              
-            { control: "rectangle", width: "{content}", height: "{content}", fill: "Green" },
+            { control: "rectangle", width: "{content}", height: "{content}", fill: "Green", margin: 0 },
         ] },
         { control: "border", background: "Gray", padding: 20, contents: [
             { control: "text", fontsize: 10, value: "Control below" },

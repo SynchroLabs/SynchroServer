@@ -14,7 +14,7 @@ exports.View =
             { control: "listview", select: "None", height: "*", width: "*", margin: { bottom: 0 }, binding: { items: "properties", onItemClick: { command: "propertySelected", property: "{$data}" } }, itemTemplate:
                 { control: "stackpanel", orientation: "Horizontal", padding: { top: 5, bottom: 5 }, contents: [
                     { control: "image", resource: "{img_url}", height: 90, width: 120 },
-                    { control: "stackpanel", orientation: "Vertical", width: "*", padding: { left: 5 }, contents: [
+                    { control: "stackpanel", orientation: "Vertical", padding: { left: 5 }, contents: [
                         { control: "text", value: "{price_formatted}", font: { bold: true, size: 10 } },
                         { control: "text", value: "{title}", fontsize: 8 },
                     ] },

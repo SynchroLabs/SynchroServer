@@ -438,7 +438,7 @@ function sendUpdate(synchroApi, context, isInterim)
                 context.response.InstanceVersion = context.session.ModuleInstance.ClientViewModel.instanceVersion;
             }
 
-            // logger.debug("Sending response: " + util.formatJSON(context.response));
+            // logger.info("Sending response: " + util.formatJSON(context.response));
             writeData(context.response);
 
             if (!context.response.Error)

@@ -13,7 +13,7 @@ exports.View =
             { control: "button", caption: "Login", width: 125, binding: "login" },
             { control: "button", caption: "Cancel", width: 125, binding: "cancel" },
         ] },
-        { control: "toggle", binding: "showPassword", header: "Show Password", onLabel: "Showing", offLabel: "Hiding", fontsize: 12 },
+        { control: "toggle", binding: "showPassword", caption: "Show Password", onLabel: "Showing", offLabel: "Hiding", fontsize: 12 },
         { control: "text", value: "Password: {password}", fontsize: 12, visibility: "{showPassword}" },
     ]
 }

@@ -1,24 +1,15 @@
-﻿// Contacts page
+// ListView header and foolter
 //
-//var contactImgUrl = "https://Synchro.blob.core.windows.net/resources/user.png";
 
 exports.View =
 {
-    title: "Contacts example",
+    title: "ListView Sample",
     elements:
     [
-        { control: "stackpanel", orientation: "Horizontal", contents: [
-            { control: "text", value: "New Contact:", fontsize: 12 },
-            { control: "edit", binding: "addFirst" },
-            { control: "edit", binding: "addLast" },
-            { control: "button", caption: "Add", binding: "add", enabled: "{addFirst}" },
-        ] },
-
-        { control: "stackpanel", orientation: "Horizontal", contents: [
-            { control: "stackpanel", orientation: "Vertical", contents: [
-
-                { control: "text", value: "Your Contacts", fontsize: 12 },
-                { control: "listview", select: "Multiple", height: 300, maxheight: 300, width: 300, binding: { items: "contacts", selection: "selectedContacts" }, itemTemplate:
+        { control: "stackpanel", orientation: "Vertical", height: "*", width: "*", contents: [
+            { control: "listview", select: "Single", height: "*", width: "*", binding: { items: "presidents", selection: "selectedPresident", onItemClick: { command: "itemClicked", president: "{$data}" } }, 
+                header: { control: "text", value: "US Presidents of America", fontsize: 12 },
+                itemTemplate:
                     { control: "stackpanel", orientation: "Horizontal", padding: 5, contents: [
                         { control: "image", resource: Synchro.getResourceUrl("user.png"), height: 50, width: 50 },
                         { control: "stackpanel", orientation: "Vertical", contents: [
@@ -26,30 +17,13 @@ exports.View =
                             { control: "text", value: "{last}" },
                         ] },
                     ] },
-                },
-            ] },
-            /*
-            { control: "stackpanel", orientation: "Vertical", contents: [
-
-                { control: "text", value: "Selected Contacts", fontsize: 12 },
-                { control: "listview", select: "none", maxheight: 300, binding: { items: "selectedContacts" }, itemTemplate:
-                    { control: "stackpanel", orientation: "Horizontal", contents: [
-                        { control: "image", resource: "resources/user.png", height: 50, width: 50 },
-                        { control: "stackpanel", orientation: "Vertical", contents: [
-                            { control: "text", value: "{first}" },
-                            { control: "text", value: "{last}" },
-                        ] },
-                    ] },
-                },
-
-            ] },
-            */
-
-        ] },
-
-        { control: "stackpanel", orientation: "Horizontal", contents: [
-            { control: "button", caption: "Remove", binding: "remove", enabled: "{selectedContacts}" },
-            { control: "button", caption: "Sort", binding: "sort" },
+                footer:
+                    { control: "stackpanel", orientation: "Vertical", width: "*", visibility: "{showFooter}", contents: [
+                        { control: "text", value: "Displaying {presidents} presidents of the United States", width: "*", fontsize: 12 },
+                        { control: "button", caption: "Load more...", binding: "loadMore" },
+                    ] }
+            },
+            { control: "text", value: "Selected: Mr. {selectedPresident.last}", visibility: "{selectedPresident}", fontsize: 12 },            
         ] },
     ]
 }
@@ -58,29 +32,30 @@ exports.InitializeViewModel = function(context, session)
 {
     var viewModel =
     {
-        addFirst: "",
-        addLast: "",
-        contacts: [ { first: "John", last: "Smith" }, { first: "George", last: "Washington" }, ],
-        selectedContacts: [],
+        presidents: [
+            { first: "George", last: "Washington" }, 
+            { first: "Abraham", last: "Lincoln" }, 
+            { first: "Andrew", last: "Jackson" }, 
+        ],
+        selectedPresident: { first: "Abraham", last: "Lincoln" },
+        showFooter: true
     }
     return viewModel;
 }
 
 exports.Commands = 
 {
-    add: function(context, session, viewModel)
+    loadMore: function(context, session, viewModel)
     {
-        viewModel.contacts.push({first: viewModel.addFirst, last: viewModel.addLast});
-        viewModel.addFirst = "";
-        viewModel.addLast = "";
+        viewModel.presidents.push({ first: "Bill", last: "Clinton" });
+        viewModel.presidents.push({ first: "Jimmy", last: "Carter" });
+        viewModel.presidents.push({ first: "Gerald", last: "Ford" });
+        viewModel.presidents.push({ first: "Harry", last: "Truman" });
+        viewModel.presidents.push({ first: "Teddy", last: "Roosevelt" });
+        viewModel.showFooter = false;
     },
-    sort: function(context, session, viewModel)
+    itemClicked: function(context, session, viewModel, params)
     {
-        viewModel.contacts.sort(function(a,b){return a.last == b.last ? a.first > b.first : a.last > b.last});
-    },
-    remove: function(context, session, viewModel)
-    {
-        viewModel.contacts.remove(viewModel.selectedContacts);
-        viewModel.selectedContacts = [];
-    },
+        return Synchro.showMessage(context, { message: "You chose: Mr. " + params.president.last });
+    }
 }

@@ -69,7 +69,11 @@ exports.Commands =
     },
     check: function(context, session, viewModel)
     {
-        if (lodash.indexOf(states, viewModel.searchText) != -1)
+        if ((viewModel.searchText == null) || (viewModel.searchText.length == 0))
+        {
+            return Synchro.showMessage(context, { message: "Please enter a state!" });
+        }
+        else if (lodash.indexOf(states, viewModel.searchText) != -1)
         {
             return Synchro.showMessage(context, { message: "It looks like '{searchText}' is a state, congrats!" });
         }

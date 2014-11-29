@@ -8,15 +8,14 @@ exports.View =
     title: "Sandbox",
     elements:
     [
-        { control: "border", border: "White", borderthickness: "5", contents: [
+        { control: "border", border: "Blue", borderthickness: "5", contents: [
             { control: "scrollview", orientation: "Horizontal", height: 150, width: 150, contents: [
                 { control: "image", height: 300, width: 300, resource: "{image}" },
             ] },
         ] },
 
-        { control: "canvas", height: 150, contents: [
-            { control: "image", top: 0, left: 0, resource: "{image}" },
-        ] },
+        { control: "image", height: 150, width: 150, resource: "{image}" },
+
         { control: "button", caption: "Switch images", binding: "switchImages" },
     ]
 }

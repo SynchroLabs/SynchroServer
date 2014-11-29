@@ -18,9 +18,9 @@ exports.View =
             { control: "stackpanel", width: "*", height: "*", visibility: "{properties}", contents: [    
                 { control: "listview", select: "None", height: "*", width: "*", margin: { bottom: 0 }, binding: { items: "properties", onItemClick: { command: "propertySelected", property: "{$data}" } }, 
                     itemTemplate:
-                        { control: "stackpanel", orientation: "Horizontal", padding: { top: 5, bottom: 5 }, contents: [
+                        { control: "stackpanel", orientation: "Horizontal", width: "*", padding: { top: 5, bottom: 5 }, contents: [
                             { control: "image", resource: "{img_url}", height: 90, width: 120 },
-                            { control: "stackpanel", orientation: "Vertical", padding: { left: 5 }, contents: [
+                            { control: "stackpanel", orientation: "Vertical", width: "*", padding: { left: 5 }, contents: [
                                 { control: "text", value: "{price_formatted}", font: { bold: true, size: 10 } },
                                 { control: "text", value: "{title}", fontsize: 8 },
                             ] },
@@ -118,8 +118,8 @@ exports.InitializeViewModel = function(context, session, params, state)
 function populateViewModelPropertiesFromResponse(viewModel, response)
 {
     viewModel.page = parseInt(response.page);
-    viewModel.totalPages = parseInt(response.total_pages);
-    viewModel.totalProperties = parseInt(response.total_results);
+    viewModel.totalPages = response.total_pages ? parseInt(response.total_pages) : 1; // 1 if null/undefined
+    viewModel.totalProperties = response.total_results ? parseInt(response.total_results) : 0; // 0 if null/undefined
     if (viewModel.page == 1)
     {
         viewModel.properties = [];                

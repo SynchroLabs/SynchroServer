@@ -35,8 +35,8 @@ exports.InitializeViewModel = function (context, session)
     var viewModel =
     {
         orientation: "Horizontal",
-        itemVerticalAlignment: "Bottom",
-        itemHorizontalAlignment: "Right",
+        itemVerticalAlignment: "Center",
+        itemHorizontalAlignment: "Center",
     }
     return viewModel;
 }

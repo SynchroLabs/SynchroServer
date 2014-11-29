@@ -10,10 +10,12 @@ exports.View =
             { control: "location", binding: "position" },
 
             { control: "text", width: "*", value: "Use the form below to search for houses to buy. You can search by place-name, postcode, or click 'My Location' to search your current location", fontsize: 10 },
-            { control: "stackpanel", orientation: "Horizontal", margin: { top: 10 }, width: "*", contents: [
-                { control: "edit", binding: "searchTerm", width: "200", verticalAlignment: "Center" },
-                { control: "button", caption: "Go", verticalAlignment: "Center", binding: "placenameSearch", enabled: "{searchTerm}" },
-                { control: "button", caption: "My location", verticalAlignment: "Center", binding: "locationSearch", visibility: "{position.available}", enabled: "{position.coordinate}" },
+            { control: "stackpanel", orientation: "Vertical", margin: { top: 10 }, width: "*", contents: [
+                { control: "edit", binding: "searchTerm", placeholder: "place name or postcode", width: "320"},
+                { control: "stackpanel", orientation: "Horizontal", margin: 0, width: "*", contents: [
+                    { control: "button", caption: "Go", verticalAlignment: "Center", binding: "placenameSearch", enabled: "{searchTerm}" },
+                    { control: "button", caption: "My location", verticalAlignment: "Center", binding: "locationSearch", visibility: "{position.available}", enabled: "{position.coordinate}" },
+                ] },
             ] },
 
             { control: "stackpanel", margin: { top: 10 }, height: "*", visibility: "{previousSearches}", contents: [
