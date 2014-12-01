@@ -1501,6 +1501,8 @@
     <Compile Include="synchro-azure\node_modules\node-uuid\test\compare_v1.js" />
     <Compile Include="synchro-azure\node_modules\node-uuid\test\test.js" />
     <Compile Include="synchro-azure\node_modules\node-uuid\uuid.js" />
+    <Compile Include="synchro-samples\field-engineer\fe_detail.js" />
+    <Compile Include="synchro-samples\field-engineer\fe_main.js" />
     <Compile Include="synchro-samples\propx\propx_detail.js" />
     <Compile Include="synchro-samples\propx\propx_favs.js" />
     <Compile Include="synchro-samples\propx\propx_list.js" />
@@ -3430,6 +3432,7 @@
     <Content Include="synchro-azure\node_modules\node-uuid\README.md" />
     <Content Include="synchro-azure\node_modules\node-uuid\test\test.html" />
     <Content Include="synchro-azure\package.json" />
+    <Content Include="synchro-samples\field-engineer\synchro.json" />
     <Content Include="synchro-samples\propx\synchro.json" />
     <Content Include="synchro-samples\resources\cloud_system_256.png" />
     <Content Include="synchro-samples\resources\user.png" />
@@ -4631,6 +4634,7 @@
     <Folder Include="synchro-azure\node_modules\node-uuid\test\" />
     <Folder Include="synchro-samples\" />
     <Folder Include="synchro-aws\" />
+    <Folder Include="synchro-samples\field-engineer\" />
     <Folder Include="synchro-samples\propx\" />
     <Folder Include="synchro-samples\resources\" />
     <Folder Include="synchro-samples\samples\" />
