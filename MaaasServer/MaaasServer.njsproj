@@ -366,6 +366,7 @@
     <Compile Include="synchro-api\test\testapp\menu.js" />
     <Compile Include="synchro-api\test\testdevices.js" />
     <Compile Include="synchro-api\test\util-test.js" />
+    <Compile Include="synchro-aws\index.js" />
     <Compile Include="synchro-aws\node_modules\aws-sdk\lib\aws.js" />
     <Compile Include="synchro-aws\node_modules\aws-sdk\lib\browser.js" />
     <Compile Include="synchro-aws\node_modules\aws-sdk\lib\config.js" />
@@ -1506,6 +1507,8 @@
     <Compile Include="synchro-samples\propx\propx_main.js" />
     <Compile Include="synchro-samples\samples\autocomplete.js" />
     <Compile Include="synchro-samples\samples\binding.js" />
+    <Compile Include="synchro-samples\samples\contacts.js" />
+    <Compile Include="synchro-samples\samples\contacts_add.js" />
     <Compile Include="synchro-samples\samples\countdown.js" />
     <Compile Include="synchro-samples\samples\counter.js" />
     <Compile Include="synchro-samples\samples\device.js" />
@@ -1520,7 +1523,6 @@
     <Compile Include="synchro-samples\samples\list.js" />
     <Compile Include="synchro-samples\samples\listclick.js" />
     <Compile Include="synchro-samples\samples\listview.js" />
-    <Compile Include="synchro-samples\samples\listview2.js" />
     <Compile Include="synchro-samples\samples\location.js" />
     <Compile Include="synchro-samples\samples\login.js" />
     <Compile Include="synchro-samples\samples\menu.js" />
@@ -3429,6 +3431,7 @@
     <Content Include="synchro-azure\node_modules\node-uuid\test\test.html" />
     <Content Include="synchro-azure\package.json" />
     <Content Include="synchro-samples\propx\synchro.json" />
+    <Content Include="synchro-samples\resources\cloud_system_256.png" />
     <Content Include="synchro-samples\resources\user.png" />
     <Content Include="synchro-samples\samples\synchro.json" />
     <Content Include="synchro-studio\node_modules\express-hbs\.editorconfig" />

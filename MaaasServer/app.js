@@ -57,7 +57,8 @@ nconf.defaults(
     'SYNCHRO_APPS':
     [
         { "uriPath": "samples", "container": "samples" },
-        { "uriPath": "propx", "container": "propx" }
+        { "uriPath": "propx", "container": "propx" },
+        { "uriPath": "field-engineer", "container": "field-engineer" }
     ],
     'LOG4JS_CONFIG': 
     { 
