@@ -1,7 +1,23 @@
-// Field Engineer - Jon List page
+// Field Engineer - Job List page
 //
 var lodash = require("lodash");
 var sql = require('mssql'); 
+
+var dbConfig = 
+{
+    // This obviously should be moved to app config and out of source code...
+    user: 'SynchroFieldEngineer@pr7sz1ussw',
+    password: 'DataAccess1!',
+    server: 'pr7sz1ussw.database.windows.net',
+    database: 'FieldEngineer',
+    options: 
+    {
+        encrypt: true // Use this if you're on Windows Azure
+    }
+}
+
+var agentId1 = '37e865e8-38f1-4e6b-a8ee-b404a188676e';
+var agentId2 = '3c15184f-5b06-48cc-bcc8-55b6e621d9d0';
 
 exports.View =
 {
@@ -39,80 +55,46 @@ exports.View =
     ]
 }
 
-var agentId1 = '37e865e8-38f1-4e6b-a8ee-b404a188676e';
-var agentId2 = '3c15184f-5b06-48cc-bcc8-55b6e621d9d0';
-
 exports.InitializeViewModel = function(context, session, params, state)
 {
     var viewModel =
     {
         jobs: null,
-        isLoading: true
+        isLoading: !state // If no restored state, we'll be loading
     }
 
     if (state)
     {
-        // If we are coming back to the list page from a detail page, we restore the saved jobs list (to save us
-        // from having to go get it again)
+        // If we are coming back to the list page from a detail page, we restore the saved jobs list...
         //
         lodash.assign(viewModel, state);
-        viewModel.isLoading = false;
     }
 
     return viewModel;
 }
 
-function connectDb(callback)
+function loadJobs(context, viewModel, agentId)
 {
-    var config = 
-    {
-        // This obviously should be moved to app config and out of source code...
-        user: 'SynchroFieldEngineer@pr7sz1ussw',
-        password: 'DataAccess1!',
-        server: 'pr7sz1ussw.database.windows.net',
-        database: 'FieldEngineer',
-        options: 
-        {
-            encrypt: true // Use this if you're on Windows Azure
-        }
+    var fieldList = ["Status", "JobNumber", "EtaTime", "Title", "FullName", "HouseNumberOrName", "Street", "Town", "Postcode", "PrimaryContactNumber"];
+    var statusColorMap = 
+    { 
+        "On Site":     "Green",    // InProgress
+        "Not Started": "#D25A00",  // Pending (210, 90, 0)
+        "Completed":   "LightBlue" // Complete
     }
 
-    var connection = new sql.Connection(config); 
-    connection.connect(function(err)
-    {
-        callback(err, connection);
-    });
-}
-
-function jobStatusToColor(status)
-{
-    if (status == "On Site") // InProgress
-    {
-        return "Green";
-    }
-    else if (status == "Not Started") // Pending
-    {
-        return "#D25A00" // 210, 90, 0
-    }
-    else if (status == "Completed") // Complete
-    {
-        return "LightBlue";
-    }
-}
-
-function loadJobs(context, viewModel)
-{
     try
     {
-        var connection = Synchro.waitFor(context, connectDb);
-        var request = connection.request();            
-        recordset = Synchro.waitFor(context, request.query.bind(request), "select * from Job inner join Customer on Job.CustomerId=CUstomer.Id where AgentId='" + agentId1 + "'");
+        var connection = new sql.Connection(dbConfig); 
+        Synchro.waitFor(context, connection.connect.bind(connection));
+        var request = connection.request();
+        request.input('agentId', sql.VarChar, agentId); // Prevent SQL injection by parameterizing
+        recordset = Synchro.waitFor(context, request.query.bind(request), "select " + fieldList.join(",") + " from Job inner join Customer on Job.CustomerId=CUstomer.Id where AgentId=@agentId");
         viewModel.jobs = [];
         recordset.forEach(function(job)
         {
-            // console.log("Job: " + JSON.stringify(job, null, 4));
-            job.Color = jobStatusToColor(job.Status);
-            viewModel.jobs.push(lodash.pick(job, "Status", "JobNumber", "EtaTime", "Title", "Status", "Color", "FullName", "HouseNumberOrName", "Street", "Town", "Postcode", "PrimaryContactNumber"));
+            job.Color = statusColorMap[job.Status];
+            viewModel.jobs.push(job);
         });
     }
     catch(err)
@@ -125,11 +107,11 @@ function loadJobs(context, viewModel)
 
 exports.LoadViewModel = function(context, session, viewModel)
 {
-    // Only query for the jobs if we didn't already populated the list (from saved state) in InitViewModel above.
+    // Only query for the jobs if we didn't already populate the list (from saved state) in InitViewModel above.
     //
     if (viewModel.jobs === null)
     {
-        loadJobs(context, viewModel);
+        loadJobs(context, viewModel, agentId1);
     }
 }
 
@@ -138,12 +120,12 @@ exports.Commands =
     reload: function(context, session, viewModel, params)
     {
         viewModel.isLoading = true;
-        Synchro.interimUpdate(context);
-        loadJobs(context, viewModel);
+        Synchro.interimUpdate(context); // Make sure client gets new isLoading value before loading
+        loadJobs(context, viewModel, agentId1);
     },
     jobSelected: function(context, session, viewModel, params)
     {
-        // Stash the job list in the session so we can pull it back it when we navigate back here.
+        // Stash the job list on the nav stack so we can pull it back it when we navigate back here...
         //
         var state = lodash.pick(viewModel, "jobs");
         return Synchro.pushAndNavigateTo(context, "fe_detail", { job: params.job }, state);
