@@ -27,6 +27,11 @@ var SynchroStudio = function(basePath, apiManager)
 	this.apiManager = apiManager;
 };
 
+SynchroStudio.prototype.getUrlPrefix = function()
+{
+	return this.basePath;
+}
+
 // Called before the Express router or any routes are added to the app.  This is a good time to add any
 // static middleware.
 //

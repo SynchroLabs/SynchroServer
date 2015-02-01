@@ -27,11 +27,19 @@
 
     <div class="list-group">
         {{#each applications}}
-        <a href="{{studioPath}}" class="list-group-item">
-            <h4 class="list-group-item-heading">{{appDefinition.name}}</h4>
-            <p class="list-group-item-text">{{appDefinition.description}}</p>
-            <h5 class="list-group-item-text">API Endpoint: <i>{{endpoint}}</i></h5>
-        </a>
+            {{#if studioPath}}
+                <a href="{{studioPath}}" class="list-group-item">
+            {{else}}
+                <div class="list-group-item">
+            {{/if}}
+                    <h4 class="list-group-item-heading">{{appDefinition.name}}</h4>
+                    <p class="list-group-item-text">{{appDefinition.description}}</p>
+                    <h5 class="list-group-item-text">API Endpoint: <i>{{endpoint}}</i></h5>
+            {{#if studioPath}}
+                </a>
+            {{else}}
+                </div>
+            {{/if}}
         {{/each}}
     </div>
 

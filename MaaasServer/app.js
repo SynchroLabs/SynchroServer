@@ -92,12 +92,36 @@ var synchroApiUrlPrefix = nconf.get("API_PATH_PREFIX");
 
 var apiManager = synchroApi.createApiProcessorManager(nconf.get('DEBUG_BASE_PORT'), nconf.get('LOG4JS_CONFIG'));
 
-// Create Synchro studio
+// Create Synchro studio (load and use Studio only if synchro-studio module is present)
 //
-var SynchroStudio = require('./synchro-studio');
-var synchroStudioUrlPrefix = nconf.get("STUDIO_PATH_PREFIX");
+// !!! There will eventually be configuration to indicate whether Studio should be active.  If config says
+//     no Studio, then we can skip the attempted module load (the studio module may or may not be installed,
+//     and we don't care).  If config says yes Studio, then we should attempt studio module load and fail with 
+//     specific error of module not present if not present.
+//
+var synchroStudio = null; 
+var synchroStudioModule = null;
 
-var synchroStudio = new SynchroStudio(synchroStudioUrlPrefix, apiManager);
+try 
+{
+    synchroStudioModule = require('./synchro-studio');
+}
+catch (e) 
+{
+    if (e instanceof Error && e.code === "MODULE_NOT_FOUND")
+        logger.info("Synchro Studio module (synchro-studio) not installed, no Studio services will be provided");
+    else
+        throw e;
+}
+
+if (synchroStudioModule)
+{
+    // We could just do this in the try above after the require, but we don't want to exception handler to handle
+    // anything except the specific exception of module not found on requiring the studio module.
+    //
+    var synchroStudioUrlPrefix = nconf.get("STUDIO_PATH_PREFIX");
+    synchroStudio = new synchroStudioModule(synchroStudioUrlPrefix, apiManager);
+}
 
 // Now let's set up the web / api servers...
 //
@@ -136,9 +160,12 @@ app.use(synchroApiUrlPrefix + '/resources', express.static(path.join(nconf.get('
 
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
-synchroStudio.addMiddleware(app);
 
-synchroStudio.addRoutes(app, login.checkAuth);
+if (synchroStudio)
+{
+    synchroStudio.addMiddleware(app);
+    synchroStudio.addRoutes(app, login.checkAuth);
+}
 
 app.get('/', login.checkAuth, function(request, response) 
 {
@@ -152,10 +179,15 @@ app.get('/', login.checkAuth, function(request, response)
         for (appPath in apiProcessors)
         {
             var moduleStore = apiManager.getModuleStore(appPath);
+            var studioPath = null;
+            if (synchroStudio)
+            {
+                studioPath = synchroStudio.getUrlPrefix() + "/" + appPath + "/sandbox";
+            }
             applications.push(
             { 
                 appPath: appPath, 
-                studioPath: synchroStudioUrlPrefix + "/" + appPath + "/sandbox", 
+                studioPath: studioPath, 
                 endpoint: netutil.addNonStandardPort(request.host, nconf.get("PORT")) + synchroApiUrlPrefix + "/" + appPath, 
                 appDefinition: moduleStore.getAppDefinition()
             });
@@ -183,13 +215,13 @@ server.on('upgrade', function(request, socket, body)
     {
         var path = url.parse(request.url).pathname; 
 
-        if (path === synchroStudioUrlPrefix) // !!! Web session auth (maybe inside websocket processor - to get/use session)
+        if (synchroModule && (path === synchroModule.getUrlPrefix())) // !!! Web session auth (maybe inside websocket processor - to get/use session)
         {
             synchroStudio.processWebSocket(request, socket, body);
         }
         else
         {
-            logger.info("ERROR - No such websocket endpoint: " + path);
+            logger.error("No such websocket endpoint: " + path);
         }
     }
 });
