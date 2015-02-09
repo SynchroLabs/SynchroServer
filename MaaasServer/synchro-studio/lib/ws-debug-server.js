@@ -28,6 +28,7 @@ function DebugSession(ws, port)
     this.client = new v8Client();
     this.client.connect(port);
 
+    // !!! This can fail hard (like kill the server hard) if the connect fails (specifically with bad/zero port)
     this.client.reqVersion(function(err, version) {
        logger.info("Remote debugger version: " + version);
     });
