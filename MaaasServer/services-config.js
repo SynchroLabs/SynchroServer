@@ -15,12 +15,12 @@ exports.getServicesConfig = function(config, directory)
 			{
 		        sessionStoreSpec:
 		        {
-		            packageRequirePath: path.resolve('./synchro-api'), 
+		            packageRequirePath: 'synchro-api', 
 		            serviceName: 'MemorySessionStore',
 		            serviceConfiguration: {}
 
 		            /*
-		            packageRequirePath: path.resolve('./synchro-api'), 
+		            packageRequirePath: './synchro-api', 
 		            serviceName: 'FileSessionStore',
 		            serviceConfiguration: 
 		            {
@@ -31,7 +31,7 @@ exports.getServicesConfig = function(config, directory)
 
 		        moduleStoreSpec:
 		        {
-		            packageRequirePath: path.resolve('./synchro-api'), 
+		            packageRequirePath: 'synchro-api', 
 		            serviceName: 'FileModuleStore',
 		            serviceConfiguration: 
 		            {
@@ -41,7 +41,7 @@ exports.getServicesConfig = function(config, directory)
 
 		        resourceResolverSpec:
 			    { 
-			        packageRequirePath: path.resolve('./synchro-api'), 
+			        packageRequirePath: 'synchro-api', 
 			        serviceName: 'ResourceResolver',
 			        serviceConfiguration: 
 			        {
@@ -63,7 +63,7 @@ exports.getServicesConfig = function(config, directory)
 			{
 		        sessionStoreSpec:
 		        {
-		            packageRequirePath: path.resolve('./synchro-api'),
+		            packageRequirePath: 'synchro-api',
 		            serviceName: 'RedisSessionStore',
 		            serviceConfiguration: 
 		            {
@@ -74,7 +74,7 @@ exports.getServicesConfig = function(config, directory)
 		            }
 
 		            /*
-		            packageRequirePath: path.resolve('./synchro-azure'),
+		            packageRequirePath: 'synchro-azure',
 		            serviceName: 'AzureSessionStore',
 		            serviceConfiguration: 
 		            {
@@ -87,7 +87,7 @@ exports.getServicesConfig = function(config, directory)
 
 		        moduleStoreSpec:
 		        {
-		            packageRequirePath: path.resolve('./synchro-azure'), 
+		            packageRequirePath: 'synchro-azure', 
 		            serviceName: 'AzureModuleStore',
 		            serviceConfiguration:
 		            {
@@ -99,7 +99,7 @@ exports.getServicesConfig = function(config, directory)
 
 		        resourceResolverSpec:
 			    { 
-			        packageRequirePath: path.resolve('./synchro-api'), 
+			        packageRequirePath: 'synchro-api', 
 			        serviceName: 'ResourceResolver',
 			        serviceConfiguration: 
 			        {

@@ -70,7 +70,7 @@ exports.getConfig = function(rootPath, overrides)
 	    'API_PATH_PREFIX': "/api",
 	    'STUDIO_PATH_PREFIX': "/studio",
 	    'DEBUG_BASE_PORT': 6969,
-	    'FILE_STORE_PATH': path.resolve(rootPath, "synchro-samples"),
+	    'FILE_STORE_PATH': path.resolve(rootPath, "synchro-apps"),
 	    'LOCAL_RESOURCE_PREFIX': 
 	        "http://" + addNonStandardPort(getExternalIPAddress(), (nconf.get("PORT") || 1337)) + 
 	        (nconf.get('API_PATH_PREFIX') || "/api") + 

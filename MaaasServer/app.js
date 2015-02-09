@@ -51,7 +51,7 @@ if (config.get("SERVICES_CONFIG") == "local")
 
 // Create Synchro API processor manager
 //
-var synchroApi = require('./synchro-api');
+var synchroApi = require('synchro-api');
 var synchroApiUrlPrefix = config.get("API_PATH_PREFIX");
 
 var apiManager = synchroApi.createApiProcessorManager(config.get('DEBUG_BASE_PORT'), config.get('LOG4JS_CONFIG'));
@@ -68,7 +68,7 @@ var synchroStudioModule = null;
 
 try 
 {
-    synchroStudioModule = require('./synchro-studio');
+    synchroStudioModule = require('synchro-studio');
 }
 catch (e) 
 {
