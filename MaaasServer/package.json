@@ -5,16 +5,23 @@
   "main": "app.js",
   "homepage": "http://synchro.io/",
   "dependencies": {
-    "express": "~3.4.8",
-    "wait.for": "~0.6.3",
-    "log4js": "^0.6.21",
-    "commander": "^2.3.0",
     "async": "^0.9.0",
+    "commander": "^2.3.0",
+    "express": "~3.4.8",
+    "log4js": "^0.6.21",
     "nconf": "^0.6.9",
-    "request": "^2.44.0"
+    "request": "^2.44.0",
+    "synchro-api": "",
+    "synchro-aws": "",
+    "synchro-azure": "",
+    "synchro-studio": "",
+    "wait.for": "~0.6.3"
   },
+  "bundleDependencies": [],
+  "private": true,
   "scripts": {
     "start": "node app.js",
+    "init-synchro": "npm install; ",
     "test": "npm run test-api",
     "test-api": "mocha synchro-api/test"
   }

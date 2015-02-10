@@ -156,16 +156,17 @@ $RECYCLE.BIN/
 .DS_Store
 
 # RDD - iisnode log files (not sure why they get sprayed into the project
-/MaaasServer/iisnode
+/*/iisnode
 
 # RDD - NTVS Analysis (local file)
 .ntvs_analysis.dat
 
 # RDD - Include top-level Synchro modules, but exclude all other node_modules...
-**/node_modules/*
-#!/*/node_modules/synchro-*/*
-#/*/node_modules/synchro-*/*.tgz
-#/*/node_modules/synchro-*/node_modules/
+/*/node_modules/**/*
+!/*/node_modules/synchro-*/*
+/*/node_modules/synchro-*/*.tgz
+/*/node_modules/synchro-*/node_modules/
+
 
 # RDD - Sublime editor 
 *.sublime-project
