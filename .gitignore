@@ -167,7 +167,6 @@ $RECYCLE.BIN/
 /*/node_modules/synchro-*/*.tgz
 /*/node_modules/synchro-*/node_modules/
 
-
 # RDD - Sublime editor 
 *.sublime-project
 *.sublime-workspace
