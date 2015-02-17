@@ -2,7 +2,6 @@
   "name": "synchro-server",
   "version": "0.0.0",
   "description": "Synchro Server",
-  "main": "app.js",
   "homepage": "http://synchro.io/",
   "dependencies": {
     "async": "^0.9.0",
@@ -21,7 +20,6 @@
   "private": true,
   "scripts": {
     "start": "node app.js",
-    "init-synchro": "npm install; ",
     "test": "npm run test-api",
     "test-api": "mocha synchro-api/test"
   }

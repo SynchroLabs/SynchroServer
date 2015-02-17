@@ -153,7 +153,7 @@ function loadApiProcessorsAsync(callback)
         var services = servicesConfig.getServicesConfig(config.get('SERVICES_CONFIG'), synchroApp.container);
 
         var bFork = true;   // Run API processor forked
-        var bDebug = true;  // Enable debugging of API processor (only valid if running forked)
+        var bDebug = (synchroStudio != null) && bFork;  // Enable debugging of API processor (only valid if running forked and studio present)
 
         if (config.get('NOFORK'))
         {
