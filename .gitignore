@@ -172,7 +172,4 @@ $RECYCLE.BIN/
 *.sublime-project
 *.sublime-workspace
 
-# RDD - Exclude config
-/*/config.json
-
 /packages/**

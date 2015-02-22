@@ -4,8 +4,7 @@ var path = require('path');
 var async = require('async');
 var log4js = require('log4js');
 
-var servicesConfig = require('./services-config');
-var synchroConfig = require('./synchro-config');
+var synchroConfig = require('synchro-api/synchro-config');
 
 var pkg = require('./package.json');
 
@@ -15,8 +14,7 @@ var commander = require('commander');
 commander.version(pkg.version);
 commander.option('-n, --nofork', 'Do not fork api processors (run inproc)');
 commander.option('-p, --port <n>', 'Server port', parseInt);
-commander.option('-s, --services <value>', 'Run with specified services configuration');
-commander.option('-l, --logconfig <value>', 'Configure logging using specified logging configuration file');
+commander.option('-c, --config <value>', 'Use the specified configuration file');
 commander.parse(process.argv);
 
 var overrides = {};
@@ -28,26 +26,13 @@ if (commander.port)
 {
     overrides.PORT = commander.port;
 }
-if (commander.services)
-{
-    overrides.SERVICES_CONFIG = commander.services;
-}
-if (commander.logconfig)
-{
-    overrides.LOG4JS_CONFIG = commander.logconfig;
-}
 
-var config = synchroConfig.getConfig(__dirname, overrides);
+var config = synchroConfig.getConfig(commander.config, overrides);
 
 log4js.configure(config.get('LOG4JS_CONFIG'));
 
 var logger = log4js.getLogger("app");
-logger.info("Synchro server loading...");
-
-if (config.get("SERVICES_CONFIG") == "local")
-{
-    logger.info("Using local services, reasource prefix: " + config.get("LOCAL_RESOURCE_PREFIX"));
-}
+logger.info("Synchro server loading - " + config.configDetails);
 
 // Create Synchro API processor manager
 //
@@ -108,7 +93,11 @@ app.use(express.methodOverride());
 // Serve client app resources locally (can be removed if not needed in your config).  Note that this route must be added before
 // the app.router below in order for it to get a crack at the request.
 //
-app.use(synchroApiUrlPrefix + '/resources', express.static(path.join(config.get('FILE_STORE_PATH'), 'resources')));
+var appStaticResourcePath = config.get('APP_RESOURCE_PATH');
+if (appStaticResourcePath)
+{
+    app.use(synchroApiUrlPrefix + '/resources', express.static(appStaticResourcePath));    
+}
 
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
@@ -150,7 +139,30 @@ function loadApiProcessorsAsync(callback)
 
     function loadApiProcessorAsync(synchroApp, callback)
     {
-        var services = servicesConfig.getServicesConfig(config.get('SERVICES_CONFIG'), synchroApp.container);
+        var servicesConfig =
+        {
+            sessionStoreSpec:
+            {
+                packageRequirePath: config.get('SESSIONSTORE_PACKAGE'),
+                serviceName: config.get('SESSIONSTORE_SERVICE'),
+                serviceConfiguration: config.get('SESSIONSTORE')
+            },
+            moduleStoreSpec:
+            {
+                packageRequirePath: config.get('MODULESTORE_PACKAGE'),
+                serviceName: config.get('MODULESTORE_SERVICE'),
+                serviceConfiguration: config.get('MODULESTORE')
+            },
+            resourceResolverSpec:
+            { 
+                packageRequirePath: 'synchro-api', 
+                serviceName: 'ResourceResolver',
+                serviceConfiguration: 
+                {
+                    prefix: config.get('APP_RESOURCE_PREFIX')
+                }
+            }
+        }
 
         var bFork = true;   // Run API processor forked
         var bDebug = (synchroStudio != null) && bFork;  // Enable debugging of API processor (only valid if running forked and studio present)
@@ -164,7 +176,7 @@ function loadApiProcessorsAsync(callback)
             bDebug = false; // Debugging of API processor not available in-proc, so don't even ask ;)
         }
 
-        apiManager.createApiProcessorAsync(synchroApp.uriPath, services, bFork, bDebug, callback);
+        apiManager.createApiProcessorAsync(synchroApp.uriPath, synchroApp.container, servicesConfig, bFork, bDebug, callback);
     }
 
     async.each(synchroApps, loadApiProcessorAsync, callback);    

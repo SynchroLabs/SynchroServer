@@ -53,6 +53,7 @@
     <Compile Include="node_modules\synchro-api\lib\resource-resolver.js" />
     <Compile Include="node_modules\synchro-api\lib\session-store.js" />
     <Compile Include="node_modules\synchro-api\lib\util.js" />
+    <Compile Include="node_modules\synchro-api\synchro-config.js" />
     <Compile Include="node_modules\synchro-api\test\api-test.js" />
     <Compile Include="node_modules\synchro-api\test\assert-helper.js" />
     <Compile Include="node_modules\synchro-api\test\filter-test.js" />

@@ -8,7 +8,7 @@
     "commander": "^2.3.0",
     "express": "~3.4.8",
     "log4js": "^0.6.21",
-    "nconf": "^0.6.9",
+    "nconf": "^0.7.1",
     "request": "^2.44.0",
     "synchro-api": "",
     "synchro-aws": "",
