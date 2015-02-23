@@ -6,14 +6,14 @@
 
 2) Install npm dependencies
 
-    `npm install`
+    npm install
 
 navigate to each of the following directories and run "npm install" there also:
 
-    `node_modules/synchro-api`
-    `node_modules/synchro-aws`
-    `node_modules/synchro-azure`
-    `node_modules/synchro-studio`
+    node_modules/synchro-api
+    node_modules/synchro-aws
+    node_modules/synchro-azure
+    node_modules/synchro-studio
 
 ## Configuration Mechanism
 
@@ -23,7 +23,7 @@ Synchro supports several mechanisms for configuration, and those mechanisms can 
 
 To see the list of supported command line parameters:
 
-    `node app.js --help`
+    node app.js --help
 
 2) Environment variables
 
@@ -36,7 +36,7 @@ When setting a Synchro config element using an environment variable, you must pr
 
 You would set an environment variable like so:
 
-    `set SYNCHRO__MODULESTORE__DIRECTORY=somedir`
+    set SYNCHRO__MODULESTORE__DIRECTORY=somedir
 
 3) Configuration file
 
