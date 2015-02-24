@@ -61,6 +61,7 @@
     <Compile Include="node_modules\synchro-api\test\module-test.js" />
     <Compile Include="node_modules\synchro-api\test\objectmon-test.js" />
     <Compile Include="node_modules\synchro-api\test\reader-writer-test.js" />
+    <Compile Include="node_modules\synchro-api\test\synchro-config-test.js" />
     <Compile Include="node_modules\synchro-api\test\test.js" />
     <Compile Include="node_modules\synchro-api\test\testapp\counter.js" />
     <Compile Include="node_modules\synchro-api\test\testapp\counter_update.js" />
@@ -390,6 +391,8 @@
     <Content Include="config.json" />
     <Content Include="node_modules\synchro-api\package.json" />
     <Content Include="node_modules\synchro-api\test\testapp\synchro.json" />
+    <Content Include="node_modules\synchro-api\test\testconfig\altconfig.json" />
+    <Content Include="node_modules\synchro-api\test\testconfig\config.json" />
     <Content Include="node_modules\synchro-aws\package.json" />
     <Content Include="node_modules\synchro-azure\package.json" />
     <Content Include="node_modules\synchro-studio\package.json" />
@@ -417,6 +420,7 @@
     <Folder Include="node_modules\synchro-api\lib\" />
     <Folder Include="node_modules\synchro-api\test\" />
     <Folder Include="node_modules\synchro-api\test\testapp\" />
+    <Folder Include="node_modules\synchro-api\test\testconfig\" />
     <Folder Include="node_modules\synchro-aws\" />
     <Folder Include="node_modules\synchro-azure\" />
     <Folder Include="node_modules\synchro-azure\lib\" />
