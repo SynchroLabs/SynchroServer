@@ -56,6 +56,7 @@
     <Compile Include="node_modules\synchro-api\synchro-config.js" />
     <Compile Include="node_modules\synchro-api\test\api-test.js" />
     <Compile Include="node_modules\synchro-api\test\assert-helper.js" />
+    <Compile Include="node_modules\synchro-api\test\file-module-store-test.js" />
     <Compile Include="node_modules\synchro-api\test\filter-test.js" />
     <Compile Include="node_modules\synchro-api\test\module-manager-test.js" />
     <Compile Include="node_modules\synchro-api\test\module-test.js" />
