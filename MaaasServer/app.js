@@ -12,19 +12,35 @@ var pkg = require('./package.json');
 //
 var commander = require('commander');
 commander.version(pkg.version);
-commander.option('-n, --nofork', 'Do not fork api processors (run inproc)');
-commander.option('-p, --port <n>', 'Server port', parseInt);
+commander.option('-i, --inproc', 'Do not fork api processors (run inproc)');
+commander.option('-p, --port <n>', 'The port on which the Synchro server will listen', parseInt);
+commander.option('-d, --debug-base-port <value>', 'The starting port for the debugging engine', parseInt);
+commander.option('-n, --no-studio', 'The Synchro Studio will not be enabled');
 commander.option('-c, --config <value>', 'Use the specified configuration file');
 commander.parse(process.argv);
 
+if (commander.debugBasePort && commander.debugBasePort <= 1024)
+{
+    console.log("Error, debug base port must be greater than 1024, was:", commander.debugBasePort);
+    process.exit(1);
+}
+
 var overrides = {};
-if (commander.nofork)
+if (commander.inproc)
 {
     overrides.NOFORK = true;
 }
 if (commander.port)
 {
     overrides.PORT = commander.port;
+}
+if (commander.debugBasePort)
+{
+    overrides.DEBUG_BASE_PORT = commander.debugBasePort;
+}
+if (!commander.studio)
+{
+    overrides.NOSTUDIO = true;
 }
 
 var config = synchroConfig.getConfig(commander.config, overrides);
@@ -41,35 +57,34 @@ var synchroApiUrlPrefix = config.get("API_PATH_PREFIX");
 
 var apiManager = synchroApi.createApiProcessorManager(config.get('DEBUG_BASE_PORT'), config.get('LOG4JS_CONFIG'));
 
-// Create Synchro studio (load and use Studio only if synchro-studio module is present)
-//
-// !!! There will eventually be configuration to indicate whether Studio should be active.  If config says
-//     no Studio, then we can skip the attempted module load (the studio module may or may not be installed,
-//     and we don't care).  If config says yes Studio, then we should attempt studio module load and fail with 
-//     specific error of module not present if not present.
+// Create Synchro studio (unless config indicates not to)
 //
 var synchroStudio = null; 
-var synchroStudioModule = null;
 
-try 
+if (!config.get("NOSTUDIO"))
 {
-    synchroStudioModule = require('synchro-studio');
-}
-catch (e) 
-{
-    if (e instanceof Error && e.code === "MODULE_NOT_FOUND")
-        logger.info("Synchro Studio module (synchro-studio) not installed, no Studio services will be provided");
-    else
-        throw e;
-}
+    var synchroStudioModule = null;
 
-if (synchroStudioModule)
-{
-    // We could just do this in the try above after the require, but we don't want to exception handler to handle
-    // anything except the specific exception of module not found on requiring the studio module.
-    //
-    var synchroStudioUrlPrefix = config.get("STUDIO_PATH_PREFIX");
-    synchroStudio = new synchroStudioModule(synchroStudioUrlPrefix, apiManager);
+    try 
+    {
+        synchroStudioModule = require('synchro-studio');
+    }
+    catch (e) 
+    {
+        if (e instanceof Error && e.code === "MODULE_NOT_FOUND")
+            logger.warn("Synchro Studio module (synchro-studio) not installed, no Studio services will be provided");
+        else
+            throw e;
+    }
+
+    if (synchroStudioModule)
+    {
+        // We could just do this in the try above after the require, but we don't want to exception handler to handle
+        // anything except the specific exception of module not found on requiring the studio module.
+        //
+        var synchroStudioUrlPrefix = config.get("STUDIO_PATH_PREFIX");
+        synchroStudio = new synchroStudioModule(config, synchroStudioUrlPrefix, apiManager);
+    }
 }
 
 // Now let's set up the web / api servers...
@@ -105,7 +120,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 if (synchroStudio)
 {
     synchroStudio.addMiddleware(app);
-    synchroStudio.addRoutes(app, config);
+    if (config.get("STUDIO_NOAUTH") == true)
+    {
+        // No auth...
+        synchroStudio.addRoutes(app, config, false);
+    }
+    else
+    {
+        // Use built-in auth...
+        synchroStudio.addRoutes(app, config);        
+    }
 }
 else
 {
