@@ -1,0 +1,11 @@
+{
+  "name": "synchro-apps",
+  "version": "1.0.0",
+  "description": "Virtual package/container for shared Synchro app dependencies",
+  "homepage": "http://synchro.io/",
+  "private": true,
+  "dependencies": {
+    "lodash": "^3.5.0",
+    "request": "^2.53.0"
+  }
+}

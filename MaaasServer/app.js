@@ -185,7 +185,8 @@ function loadApiProcessorsAsync(callback)
                 {
                     prefix: config.get('APP_RESOURCE_PREFIX')
                 }
-            }
+            },
+            appRootPath: config.get('APP_ROOT_PATH')
         }
 
         var bFork = true;   // Run API processor forked

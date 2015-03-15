@@ -391,6 +391,7 @@
     <Content Include="bin\iisnode-full-iis7-v0.2.7-x64.msi" />
     <Content Include="config.json" />
     <Content Include="node_modules\synchro-api\package.json" />
+    <Content Include="node_modules\synchro-api\test\testapp\package.json" />
     <Content Include="node_modules\synchro-api\test\testapp\synchro.json" />
     <Content Include="node_modules\synchro-api\test\testconfig\altconfig.json" />
     <Content Include="node_modules\synchro-api\test\testconfig\config.json" />
@@ -407,11 +408,12 @@
     <Content Include="package.json" />
     <Content Include="README.md" />
     <None Include="Web.local.config" />
-    <Content Include="synchro-apps\field-engineer\synchro.json" />
-    <Content Include="synchro-apps\propx\synchro.json" />
+    <Content Include="synchro-apps\field-engineer\package.json" />
+    <Content Include="synchro-apps\package.json" />
+    <Content Include="synchro-apps\propx\package.json" />
     <Content Include="synchro-apps\resources\cloud_system_256.png" />
     <Content Include="synchro-apps\resources\user.png" />
-    <Content Include="synchro-apps\samples\synchro.json" />
+    <Content Include="synchro-apps\samples\package.json" />
     <Content Include="Web.Debug.config" />
     <Content Include="Web.Release.config" />
   </ItemGroup>
