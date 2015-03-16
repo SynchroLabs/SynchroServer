@@ -2,7 +2,7 @@
   "name": "synchro-samples",
   "version": "0.0.0",
   "description": "Synchro API Samples",
-  "mainPage": "menu",
+  "main": "menu",
   "author": "Bob Dickinson <bob@synchro.io> (http://synchro.io/)",
   "private": true,
   "engines":  { "synchro" : "*" } 
