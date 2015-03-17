@@ -1,5 +1,7 @@
 // Counter page
 //
+var util = require('./lib/util');
+
 var fontStyle = 
 {
     normal: { color: "Green", isBold: false },
@@ -69,7 +71,7 @@ exports.Commands =
 {
     vary: function(context, session, viewModel, params)
     {
-        viewModel.count += params.amount;
+        viewModel.count = util.Vary(viewModel.count, params.amount);
     },
     reset: function(context, session, viewModel)
     {
