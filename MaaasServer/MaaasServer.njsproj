@@ -353,7 +353,6 @@
     <Compile Include="node_modules\synchro-studio\routes\edit.js" />
     <Compile Include="node_modules\synchro-studio\routes\index.js" />
     <Compile Include="node_modules\synchro-studio\routes\login.js" />
-    <Compile Include="services-config.js" />
     <Compile Include="synchro-apps\field-engineer\fe_detail.js" />
     <Compile Include="synchro-apps\field-engineer\fe_main.js" />
     <Compile Include="synchro-apps\propx\propx_detail.js" />
@@ -375,6 +374,7 @@
     <Compile Include="synchro-apps\samples\hello.js" />
     <Compile Include="synchro-apps\samples\image.js" />
     <Compile Include="synchro-apps\samples\layout.js" />
+    <Compile Include="synchro-apps\samples\lib\util.js" />
     <Compile Include="synchro-apps\samples\list.js" />
     <Compile Include="synchro-apps\samples\listclick.js" />
     <Compile Include="synchro-apps\samples\listview.js" />
@@ -387,12 +387,10 @@
     <Compile Include="synchro-apps\samples\textflow.js" />
     <Compile Include="synchro-apps\samples\webview.js" />
     <Compile Include="synchro-apps\samples\wrap.js" />
-    <Compile Include="synchro-config.js" />
     <Content Include="bin\iisnode-full-iis7-v0.2.7-x64.msi" />
     <Content Include="config.json" />
     <Content Include="node_modules\synchro-api\package.json" />
     <Content Include="node_modules\synchro-api\test\testapp\package.json" />
-    <Content Include="node_modules\synchro-api\test\testapp\synchro.json" />
     <Content Include="node_modules\synchro-api\test\testconfig\altconfig.json" />
     <Content Include="node_modules\synchro-api\test\testconfig\config.json" />
     <Content Include="node_modules\synchro-aws\package.json" />
@@ -445,6 +443,7 @@
     <Folder Include="synchro-apps\propx\" />
     <Folder Include="synchro-apps\resources\" />
     <Folder Include="synchro-apps\samples\" />
+    <Folder Include="synchro-apps\samples\lib\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Web.config">

@@ -26,18 +26,28 @@ if (commander.debugBasePort && commander.debugBasePort <= 1024)
 }
 
 var overrides = {};
+
 if (commander.inproc)
 {
     overrides.NOFORK = true;
 }
+
 if (commander.port)
 {
     overrides.PORT = commander.port;
 }
+else if (process.env.PORT)
+{
+    // For Azure specifically, they set the port via the PORT environment variable
+    //
+    overrides.PORT = process.env.PORT;
+}
+
 if (commander.debugBasePort)
 {
     overrides.DEBUG_BASE_PORT = commander.debugBasePort;
 }
+
 if (!commander.studio)
 {
     overrides.NOSTUDIO = true;
