@@ -1,16 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30110.0
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "MaaasServer", "MaaasServer\MaaasServer.njsproj", "{7E458DE2-FB3A-4EE0-B5DB-F29C072B482E}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7BE5A9E2-70C7-466D-A6F9-6A12BF185275}"
-	ProjectSection(SolutionItems) = preProject
-		Notes.txt = Notes.txt
-	EndProjectSection
 EndProject
-Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "MaaasServer.Azure", "MaaasServer.Azure\MaaasServer.Azure.ccproj", "{2DE0D517-8C94-4640-8C4C-BA8256625290}"
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "SynchroServer", "SynchroServer\SynchroServer.njsproj", "{7E458DE2-FB3A-4EE0-B5DB-F29C072B482E}"
+EndProject
+Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "SynchroServer.Azure", "SynchroServer.Azure\SynchroServer.Azure.ccproj", "{2DE0D517-8C94-4640-8C4C-BA8256625290}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,7 +23,6 @@ Global
 		{2DE0D517-8C94-4640-8C4C-BA8256625290}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2DE0D517-8C94-4640-8C4C-BA8256625290}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2DE0D517-8C94-4640-8C4C-BA8256625290}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2DE0D517-8C94-4640-8C4C-BA8256625290}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

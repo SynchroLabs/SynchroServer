@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ServiceConfiguration serviceName="SynchroServer.Azure" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="3" osVersion="*" schemaVersion="2014-06.2.4">
+  <Role name="SynchroServer">
+    <Instances count="1" />
+    <ConfigurationSettings>
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=expresstest;AccountKey=jYJk51UUlWXEOujyCc/Plm/Qs/zRMuxsjlcwZ+it/VI0yT9QypxN2z2AgkxfvfkM/jXr78qGCO5z3utoksuKOw==" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.Enabled" value="true" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountUsername" value="bob.dickinson" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountEncryptedPassword" value="MIIBnQYJKoZIhvcNAQcDoIIBjjCCAYoCAQAxggFOMIIBSgIBADAyMB4xHDAaBgNVBAMME1dpbmRvd3MgQXp1cmUgVG9vbHMCEEuuZpjp8QiTTU7s+vpiQSkwDQYJKoZIhvcNAQEBBQAEggEAElpLzDNXYm8b3y3wQByEAQeY5KMRxrE0dSyq3eYdofm6El0EPUF5s64aPHZyPVA1RnHFkvsPiWOx477FOUKbqHBl6BYIlqrFFw4TM1QpBkW0zq6MzxJskKC8EYYNNBikpoZGZZ/RLzL7uy20k7VZlgywIJU5BcvBg9Y6D/BApqfm7RmTUDxQ6H9nmdn4dxTrmlDbf5v1XdDMEMe8xqlE00GfAv+NfYnGNvMtsy/uQ0QKpO2xge4dnoYLl1DXGR6OA6m+OFGo5QeEMD82US+/GmMQDdcCmeGJvCaWq8F7tZJlrOU8wV884lo/iVBKwImRkjjkG6avPTvDIs/OKCf+WDAzBgkqhkiG9w0BBwEwFAYIKoZIhvcNAwcECHO6DO4n1E3kgBADOyizEOIrYROIXMjoXSQQ" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountExpiration" value="2016-12-31T23:59:59.0000000-08:00" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteForwarder.Enabled" value="true" />
+    </ConfigurationSettings>
+    <Certificates>
+      <Certificate name="Microsoft.WindowsAzure.Plugins.RemoteAccess.PasswordEncryption" thumbprint="996C3F25069B114F69AA66641B67EEA7E0A74C8F" thumbprintAlgorithm="sha1" />
+      <Certificate name="MaaasIoSSL" thumbprint="B0849E024612880831FF265D2D5629E1D68C5617" thumbprintAlgorithm="sha1" />
+    </Certificates>
+  </Role>
+</ServiceConfiguration>

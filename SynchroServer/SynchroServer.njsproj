@@ -3,7 +3,7 @@
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
-    <Name>MaaasServer</Name>
+    <Name>SynchroServer</Name>
     <RootNamespace>MaaasServer</RootNamespace>
     <NameOfLastUsedPublishProfile>maaas - Cloud Web Deploy</NameOfLastUsedPublishProfile>
     <NodeExePath />
@@ -18,7 +18,8 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>7e458de2-fb3a-4ee0-b5db-f29c072b482e</ProjectGuid>
-    <ProjectHome>.</ProjectHome>
+    <ProjectHome>
+    </ProjectHome>
     <StartupFile>app.js</StartupFile>
     <SearchPath>
     </SearchPath>
@@ -388,6 +389,8 @@
     <Compile Include="synchro-apps\samples\webview.js" />
     <Compile Include="synchro-apps\samples\wrap.js" />
     <Content Include="bin\iisnode-full-iis7-v0.2.7-x64.msi" />
+    <Content Include="bin\Microsoft.NodejsTools.WebRole.dll" />
+    <Content Include="bin\SetupSite.ps1" />
     <Content Include="config.json" />
     <Content Include="node_modules\synchro-api\package.json" />
     <Content Include="node_modules\synchro-api\test\testapp\package.json" />
@@ -405,15 +408,12 @@
     <Content Include="node_modules\synchro-studio\views\sandbox.hbs" />
     <Content Include="package.json" />
     <Content Include="README.md" />
-    <None Include="Web.local.config" />
     <Content Include="synchro-apps\field-engineer\package.json" />
     <Content Include="synchro-apps\package.json" />
     <Content Include="synchro-apps\propx\package.json" />
     <Content Include="synchro-apps\resources\cloud_system_256.png" />
     <Content Include="synchro-apps\resources\user.png" />
     <Content Include="synchro-apps\samples\package.json" />
-    <Content Include="Web.Debug.config" />
-    <Content Include="Web.Release.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />

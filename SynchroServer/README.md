@@ -15,6 +15,9 @@ navigate to each of the following directories and run "npm install" there also:
     node_modules/synchro-azure
     node_modules/synchro-studio
 
+    synchro-apps
+    synchro-apps/field-engineer
+
 ## Configuration Mechanism
 
 Synchro supports several mechanisms for configuration, and those mechanisms can even be combined as appropriate.  Synchro configuration is processed with the following precedence:

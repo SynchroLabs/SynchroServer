@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ServiceDefinition name="SynchroServer.Azure" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition" schemaVersion="2014-06.2.4">
+ <WebRole name="SynchroServer" vmsize="Small">
+  <Sites>
+   <Site name="Web">
+    <Bindings>
+     <Binding name="HttpIn" endpointName="HttpIn" />
+     <Binding name="HttpsIn" endpointName="HttpsIn" />
+    </Bindings>
+   </Site>
+  </Sites>
+  <Endpoints>
+   <InputEndpoint name="HttpIn" protocol="http" port="80" />
+   <InputEndpoint name="HttpsIn" protocol="https" port="443" certificate="MaaasIoSSL" />
+  </Endpoints>
+  <Imports>
+   <Import moduleName="Diagnostics" />
+   <Import moduleName="RemoteAccess" />
+   <Import moduleName="RemoteForwarder" />
+  </Imports>
+  <Certificates>
+   <Certificate name="MaaasIoSSL" storeLocation="LocalMachine" storeName="CA" />
+  </Certificates>
+  <Startup>
+   <Task commandLine="setup_web.cmd &gt; log.txt" executionContext="elevated" taskType="simple">
+    <Environment>
+     <Variable name="EMULATED">
+      <RoleInstanceValue xpath="/RoleEnvironment/Deployment/@emulated" />
+     </Variable>
+     <Variable name="RUNTIMEID" value="node" />
+     <Variable name="RUNTIMEURL" value="http://az413943.vo.msecnd.net/node/0.10.21.exe;http://nodertncu.blob.core.windows.net/iisnode/0.1.21.exe" />
+    </Environment>
+   </Task>
+  </Startup>
+ </WebRole>
+</ServiceDefinition>

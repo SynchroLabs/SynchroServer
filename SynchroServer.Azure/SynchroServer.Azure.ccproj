@@ -9,10 +9,10 @@
     <ProjectGuid>2de0d517-8c94-4640-8c4c-ba8256625290</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MaaasServer.Azure</RootNamespace>
-    <AssemblyName>MaaasServer.Azure</AssemblyName>
+    <RootNamespace>SynchroServer.Azure</RootNamespace>
+    <AssemblyName>SynchroServer.Azure</AssemblyName>
     <StartDevelopmentStorage>True</StartDevelopmentStorage>
-    <Name>MaaasServer.Azure</Name>
+    <Name>SynchroServer.Azure</Name>
     <PackageEnableRemoteDebugger>True</PackageEnableRemoteDebugger>
     <UseEmulatorExpressByDefault>False</UseEmulatorExpressByDefault>
   </PropertyGroup>
@@ -40,26 +40,26 @@
     <ServiceConfiguration Include="ServiceConfiguration.Cloud.cscfg" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MaaasServer\MaaasServer.njsproj">
-      <Name>MaaasServer</Name>
-      <Project>{7e458de2-fb3a-4ee0-b5db-f29c072b482e}</Project>
-      <Private>True</Private>
-      <RoleType>Web</RoleType>
-      <RoleName>MaaasServer</RoleName>
-      <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="MaaasServerContent\" />
+    <Folder Include="SynchroServerContent" />
     <Folder Include="Profiles" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="MaaasServerContent\diagnostics.wadcfg">
+    <Content Include="SynchroServerContent\diagnostics.wadcfg">
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PublishProfile Include="Profiles\maaasProduction1.azurePubxml" />
+    <PublishProfile Include="Profiles\synchroProduction1.azurePubxml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SynchroServer\SynchroServer.njsproj">
+      <Name>SynchroServer</Name>
+      <Project>{7e458de2-fb3a-4ee0-b5db-f29c072b482e}</Project>
+      <Private>True</Private>
+      <RoleType>Web</RoleType>
+      <RoleName>SynchroServer</RoleName>
+      <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
+    </ProjectReference>
   </ItemGroup>
   <!-- Import the target files for this project template -->
   <PropertyGroup>
