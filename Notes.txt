@@ -1,5 +1,0 @@
-
-Mobile Application As A Service (MAAAS) - Server
-=================================================
-
-This content is now at: https://github.com/BobDickinson/MaaasServer/wiki/Server-ToDo
