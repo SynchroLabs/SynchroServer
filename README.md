@@ -22,6 +22,7 @@ Install and run locally, per above (under Azure Cloud Service emulation or just 
 To debug:
 
 Conntect to cloud service via Remote Desktop
+
 Active configuration will be in either E: or F: under \sitesroot\0\
 
 Note: There can be long path issues packaging and publishing.  To avoid these:
