@@ -221,7 +221,7 @@ function startServerAsync(callback)
 {
     server.listen(config.get('PORT'), function()
     {
-        logger.info('Express server listening on port ' + this.address().port + ", node version: " + process.version);
+        logger.info('Synchro server listening on port ' + this.address().port + ", node version: " + process.version);
         callback(null);
     });
 }
@@ -234,6 +234,6 @@ async.series([loadApiProcessorsAsync, startServerAsync], function(err)
     }
     else
     {
-        logger.info("Server up and running!");
+        logger.debug("Synchro server up and running!");
     }
 });
