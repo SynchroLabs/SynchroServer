@@ -939,6 +939,7 @@
     <Compile Include="synchro-apps\propx\propx_detail.js" />
     <Compile Include="synchro-apps\propx\propx_favs.js" />
     <Compile Include="synchro-apps\propx\propx_list.js" />
+    <Compile Include="synchro-apps\propx\propx_login.js" />
     <Compile Include="synchro-apps\propx\propx_main.js" />
     <Compile Include="synchro-apps\samples\autocomplete.js" />
     <Compile Include="synchro-apps\samples\binding.js" />

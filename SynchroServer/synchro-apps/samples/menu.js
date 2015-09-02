@@ -2,7 +2,7 @@
 //
 exports.View =
 {
-    title: "Synchro.io Menu",
+    title: "Synchro Samples",
     elements: 
     [
         { control: "stackpanel", width: "*", contents: [
@@ -11,6 +11,7 @@ exports.View =
             ]
             },
             { control: "button", caption: "{caption}", binding: { foreach: "pages", command: "goToView", view: "{view}" } },
+            { control: "button", caption: "Log Out", binding: "logout" },
         ] }
     ]
 }
@@ -21,7 +22,7 @@ exports.InitializeViewModel = function (context, session)
     {
         pages: [
             { caption: "Hello World", view: "hello" },
-            { caption: "Login Sample", view: "login" },
+            //{ caption: "Login Sample", view: "login" },
             { caption: "Location Sample", view: "location" },
             { caption: "Click Counter Sample", view: "counter" },
             { caption: "Countdown Sample", view: "countdown" },
@@ -56,4 +57,24 @@ exports.Commands =
     {
         return Synchro.pushAndNavigateTo(context, params.view);
     },
+    logout: function (context, session)
+    {
+        delete session.username;
+        Synchro.popTo(context, "login");
+    }
+}
+
+exports.OnBack = function(context, session)
+{
+    var messageBox = 
+    {
+        title: "Synchro Samples",
+        message: "Exit and return to login?",
+        options:
+        [
+            { label: "Ok", command: "logout" },
+            { label: "Cancel" },
+        ]
+    }
+    return Synchro.showMessage(context, messageBox);
 }

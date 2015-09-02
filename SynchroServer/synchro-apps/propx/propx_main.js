@@ -15,6 +15,7 @@ exports.View =
                 { control: "stackpanel", orientation: "Horizontal", margin: 0, width: "*", contents: [
                     { control: "button", caption: "Go", verticalAlignment: "Center", binding: "placenameSearch", enabled: "{searchTerm}" },
                     { control: "button", caption: "My location", verticalAlignment: "Center", binding: "locationSearch", visibility: "{position.available}", enabled: "{position.coordinate}" },
+                    { control: "button", caption: "Logout", verticalAlignment: "Center", binding: "logout" },
                 ] },
             ] },
 
@@ -66,5 +67,25 @@ exports.Commands =
     favs: function(context, session, viewModel)
     {
         return Synchro.pushAndNavigateTo(context, "propx_favs");
+    },
+    logout: function (context, session)
+    {
+        delete session.username;
+        Synchro.popTo(context, "propx_login");
     }
+}
+
+exports.OnBack = function (context, session)
+{
+    var messageBox = 
+ {
+        title: "PropertyCross",
+        message: "Exit and return to login?",
+        options:
+        [
+            { label: "Ok", command: "logout" },
+            { label: "Cancel" },
+        ]
+    }
+    return Synchro.showMessage(context, messageBox);
 }

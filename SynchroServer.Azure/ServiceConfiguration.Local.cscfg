@@ -12,7 +12,7 @@
     </ConfigurationSettings>
     <Certificates>
       <Certificate name="Microsoft.WindowsAzure.Plugins.RemoteAccess.PasswordEncryption" thumbprint="996C3F25069B114F69AA66641B67EEA7E0A74C8F" thumbprintAlgorithm="sha1" />
-      <Certificate name="MaaasIoSSL" thumbprint="B0849E024612880831FF265D2D5629E1D68C5617" thumbprintAlgorithm="sha1" />
+      <Certificate name="SynchroIoSSL" thumbprint="63CA51E12643FC1EA9681EA05852877F38D35BF0" thumbprintAlgorithm="sha1" />
     </Certificates>
   </Role>
 </ServiceConfiguration>
