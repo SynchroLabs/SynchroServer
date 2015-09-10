@@ -2,7 +2,7 @@
 //
 exports.View =
 {
-    title: "Synchro Samples",
+    title: "Login",
     elements:
     [
         { control: "text", value: "Login", font: { size: 16 }, margin: { bottom: 16 } },
@@ -12,32 +12,23 @@ exports.View =
         { control: "password", binding: "password", placeholder: "password", width: 200 },
         { control: "stackpanel", orientation: "Horizontal", margin: { top: 10 }, contents: [
             { control: "button", caption: "Login", width: 125, binding: "login" },
-            // { control: "button", caption: "Cancel", width: 125, binding: "cancel" },
+            { control: "button", caption: "Cancel", width: 125, binding: "cancel" },
             ]
         },
-        /*
         { control: "toggle", binding: "showPassword", caption: "Show Password", onLabel: "Showing", offLabel: "Hiding", fontsize: 12 },
         { control: "text", value: "Password: {password}", fontsize: 12, visibility: "{showPassword}" },
-        */
     ]
 }
 
 exports.InitializeViewModel = function(context, session)
 {
-    if (session.username)
+    var viewModel =
     {
-        Synchro.navigateTo(context, "menu");
+        username: "",
+        password: "",
+        showPassword: false
     }
-    else
-    {
-        var viewModel =
-        {
-            username: "",
-            password: "",
-            showPassword: false
-        }
-        return viewModel;
-    }
+    return viewModel;
 }
 
 exports.Commands = 
@@ -47,7 +38,6 @@ exports.Commands =
         if (viewModel.username && (viewModel.username == viewModel.password))
         {
             session.username = viewModel.username;
-            /*
             var messageBox = 
             {
                 title: "Winner",
@@ -59,17 +49,11 @@ exports.Commands =
                 ]
             }
             return Synchro.showMessage(context, messageBox);
-            */
-            return Synchro.pushAndNavigateTo(context, "menu");
         }
         else
         {
             return Synchro.showMessage(context, { message: "Sorry, login failed!" });
         }
-    },
-    cancel: function(context)
-    {
-        Synchro.pop(context);
     },
     success: function(context)
     {

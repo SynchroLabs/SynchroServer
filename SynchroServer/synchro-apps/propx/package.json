@@ -2,7 +2,7 @@
   "name": "synchro-propx",
   "version": "0.0.0",
   "description": "Synchro Property Cross",
-  "main": "propx_login",
+  "main": "propx_main",
   "author": "Bob Dickinson <bob@synchro.io> (http://synchro.io/)",
   "private": true,
   "engines":  { "synchro" : "*" } 
