@@ -11,7 +11,7 @@ exports.View =
                 header: { control: "text", value: "US Presidents of America", fontsize: 12 },
                 itemTemplate:
                     { control: "stackpanel", orientation: "Horizontal", padding: 5, contents: [
-                        { control: "image", resource: Synchro.getResourceUrl("user.png"), height: 50, width: 50 },
+                        { control: "image", resource: "http://blob.synchro.io/resources/user.png", height: 50, width: 50 },
                         { control: "stackpanel", orientation: "Vertical", contents: [
                             { control: "text", value: "{first}" },
                             { control: "text", value: "{last}" },

@@ -10,7 +10,7 @@ exports.View =
             { control: "slider", minimum: 10, maximum: 400, binding: "size", width: 300 },
             ]
         },
-        { control: "image", resource: Synchro.getResourceUrl("user.png"), height: "{size}", width: "{size}" },
+        { control: "image", resource: "http://blob.synchro.io/resources/user.png", height: "{size}", width: "{size}" },
     ]
 }
 

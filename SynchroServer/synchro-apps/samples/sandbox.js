@@ -1,7 +1,7 @@
 ﻿// Sandbox page
 //
-var userImage =  Synchro.getResourceUrl("user.png");
-var profileImage = "http://fbcdn-profile-a.akamaihd.net/hprofile-ak-ash3/c23.23.285.285/s160x160/943786_10201215910308278_1343091684_n.jpg";
+var userImage =  "http://blob.synchro.io/resources/user.png";
+var profileImage = "http://blob.synchro.io/resources/cloud_system_256.png";
 
 exports.View =
 {

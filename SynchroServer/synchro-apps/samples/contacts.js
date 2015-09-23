@@ -10,7 +10,7 @@ exports.View =
             { control: "text", value: "Your Contacts", fontsize: 12 },
             { control: "listview", select: "Multiple", height: 300, maxheight: 300, width: 300, binding: { items: "contacts", selection: "selectedContacts" }, itemTemplate:
                 { control: "stackpanel", orientation: "Horizontal", padding: 5, contents: [
-                    { control: "image", resource: Synchro.getResourceUrl("user.png"), height: 50, width: 50 },
+                    { control: "image", resource: "http://blob.synchro.io/resources/user.png", height: 50, width: 50 },
                     { control: "stackpanel", orientation: "Vertical", contents: [
                         { control: "text", value: "{first}" },
                         { control: "text", value: "{last}" },

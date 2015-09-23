@@ -1,0 +1,23 @@
+{
+  "name": "synchro-server",
+  "version": "0.0.5",
+  "description": "Synchro Server",
+  "homepage": "http://synchro.io/",
+  "license" : "LicenseRef-LICENSE",
+  "dependencies": {
+    "async": "^0.9.0",
+    "commander": "^2.3.0",
+    "express": "~3.4.8",
+    "log4js": "^0.6.21",
+    "nconf": "^0.7.1",
+    "synchro-api": "http://[host]/dist/[token]/synchro-api-0.0.5.tgz",
+    "synchro-aws": "http://[host]/dist/[token]/synchro-aws-0.0.5.tgz",
+    "synchro-azure": "http://[host]/dist/[token]/synchro-azure-0.0.5.tgz",
+    "synchro-studio": "http://[host]/dist/[token]/synchro-studio-0.0.5.tgz"
+  },
+  "bundledDependencies": [ "wait.for" ], 
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  }
+}
