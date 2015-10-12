@@ -2,11 +2,13 @@ var express = require('express');
 var http = require('http');
 var path = require('path');
 var async = require('async');
+var semver = require('semver');
 var log4js = require('log4js');
 
 var synchroConfig = require('synchro-api/synchro-config');
 
 var pkg = require('./package.json');
+var apiPkg = require('synchro-api/package.json');
 
 // Process command line params
 //
@@ -198,7 +200,31 @@ function loadApiProcessorsAsync(callback)
             },
             appRootPath: config.get('APP_ROOT_PATH')
         }
+        
+        // We're going to load the module store (in proc) for the API processor that we're about to create so that
+        // we can get the app definition and check version requirements before we create the API processor (which 
+        // creation is async and might involve spawning a new process).
+        //
+        var appModuleStore = apiManager.getAppModuleStore(synchroApp.uriPath, synchroApp.container, servicesConfig.moduleStoreSpec);
+        var appDefinition = appModuleStore.getAppDefinition();
+        if (appDefinition.engines && appDefinition.engines.synchro)
+        {
+            // A Synchro engine version spec exists in the app being loaded, let's check it against the API version...
+            //
+            if (!semver.satisfies(apiPkg.version, appDefinition.engines.synchro))
+            {
+                // For now we're just going to log an error message for the app in question, but we will continue to load
+                // other apps and start the server.
+                //
+                logger.error("App being loaded: \"" + appDefinition.name + "\" at path: \"" + synchroApp.uriPath + "\"" +
+                    " specified a synchro engine version requirement that was not met by the Synchro API on this server." +
+                    " Synchro API version: \"" + apiPkg.version + "\", required version: \"" + appDefinition.engines.synchro + "\"");
 
+                callback(null); // Could throw the above messages as an error by passing it as first param to callback, if desired
+                return;
+            }
+        }
+        
         var bFork = true;   // Run API processor forked
         var bDebug = (synchroStudio != null) && bFork;  // Enable debugging of API processor (only valid if running forked and studio present)
 
@@ -230,6 +256,9 @@ async.series([loadApiProcessorsAsync, startServerAsync], function(err)
 {
     if (err)
     {
+        // !!! This gets called if an individual app throws an exception on load, but other apps will load and the server
+        //     will still start.  Investigate whether we really want to bail on startup here, and if so, how to do that.
+        //
         logger.error("Failed to start: " + err);
     }
     else

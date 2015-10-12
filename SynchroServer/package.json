@@ -9,6 +9,7 @@
     "express": "~3.4.8",
     "log4js": "^0.6.21",
     "nconf": "^0.7.1",
+    "semver": "^5.0.3",
     "synchro-api": "",
     "synchro-aws": "",
     "synchro-azure": "",
@@ -20,6 +21,6 @@
   "scripts": {
     "start": "node app.js",
     "test": "npm run test-api",
-    "test-api": "mocha synchro-api/test"
+    "test-api": "mocha node_modules/synchro-api/test"
   }
 }

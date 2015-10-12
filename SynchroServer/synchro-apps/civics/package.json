@@ -1,0 +1,9 @@
+﻿{
+  "name": "synchro-civics",
+  "version": "0.0.0",
+  "description": "Synchro Civics",
+  "main": "civics_main",
+  "author": "Bob Dickinson <bob@synchro.io> (http://synchro.io/)",
+  "private": true,
+  "engines":  { "synchro" : "*" } 
+}

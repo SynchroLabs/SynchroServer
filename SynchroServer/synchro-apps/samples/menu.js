@@ -25,6 +25,7 @@ exports.InitializeViewModel = function (context, session)
             { caption: "Location Sample", view: "location" },
             { caption: "Click Counter Sample", view: "counter" },
             { caption: "Countdown Sample", view: "countdown" },
+            { caption: "Lauch URL", view: "launchurl" },
             { caption: "ListView", view: "listview" },
             { caption: "Device", view: "device" },
             { caption: "Auto-Complete", view: "autocomplete" },

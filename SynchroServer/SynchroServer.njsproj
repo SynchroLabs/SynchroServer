@@ -383,6 +383,11 @@
     <Compile Include="node_modules\synchro-studio\routes\edit.js" />
     <Compile Include="node_modules\synchro-studio\routes\index.js" />
     <Compile Include="node_modules\synchro-studio\routes\login.js" />
+    <Compile Include="synchro-apps\civics\civics_list.js" />
+    <Compile Include="synchro-apps\civics\civics_main.js" />
+    <Compile Include="synchro-apps\civics\civics_official.js" />
+    <Compile Include="synchro-apps\civics\civics_favs.js" />
+    <Compile Include="synchro-apps\civics\google_api.js" />
     <Compile Include="synchro-apps\field-engineer\fe_detail.js" />
     <Compile Include="synchro-apps\field-engineer\fe_main.js" />
     <Compile Include="synchro-apps\field-engineer\node_modules\mssql\index.js" />
@@ -983,6 +988,7 @@
     <Compile Include="synchro-apps\samples\font.js" />
     <Compile Include="synchro-apps\samples\hello.js" />
     <Compile Include="synchro-apps\samples\image.js" />
+    <Compile Include="synchro-apps\samples\launchurl.js" />
     <Compile Include="synchro-apps\samples\layout.js" />
     <Compile Include="synchro-apps\samples\lib\util.js" />
     <Compile Include="synchro-apps\samples\list.js" />
@@ -1047,8 +1053,6 @@
     <Content Include="dist\npm-shrinkwrap.json" />
     <Content Include="dist\package.json" />
     <Content Include="dist\synchro-apps\package.json" />
-    <Content Include="dist\synchro-server-0.0.5.tgz" />
-    <Content Include="dist\synchro-server.tgz" />
     <Content Include="node_modules\synchro-api\package.json" />
     <Content Include="node_modules\synchro-api\test\testapp\package.json" />
     <Content Include="node_modules\synchro-api\test\testconfig\altconfig.json" />
@@ -1065,6 +1069,7 @@
     <Content Include="node_modules\synchro-studio\views\sandbox.hbs" />
     <Content Include="package.json" />
     <Content Include="README.md" />
+    <Content Include="synchro-apps\civics\package.json" />
     <Content Include="synchro-apps\field-engineer\node_modules\.bin\mssql" />
     <Content Include="synchro-apps\field-engineer\node_modules\.bin\mssql.cmd" />
     <Content Include="synchro-apps\field-engineer\node_modules\mssql\.coffeemaker" />
@@ -1403,6 +1408,7 @@
     <Folder Include="synchro-apps\field-engineer\node_modules\mssql\node_modules\tedious\node_modules\sprintf\lib\" />
     <Folder Include="synchro-apps\field-engineer\node_modules\mssql\node_modules\tedious\node_modules\sprintf\test\" />
     <Folder Include="synchro-apps\field-engineer\node_modules\mssql\src\" />
+    <Folder Include="synchro-apps\civics\" />
     <Folder Include="synchro-apps\node_modules\" />
     <Folder Include="synchro-apps\node_modules\lodash\" />
     <Folder Include="synchro-apps\node_modules\lodash\array\" />
