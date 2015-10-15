@@ -12,11 +12,29 @@ exports.View =
                 { control: "text", value: "{rep.office}", font: { bold: true, size: 14 } },
                 { control: "text", value: "{rep.name} {rep.partyLetter}", width: "*", ellipsize: true, fontsize: 12 },
                 { control: "image", resource: "{rep.photoUrl}", visibility: "{rep.photoUrl}", horizontalAlignment: "Left", margin: { top: 10, bottom: 10 }, height: 300, width: 400 },
-                { control: "text", value: "Phone: {rep.phone}", width: "*", visibility: "{rep.phone}", fontsize: 12 },
-                { control: "text", value: "Email: {rep.email}", width: "*", visibility: "{rep.email}", fontsize: 12 },
-                { control: "text", value: "Facebook: {rep.facebook}", width: "*", visibility: "{rep.facebook}", fontsize: 12 },
-                { control: "text", value: "Twitter: {rep.twitter}", width: "*", visibility: "{rep.twitter}", fontsize: 12 },
-                { control: "text", value: "Web: {rep.url}", width: "*", visibility: "{rep.url}", fontsize: 12 },
+
+                { control: "stackpanel", orientation: "Vertical", margin: 0, width: "*", contents: [
+                    { control: "stackpanel", orientation: "Horizontal", margin: 0, width: "*", visibility: "{rep.phone}", contents: [
+                        { control: "button", caption: "Call", verticalAlignment: "Center", binding: "onTel" },
+                        { control: "text", value: "{rep.phone}", verticalAlignment: "Center", width: "*", fontsize: 8 },
+                    ]},
+                    { control: "stackpanel", orientation: "Horizontal", margin: 0, width: "*", visibility: "{rep.email}", contents: [
+                        { control: "button", caption: "Email", verticalAlignment: "Center", binding: "onEmail" },
+                        { control: "text", value: "{rep.email}", verticalAlignment: "Center", width: "*", fontsize: 8 },
+                    ]},
+                    { control: "stackpanel", orientation: "Horizontal", margin: 0, width: "*", visibility: "{rep.facebook}", contents: [
+                        { control: "button", caption: "Facebook", verticalAlignment: "Center", binding: "onFacebook" },
+                        { control: "text", value: "{rep.facebook}", verticalAlignment: "Center", width: "*", fontsize: 8 },
+                    ]},
+                    { control: "stackpanel", orientation: "Horizontal", margin: 0, width: "*", visibility: "{rep.twitter}", contents: [
+                        { control: "button", caption: "Twitter", verticalAlignment: "Center", binding: "onTwitter"},
+                        { control: "text", value: "{rep.twitter}", verticalAlignment: "Center", width: "*", fontsize: 8 },
+                    ]},
+                    { control: "stackpanel", orientation: "Horizontal", margin: 0, width: "*", visibility: "{rep.url}", contents: [
+                        { control: "button", caption: "Web", verticalAlignment: "Center", binding: "onWeb" },
+                        { control: "text", value: "{rep.url}", verticalAlignment: "Center", width: "*", fontsize: 8 },
+                    ]}
+                ]},      
 
                 { filter: { deviceMetric: "os", is: ["Windows", "WinPhone"] }, control: "commandBar.toggle", text: "Favorite", icon: "Favorite", binding: { value: "fav", onToggle: "favToggled" } },
                 { filter: { deviceMetric: "os", is: "Android" }, control: "actionBar.toggle", checkedicon: "ic_action_important", uncheckedicon: "ic_action_not_important", showAsAction: "IfRoom", binding: { value: "fav", onToggle: "favToggled" } },
@@ -51,5 +69,25 @@ exports.Commands =
         {
             lodash.remove(session.favs, function (fav) { return fav.guid == viewModel.rep.guid });
         }
+    },
+    onTel: function (context, session, viewModel)
+    {
+        Synchro.launchUrl(context, "tel:" + viewModel.rep.phone);
+    },
+    onEmail: function (context, session, viewModel)
+    {
+        Synchro.launchUrl(context, "mailto:" + viewModel.rep.email);
+    },
+    onWeb: function (context, session, viewModel)
+    {
+        Synchro.launchUrl(context, viewModel.rep.url);
+    },
+    onFacebook: function (context, session, viewModel)
+    {
+        Synchro.launchUrl(context, "fb://profile/" + viewModel.rep.facebook, "http://www.facebook.com/" + viewModel.rep.facebook);
+    },
+    onTwitter: function (context, session, viewModel)
+    {
+        Synchro.launchUrl(context, "twitter://user?screen_name=" + viewModel.rep.twitter, "http://twitter.com/" + viewModel.rep.twitter);
     },
 }
