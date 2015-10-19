@@ -48,7 +48,7 @@ function findAndLoadRepresentatives(context, session, viewModel)
 {
     try
     {
-        var reps = Synchro.waitFor(context, googleApi.callApiAsync, "https://www.googleapis.com/civicinfo/v2/representatives", { "address": viewModel.address });
+        var reps = Synchro.waitFor(context, googleApi.callApiAsync, context, "https://www.googleapis.com/civicinfo/v2/representatives", { "address": viewModel.address });
         
         if (!reps || !reps.offices || (reps.offices.length == 0))
         {

@@ -17,14 +17,17 @@ exports.View =
         { control: "image", height: 150, width: 150, resource: "{image}" },
 
         { control: "button", caption: "Switch images", binding: "switchImages" },
+
+        { control: "text", value: "Container: {container}" },
     ]
 }
 
 exports.InitializeViewModel = function(context, session)
 {
     var viewModel =
-    {
+  {
         image: profileImage,
+        container: Synchro.getConfig(context, "container")
     }
     return viewModel;
 }

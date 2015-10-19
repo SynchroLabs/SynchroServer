@@ -2,10 +2,7 @@
 //
 var request = require('request');
 
-var synchroConfig = require('synchro-api/synchro-config');
-var config = synchroConfig.getConfig();
-
-exports.callApiAsync = function(endpoint, params, callback)
+exports.callApiAsync = function(context, endpoint, params, callback)
 {
     var url = endpoint + "?";
     if (params)
@@ -15,7 +12,7 @@ exports.callApiAsync = function(endpoint, params, callback)
             url += key + "=" + encodeURIComponent(params[key]) + "&";
         });
     }
-    url += "key=" + config.get("GOOGLE_CIVICS_KEY");
+    url += "key=" + Synchro.getConfig(context, "GOOGLE_CIVICS_KEY");
     
     request({ url: url, timeout: 5000 }, function (err, response, body)
     {

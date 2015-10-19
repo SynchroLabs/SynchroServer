@@ -67,7 +67,7 @@ logger.info("Synchro server loading - " + config.configDetails);
 var synchroApi = require('synchro-api');
 var synchroApiUrlPrefix = config.get("API_PATH_PREFIX");
 
-var apiManager = synchroApi.createApiProcessorManager(config.get('DEBUG_BASE_PORT'), config.get('LOG4JS_CONFIG'));
+var apiManager = synchroApi.createApiProcessorManager(config.get('DEBUG_BASE_PORT'), config); 
 
 // Create Synchro studio (unless config indicates not to)
 //
@@ -171,41 +171,24 @@ if (synchroStudio)
 //
 function loadApiProcessorsAsync(callback)
 {
-    var synchroApps = config.get('SYNCHRO_APPS');
+    var synchroApps = config.get('APPS');
 
-    function loadApiProcessorAsync(synchroApp, callback)
+    function loadApiProcessorAsync(synchroAppPath, callback)
     {
-        var servicesConfig =
-        {
-            sessionStoreSpec:
-            {
-                packageRequirePath: config.get('SESSIONSTORE_PACKAGE'),
-                serviceName: config.get('SESSIONSTORE_SERVICE'),
-                serviceConfiguration: config.get('SESSIONSTORE')
-            },
-            moduleStoreSpec:
-            {
-                packageRequirePath: config.get('MODULESTORE_PACKAGE'),
-                serviceName: config.get('MODULESTORE_SERVICE'),
-                serviceConfiguration: config.get('MODULESTORE')
-            },
-            resourceResolverSpec:
-            { 
-                packageRequirePath: 'synchro-api', 
-                serviceName: 'ResourceResolver',
-                serviceConfiguration: 
-                {
-                    prefix: config.get('APP_RESOURCE_PREFIX')
-                }
-            },
-            appRootPath: config.get('APP_ROOT_PATH')
-        }
-        
+        var synchroApp = synchroApps[synchroAppPath];
+
         // We're going to load the module store (in proc) for the API processor that we're about to create so that
         // we can get the app definition and check version requirements before we create the API processor (which 
         // creation is async and might involve spawning a new process).
         //
-        var appModuleStore = apiManager.getAppModuleStore(synchroApp.uriPath, synchroApp.container, servicesConfig.moduleStoreSpec);
+        var moduleStoreSpec = 
+        {
+            packageRequirePath: config.get('MODULESTORE_PACKAGE'),
+            serviceName: config.get('MODULESTORE_SERVICE'),
+            serviceConfiguration: config.get('MODULESTORE')
+        }
+
+        var appModuleStore = apiManager.getAppModuleStore(synchroAppPath, synchroApp.container, moduleStoreSpec);
         var appDefinition = appModuleStore.getAppDefinition();
         if (appDefinition.engines && appDefinition.engines.synchro)
         {
@@ -216,7 +199,7 @@ function loadApiProcessorsAsync(callback)
                 // For now we're just going to log an error message for the app in question, but we will continue to load
                 // other apps and start the server.
                 //
-                logger.error("App being loaded: \"" + appDefinition.name + "\" at path: \"" + synchroApp.uriPath + "\"" +
+                logger.error("App being loaded: \"" + appDefinition.name + "\" at path: \"" + synchroAppPath + "\"" +
                     " specified a synchro engine version requirement that was not met by the Synchro API on this server." +
                     " Synchro API version: \"" + apiPkg.version + "\", required version: \"" + appDefinition.engines.synchro + "\"");
 
@@ -237,10 +220,10 @@ function loadApiProcessorsAsync(callback)
             bDebug = false; // Debugging of API processor not available in-proc, so don't even ask ;)
         }
 
-        apiManager.createApiProcessorAsync(synchroApp.uriPath, synchroApp.container, servicesConfig, bFork, bDebug, callback);
+        apiManager.createApiProcessorAsync(synchroAppPath, bFork, bDebug, callback);
     }
 
-    async.each(synchroApps, loadApiProcessorAsync, callback);    
+    async.each(Object.keys(synchroApps), loadApiProcessorAsync, callback);    
 }
 
 function startServerAsync(callback)

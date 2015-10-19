@@ -76,7 +76,7 @@ exports.Commands =
                 "latlng": viewModel.position.coordinate.latitude + "," + viewModel.position.coordinate.longitude,
                 "result_type": "street_address"
             }
-            var response = Synchro.waitFor(context, googleApi.callApiAsync, "https://maps.googleapis.com/maps/api/geocode/json", params);
+            var response = Synchro.waitFor(context, googleApi.callApiAsync, context, "https://maps.googleapis.com/maps/api/geocode/json", params);
             if (response && response.results && (response.results.length > 0))
             {
                 viewModel.address = response.results[0].formatted_address;
