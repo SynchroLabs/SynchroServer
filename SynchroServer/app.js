@@ -4,6 +4,7 @@ var path = require('path');
 var async = require('async');
 var semver = require('semver');
 var log4js = require('log4js');
+var wait = require('wait.for');
 
 var synchroConfig = require('synchro-api/synchro-config');
 
@@ -179,7 +180,7 @@ function loadApiProcessorsAsync(callback)
         return;
     }
 
-    function loadApiProcessorAsync(synchroAppPath, callback)
+    function loadApiProcessorAsyncInFiber(synchroAppPath, callback)
     {
         var synchroApp = synchroApps[synchroAppPath];
 
@@ -228,8 +229,13 @@ function loadApiProcessorsAsync(callback)
 
         apiManager.createApiProcessorAsync(synchroAppPath, bFork, bDebug, callback);
     }
+    
+    function loadApiProcessorAsync(synchroAppPath, callback)
+    {
+        wait.launchFiber(loadApiProcessorAsyncInFiber, synchroAppPath, callback);
+    }
 
-    async.each(Object.keys(synchroApps), loadApiProcessorAsync, callback);    
+    async.each(Object.keys(synchroApps), loadApiProcessorAsync, callback);
 }
 
 function startServerAsync(callback)
