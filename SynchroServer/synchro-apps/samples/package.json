@@ -1,6 +1,6 @@
 {
   "name": "synchro-samples",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Synchro API Samples",
   "main": "menu",
   "author": "Bob Dickinson <bob@synchro.io> (http://synchro.io/)",

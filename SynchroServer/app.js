@@ -172,6 +172,12 @@ if (synchroStudio)
 function loadApiProcessorsAsync(callback)
 {
     var synchroApps = config.get('APPS');
+    if (!synchroApps || Object.keys(synchroApps).length == 0)
+    {
+        logger.error("No Synchro apps defined (via the \"APPS\" key in config) - no apps will be started");
+        callback();
+        return;
+    }
 
     function loadApiProcessorAsync(synchroAppPath, callback)
     {

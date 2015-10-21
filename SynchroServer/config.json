@@ -1,16 +1,13 @@
 {
-    "SYNCHRO_APPS": [
-        {
-            "uriPath": "samples",
+    "APPS": {
+        "samples": {
             "container": "samples"
         },
-        {
-            "uriPath": "propx",
+        "propx": {
             "container": "propx"
         },
-        {
-            "uriPath": "civics",
+        "civics": {
             "container": "civics"
         }
-    ]
+    }
 }

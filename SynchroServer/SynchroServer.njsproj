@@ -1052,6 +1052,7 @@
     <Content Include="dist\node_modules\wait.for\README.md" />
     <Content Include="dist\npm-shrinkwrap.json" />
     <Content Include="dist\package.json" />
+    <Content Include="dist\README.md" />
     <Content Include="dist\synchro-apps\package.json" />
     <Content Include="node_modules\synchro-api\package.json" />
     <Content Include="node_modules\synchro-api\test\testapp\package.json" />
