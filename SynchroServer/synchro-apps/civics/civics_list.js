@@ -30,8 +30,8 @@ exports.View =
                                     { control: "image", resource: "{photoUrl}", height: 100, width: 75 },
                                     {
                                         control: "stackpanel", orientation: "Vertical", width: "*", padding: { left: 5 }, contents: [
-                                            { control: "text", value: "{office}", font: { bold: true, size: 10 } },
-                                            { control: "text", value: "{name} {partyLetter}", fontsize: 8 },
+                                            { control: "text", value: "{office}", width: "*", font: { bold: true, size: 10 } },
+                                            { control: "text", value: "{name} {partyLetter}", width: "*", fontsize: 8 },
                                         ]
                                     }
                                 ]

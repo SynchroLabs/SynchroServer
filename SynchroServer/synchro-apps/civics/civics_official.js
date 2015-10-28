@@ -9,9 +9,9 @@ exports.View =
     [
         {
             control: "stackpanel", width: "*", contents: [
-                { control: "text", value: "{rep.office}", font: { bold: true, size: 14 } },
+                { control: "text", value: "{rep.office}", width: "*", font: { bold: true, size: 14 } },
                 { control: "text", value: "{rep.name} {rep.partyLetter}", width: "*", ellipsize: true, fontsize: 12 },
-                { control: "image", resource: "{rep.photoUrl}", visibility: "{rep.photoUrl}", horizontalAlignment: "Left", margin: { top: 10, bottom: 10 }, height: 300, width: 400 },
+                { control: "image", resource: "{rep.photoUrl}", visibility: "{rep.photoUrl}", horizontalAlignment: "Left", margin: { top: 10, bottom: 10 }, width: 300 },
 
                 { control: "stackpanel", orientation: "Vertical", margin: 0, width: "*", contents: [
                     { control: "stackpanel", orientation: "Horizontal", margin: 0, width: "*", visibility: "{rep.phone}", contents: [
