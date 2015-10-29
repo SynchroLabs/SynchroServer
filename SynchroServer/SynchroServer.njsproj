@@ -988,6 +988,7 @@
     <Compile Include="synchro-apps\samples\font.js" />
     <Compile Include="synchro-apps\samples\hello.js" />
     <Compile Include="synchro-apps\samples\image.js" />
+    <Compile Include="synchro-apps\samples\imagescale.js" />
     <Compile Include="synchro-apps\samples\launchurl.js" />
     <Compile Include="synchro-apps\samples\layout.js" />
     <Compile Include="synchro-apps\samples\lib\util.js" />

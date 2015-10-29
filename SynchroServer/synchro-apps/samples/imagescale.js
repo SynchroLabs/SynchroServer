@@ -2,7 +2,7 @@
 //
 exports.View =
 {
-    title: "Image2",
+    title: "Image Scale",
     elements:
     [
         { control: "stackpanel", orientation: "Horizontal", contents: [
@@ -16,7 +16,7 @@ exports.View =
             { control: "button", width: 150, caption: "Fit", binding: { command: "setScale", scale: "Fit" } },
             { control: "button", width: 150, caption: "Fill", binding: { command: "setScale", scale: "Fill" } },
         ] },
-
+        /*
         { control: "stackpanel", orientation: "Horizontal", contents: [
             { control: "button", width: 150, caption: "Top", binding: { command: "setVAlign", align: "Top" } },
             { control: "button", width: 150, caption: "Center", binding: { command: "setVAlign", align: "Center" } },
@@ -28,7 +28,7 @@ exports.View =
             { control: "button", width: 150, caption: "Center", binding: { command: "setHAlign", align: "Center" } },
             { control: "button", width: 150, caption: "Right", binding: { command: "setHAlign", align: "Right" } },
         ] },
-
+        */
         { control: "border", border: "Red", borderThickness: "5", contents: [
             { control: "image", resource: "{img}", scale: "{scale}", horizontalAlignment: "{alignH}", verticalAlignment: "{alignV}", margin: 0, height: "100", width: "100" },
         ] },
@@ -43,11 +43,16 @@ exports.View =
     ]
 }
 
+function imageUrl(img)
+{
+    return "http://blob.synchro.io/resources/" + img + ".jpg";
+}
+
 exports.InitializeViewModel = function (context, session)
 {
     var viewModel =
     {
-        img: null,
+        img: imageUrl("landscape"),
         scale: null,
         alignH: "Center",
         alignV: "Center",
@@ -59,13 +64,13 @@ exports.Commands =
 {
     setImage: function(context, session, viewModel, params)
     {
-        viewModel.img = Synchro.getResourceUrl(params.image + ".jpg");
-        console.log("IMg: " + viewModel.img);
+        viewModel.img = imageUrl(params.image);
     },
     setScale: function(context, session, viewModel, params)
     {
         viewModel.scale = params.scale;
     },
+    /*
     setVAlign: function(context, session, viewModel, params)
     {
         viewModel.alignV = params.align;
@@ -74,4 +79,5 @@ exports.Commands =
     {
         viewModel.alignH = params.align;
     },
+    */
 }

@@ -1,4 +1,4 @@
-﻿// Image scaling page
+﻿// Image page
 //
 exports.View =
 {

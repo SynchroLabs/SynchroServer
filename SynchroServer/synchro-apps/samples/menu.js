@@ -21,7 +21,6 @@ exports.InitializeViewModel = function (context, session)
     {
         pages: [
             { caption: "Hello World", view: "hello" },
-            { caption: "Image 2", view: "image2" },
             { caption: "Login Sample", view: "login" },
             { caption: "Location Sample", view: "location" },
             { caption: "Click Counter Sample", view: "counter" },
@@ -42,6 +41,7 @@ exports.InitializeViewModel = function (context, session)
             { caption: "Flex 3", view: "flex3" },
             { caption: "Text Flow", view: "textflow" },
             { caption: "Image", view: "image" },
+            { caption: "Image Scale", view: "imagescale" },
             { caption: "Font", view: "font" },
             { caption: "Binding", view: "binding" },
             { caption: "Picker", view: "picker" },
