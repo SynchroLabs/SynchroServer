@@ -18,7 +18,7 @@ exports.View =
                         { control: "edit", binding: "address", placeholder: "street address", width: "320" },
                         {
                             control: "stackpanel", orientation: "Horizontal", margin: 0, width: "*", contents: [
-                                { control: "button", caption: "Find Reps", verticalAlignment: "Center", binding: "placenameSearch", enabled: "{address}" },
+                                { control: "button", caption: "Find Reps", verticalAlignment: "Center", binding: "placenameSearch", enabled: "{address}", margin: { right: 25 } },
                                 { control: "button", caption: "Use Location", verticalAlignment: "Center", binding: "locationSearch", visibility: "{position.available}", enabled: "{position.coordinate}" },
                             ]
                         },
