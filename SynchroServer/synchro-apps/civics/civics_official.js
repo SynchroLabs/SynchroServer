@@ -72,7 +72,7 @@ exports.Commands =
     },
     onTel: function (context, session, viewModel)
     {
-        Synchro.launchUrl(context, "tel:" + viewModel.rep.phone);
+        Synchro.launchUrl(context, "tel:" + encodeURIComponent(viewModel.rep.phone));
     },
     onEmail: function (context, session, viewModel)
     {
@@ -84,7 +84,7 @@ exports.Commands =
     },
     onFacebook: function (context, session, viewModel)
     {
-        Synchro.launchUrl(context, "fb://profile/" + viewModel.rep.facebook, "http://www.facebook.com/" + viewModel.rep.facebook);
+        Synchro.launchUrl(context, "http://www.facebook.com/" + viewModel.rep.facebook);
     },
     onTwitter: function (context, session, viewModel)
     {

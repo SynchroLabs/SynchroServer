@@ -11,6 +11,9 @@ exports.View =
         { control: "text", value: "Type: {deviceMetrics.deviceType}", fontsize: 12 },
         { control: "text", value: "Class: {deviceMetrics.deviceClass}", fontsize: 12 },
 
+        { control: "text", value: "Client: {deviceMetrics.clientName}", fontsize: 12 },
+        { control: "text", value: "Version: {deviceMetrics.clientVersion}", fontsize: 12 },
+
         // No select:First here, just to show that you can use filters on standalone nodes...
         //
         { control: "text", filter: { deviceMetric: "deviceType", is: "Phone" }, value: "Phone type device", fontsize: 12 },
