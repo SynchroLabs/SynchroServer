@@ -6,20 +6,20 @@ exports.View =
     elements:
     [
         { control: "stackpanel", orientation: "Horizontal", contents: [
-            { control: "text", value: "Border", fontsize: 10, width: 140, foreground: "Red" },
-            { control: "slider", minimum: 0, maximum: 20, binding: "border", width: 300 },
+            { control: "text", value: "Border", fontsize: 10, width: 140, foreground: "Red", verticalAlignment: "Center" },
+            { control: "slider", minimum: 0, maximum: 20, binding: "border", width: 300, verticalAlignment: "Center" },
         ] },
         { control: "stackpanel", orientation: "Horizontal", contents: [
-            { control: "text", value: "Radius", fontsize: 10, width: 140, foreground: "Red" },
-            { control: "slider", minimum: 0, maximum: 20, binding: "radius", width: 300 },
+            { control: "text", value: "Radius", fontsize: 10, width: 140, foreground: "Red", verticalAlignment: "Center" },
+            { control: "slider", minimum: 0, maximum: 20, binding: "radius", width: 300, verticalAlignment: "Center" },
         ] },
         { control: "stackpanel", orientation: "Horizontal", contents: [
-            { control: "text", value: "Padding", fontsize: 10, width: 140, foreground: "Blue" },
-            { control: "slider", minimum: 0, maximum: 20, binding: "padding", width: 300 },
+            { control: "text", value: "Padding", fontsize: 10, width: 140, foreground: "Blue", verticalAlignment: "Center" },
+            { control: "slider", minimum: 0, maximum: 20, binding: "padding", width: 300, verticalAlignment: "Center" },
         ] },
         { control: "stackpanel", orientation: "Horizontal", contents: [
-            { control: "text", value: "Content", fontsize: 10, width: 140, foreground: "Green" },
-            { control: "slider", minimum: 0, maximum: 300, binding: "content", width: 300 },
+            { control: "text", value: "Content", fontsize: 10, width: 140, foreground: "Green", verticalAlignment: "Center" },
+            { control: "slider", minimum: 0, maximum: 300, binding: "content", width: 300, verticalAlignment: "Center" },
         ] },
         { control: "border", border: "Red", borderThickness: "{border}", cornerRadius: "{radius}", padding: "{padding}", background: "Blue", contents: [              
             { control: "rectangle", width: "{content}", height: "{content}", fill: "Green", margin: 0 },
