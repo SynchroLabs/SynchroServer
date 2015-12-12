@@ -8,7 +8,6 @@ exports.View =
     elements:
     [
         { control: "button", caption: "Button", foreground: "CornflowerBlue", background: "Black", width: 125, binding: "text" },
-        { control: "button", caption: "Button", foreground: "Black", opacity: "0.65", resource: img, width: 125, height: 125, binding: "textWithImage" },
         { control: "button", resource: img, width: 125, height: 125, binding: "image" },
         { control: "text", value: "{message}", fontsize: 12 },
     ]
@@ -32,21 +31,14 @@ exports.Commands =
 {
     text: function(context, session, viewModel)
     {
-        viewModel.message = "Caption Only";
-        Synchro.interimUpdate(context);                
-        Synchro.waitFor(context, waitInterval, 1000);
-        viewModel.message = "";
-    },
-    textWithImage: function(context, session, viewModel)
-    {
-        viewModel.message = "Caption + Image";
+        viewModel.message = "Caption button";
         Synchro.interimUpdate(context);                
         Synchro.waitFor(context, waitInterval, 1000);
         viewModel.message = "";
     },
     image: function(context, session, viewModel)
     {
-        viewModel.message = "Image Only";
+        viewModel.message = "Image button";
         Synchro.interimUpdate(context);                
         Synchro.waitFor(context, waitInterval, 1000);
         viewModel.message = "";
