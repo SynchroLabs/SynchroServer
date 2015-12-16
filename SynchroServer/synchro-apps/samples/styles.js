@@ -2,15 +2,23 @@
 //
 exports.View =
 {
-    title: "Buttons",
+    title: "Styles",
     elements:
     [
-        { control: "button", style: "btnStyle", caption: "Blue" },
-        { control: "button", style: "btnStyle", caption: "Blue Wider", width: 175, margin: { left: 10 } },
-        { control: "button", style: "btnStyle", caption: "White", foreground: "White" },
-        { control: "text",  style: "txtStyle", value: "Serif, Bold" },
-        { control: "text",  style: "txtStyle", value: "Serif, Italic", font: { bold: false, italic: true } },
-        { control: "text",  style: "codeTxtStyle, txtStyle", value: "Mono, bold" },
+        { control: "stackpanel", orientation: "Vertical", width: "*", contents: [
+            { control: "button", style: "btnStyle", caption: "Blue" },
+            { control: "button", style: "btnStyle", caption: "Blue Wider", width: 175, margin: { left: 10 } },
+            { control: "button", style: "btnStyle", caption: "White", foreground: "White" },
+            { control: "stackpanel", width: "*", contents: [
+                { control: "text",  style: "txtStyle", value: "Serif, Bold" },
+                { control: "text",  style: "txtStyle", value: "Serif, Italic", font: { bold: false, italic: true } },
+                { control: "text",  style: "codeTxtStyle, txtStyle", value: "Mono, bold" },
+                { control: "stackpanel", style: "stackStyle", horizontalAlignment: "Center", contents: [
+                    { control: "text", fontsize: 14, value: "Left" },
+                    { control: "text", fontsize: 14, value: "Right" },
+                ] }, 
+            ] },
+        ] },
     ]
 }
 
@@ -21,7 +29,7 @@ exports.InitializeViewModel = function(context, session)
         btnStyle:
         {
             foreground: "CornflowerBlue",
-            background: "Black",
+            background: "DarkSlateGray",
             margin: { left: 35 },
             width: 125
         },
@@ -31,7 +39,9 @@ exports.InitializeViewModel = function(context, session)
             {
                 face: "Serif",
                 bold: true
-            }
+            },
+            fontsize: 12,
+            horizontalAlignment: "Center"
         },
         codeTxtStyle:
         {
@@ -39,6 +49,10 @@ exports.InitializeViewModel = function(context, session)
             {
                 face: "Monospace"
             }
+        },
+        stackStyle:
+        {
+            orientation: "Horizontal"
         },
         message: null,
     }
