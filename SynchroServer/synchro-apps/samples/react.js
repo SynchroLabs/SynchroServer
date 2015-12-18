@@ -10,7 +10,7 @@ exports.View =
     elements:
     [
         { control: "stackpanel", orientation: "Vertical", width: "*", height: "*", contents: [
-            { control: "text", value: "Loading movies...", visibility: "{!responseData.movies}" },
+            { control: "text", value: "Loading movies...", fontsize: 10, visibility: "{!responseData.movies}" },
             { control: "listview", select: "None", height: "*", width: "*", margin: 0, binding: "responseData.movies", itemTemplate:
                 { control: "stackpanel", orientation: "Horizontal", width: "*", margin: 0, contents: [
                     { control: "image", resource: "{posters.thumbnail}", height: 100, width: 75 },
