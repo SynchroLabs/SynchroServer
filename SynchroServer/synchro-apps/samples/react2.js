@@ -30,7 +30,7 @@ exports.InitializeViewModel = function(context, session)
     {
         /* Styles */
         container: { orientation: "Vertical", width: "*", height: "*" },
-        loading: { value: "Loading movies...", fonsize: 10 },
+        loading: { value: "Loading movies...", fontsize: 10 },
         listView: { select: "None", height: "*", width: "*", margin: 0 },
         listItem: { orientation: "Horizontal", width: "*", margin: 0 },
         thumbnail: { height: 100, width: 75 },
