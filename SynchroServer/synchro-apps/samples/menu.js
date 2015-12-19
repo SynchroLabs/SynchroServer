@@ -28,6 +28,7 @@ exports.InitializeViewModel = function (context, session)
             { caption: "Launch URL", view: "launchurl" },
             { caption: "Styles", view: "styles" },
             { caption: "Movies", view: "react" },
+            { caption: "Movies2", view: "react2" },
             { caption: "Toggle", view: "toggle" },
             { caption: "Button", view: "button" },
             { caption: "Canvas", view: "canvas" },

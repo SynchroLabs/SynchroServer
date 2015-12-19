@@ -26,11 +26,7 @@ exports.View =
 
 exports.InitializeViewModel = function(context, session)
 {
-    var viewModel =
-    {
-        responseData: null,
-    }
-    return viewModel;
+    return { responseData: null };
 }
 
 exports.LoadViewModel = function(context, session, viewModel)
