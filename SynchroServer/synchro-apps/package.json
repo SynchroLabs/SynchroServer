@@ -1,6 +1,6 @@
 {
   "name": "synchro-apps",
-  "version": "0.1.0",
+  "version": "1.2.0",
   "description": "Virtual package/container for shared Synchro app dependencies",
   "homepage": "http://synchro.io/",
   "private": true,
