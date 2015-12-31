@@ -175,3 +175,4 @@ $RECYCLE.BIN/
 *.sublime-workspace
 
 /packages/**
+SynchroServer/config_local.json
