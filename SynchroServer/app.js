@@ -116,7 +116,6 @@ app.use(log4js.connectLogger(logger, { level: 'auto' }));
 app.use(express.query());
 app.use(express.json());
 app.use(express.urlencoded());
-app.use(express.methodOverride());
 
 // Serve client app resources locally (can be removed if not needed in your config).  Note that this route must be added before
 // the app.router below in order for it to get a crack at the request.
