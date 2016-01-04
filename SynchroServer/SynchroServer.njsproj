@@ -1076,7 +1076,8 @@
     <Compile Include="synchro-apps\samples\imagescale.js" />
     <Compile Include="synchro-apps\samples\launchurl.js" />
     <Compile Include="synchro-apps\samples\layout.js" />
-    <Compile Include="synchro-apps\samples\lib\app_styles.js" />
+    <Compile Include="synchro-apps\samples\lib\stylehook.js" />
+    <Compile Include="synchro-apps\samples\lib\loghook.js" />
     <Compile Include="synchro-apps\samples\lib\util.js" />
     <Compile Include="synchro-apps\samples\list.js" />
     <Compile Include="synchro-apps\samples\listclick.js" />
