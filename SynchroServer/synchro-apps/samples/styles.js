@@ -1,8 +1,37 @@
 // Styles test page
 //
+// Note: For a more practical example of using application-wide styles, see lib/stylehook.js
+//
+
 var styles = require("synchro-api/style-helper");
 
-var appStyles = require("./lib/app_styles");
+// Default styles to be applied to all controls of type...
+//
+var appStyleMappings = 
+{
+    "button": "btnStyle",
+    "text": "txtStyle"
+}
+
+// App default styles (typically these would be shared across multiple pages, either in an app hook, or in a separate module
+// referenced by each page).
+//
+var appStyles = 
+ {
+    btnStyle:
+    {
+        foreground: "CornflowerBlue",
+        background: "DarkSlateGray",
+    },
+    txtStyle:
+    {
+        fontsize: 12
+    },
+    stackStyle:
+    {
+        orientation: "Horizontal"
+    },
+}
 
 exports.View =
 {
@@ -17,7 +46,7 @@ exports.View =
                 { control: "text",  style: "txtStyle", value: "Serif, Bold" },
                 { control: "text",  style: "txtStyle", value: "Serif, Italic", font: { bold: false, italic: true } },
                 { control: "text",  style: "codeTxtStyle", value: "Mono, bold" }, // default app style of txtStyle will be added
-                { control: "stackpanel", style: "stackStyle", horizontalAlignment: "Center", contents: [
+                { control: "stackpanel", style: "stackStyle", horizontalAlignment: "Center", contents: [ // Will use app stackStyle for orientation
                     { control: "text", fontsize: 10, value: "Left" },      // default app style of txtStyle will be applied
                     { control: "text", fontsize: 10, value: "{message}" }, // default app style of txtStyle will be applied
                     { control: "text", fontsize: 10, value: "Right" },     // default app style of txtStyle will be applied
@@ -29,7 +58,7 @@ exports.View =
 
 exports.InitializeView = function(context, session, viewModel, view, metrics, isViewMetricUpdate)
 {
-    styles.processViewAndViewModelStyles(viewModel, view, metrics, appStyles.defaultStyleMapping, appStyles.styles);
+    styles.processViewAndViewModelStyles(viewModel, view, metrics, appStyleMappings, appStyles);
     return view;
 }
 
