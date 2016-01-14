@@ -1,4 +1,4 @@
-﻿// Binding page
+// Binding page
 //
 exports.View =
 {

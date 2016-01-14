@@ -4,7 +4,7 @@ var path = require('path');
 var async = require('async');
 var semver = require('semver');
 var log4js = require('log4js');
-var wait = require('wait.for');
+var co = require('co');
 
 var synchroConfig = require('synchro-api/synchro-config');
 
@@ -179,7 +179,7 @@ function loadApiProcessorsAsync(callback)
         return;
     }
 
-    function loadApiProcessorAsyncInFiber(synchroAppPath, callback)
+    function * loadApiProcessorAsyncInFiber(synchroAppPath, callback)
     {
         var synchroApp = synchroApps[synchroAppPath];
 
@@ -194,8 +194,8 @@ function loadApiProcessorsAsync(callback)
             serviceConfiguration: config.get('MODULESTORE')
         }
 
-        var appModuleStore = apiManager.getAppModuleStore(synchroAppPath, synchroApp.container, moduleStoreSpec);
-        var appDefinition = appModuleStore.getAppDefinition();
+        var appModuleStore = yield apiManager.getAppModuleStore(synchroAppPath, synchroApp.container, moduleStoreSpec);
+        var appDefinition = yield appModuleStore.getAppDefinition();
         if (appDefinition.engines && appDefinition.engines.synchro)
         {
             // A Synchro engine version spec exists in the app being loaded, let's check it against the API version...
@@ -226,12 +226,12 @@ function loadApiProcessorsAsync(callback)
             bDebug = false; // Debugging of API processor not available in-proc, so don't even ask ;)
         }
 
-        apiManager.createApiProcessorAsync(synchroAppPath, bFork, bDebug, callback);
+        apiManager.createApiProcessorAsync(synchroAppPath, bFork, bDebug, callback); // !!! yield ???
     }
     
     function loadApiProcessorAsync(synchroAppPath, callback)
     {
-        wait.launchFiber(loadApiProcessorAsyncInFiber, synchroAppPath, callback);
+        co(loadApiProcessorAsyncInFiber, synchroAppPath, callback);
     }
 
     async.each(Object.keys(synchroApps), loadApiProcessorAsync, callback);

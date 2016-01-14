@@ -5,5 +5,6 @@
   "main": "menu",
   "author": "Bob Dickinson <bob@synchro.io> (http://synchro.io/)",
   "private": true,
-  "engines": { "synchro": "*" }
+  "engines": { "synchro": "*" },
+  "hooks": [ "lib/loghook", "lib/stylehook" ]
 }
