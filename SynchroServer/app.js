@@ -179,7 +179,7 @@ function loadApiProcessorsAsync(callback)
         return;
     }
 
-    function * loadApiProcessorAsyncInFiber(synchroAppPath, callback)
+    function * loadApiProcessorAsyncAwaitable(synchroAppPath, callback)
     {
         var synchroApp = synchroApps[synchroAppPath];
 
@@ -194,8 +194,8 @@ function loadApiProcessorsAsync(callback)
             serviceConfiguration: config.get('MODULESTORE')
         }
 
-        var appModuleStore = yield apiManager.getAppModuleStore(synchroAppPath, synchroApp.container, moduleStoreSpec);
-        var appDefinition = yield appModuleStore.getAppDefinition();
+        var appModuleStore = yield apiManager.getAppModuleStoreAwaitable(synchroAppPath, synchroApp.container, moduleStoreSpec);
+        var appDefinition = yield appModuleStore.getAppDefinitionAwaitable();
         if (appDefinition.engines && appDefinition.engines.synchro)
         {
             // A Synchro engine version spec exists in the app being loaded, let's check it against the API version...
@@ -231,7 +231,10 @@ function loadApiProcessorsAsync(callback)
     
     function loadApiProcessorAsync(synchroAppPath, callback)
     {
-        co(loadApiProcessorAsyncInFiber, synchroAppPath, callback);
+        co(loadApiProcessorAsyncAwaitable, synchroAppPath, callback).catch(function(err)
+        {
+            logger.error("Error loading async processor:", err); 
+        });
     }
 
     async.each(Object.keys(synchroApps), loadApiProcessorAsync, callback);

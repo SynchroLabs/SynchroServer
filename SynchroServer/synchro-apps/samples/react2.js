@@ -45,5 +45,5 @@ exports.InitializeViewModel = function(context, session)
 
 exports.LoadViewModel = function * (context, session, viewModel)
 {
-    viewModel.responseData = JSON.parse((yield Synchro.waitFor(context, request, { url: REQUEST_URL }))[0].body);
+    viewModel.responseData = JSON.parse((yield Synchro.waitForAwaitable(context, request, { url: REQUEST_URL }))[0].body);
 }

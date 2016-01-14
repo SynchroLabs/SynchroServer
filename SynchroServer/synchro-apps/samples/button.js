@@ -32,15 +32,15 @@ exports.Commands =
     text: function * (context, session, viewModel)
     {
         viewModel.message = "Caption button";
-        yield Synchro.interimUpdate(context);                
-        yield Synchro.waitFor(context, waitInterval, 1000);
+        yield Synchro.interimUpdateAwaitable(context);
+        yield Synchro.waitForAwaitable(context, waitInterval, 1000);
         viewModel.message = "";
     },
     image: function * (context, session, viewModel)
     {
         viewModel.message = "Image button";
-        yield Synchro.interimUpdate(context);                
-        yield Synchro.waitFor(context, waitInterval, 1000);
+        yield Synchro.interimUpdateAwaitable(context);
+        yield Synchro.waitForAwaitable(context, waitInterval, 1000);
         viewModel.message = "";
     },
 }
