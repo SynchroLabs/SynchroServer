@@ -24,6 +24,9 @@ echo Downloading and installing runtime components
 powershell .\download.ps1 '%RUNTIMEURL%' '%RUNTIMEURLOVERRIDE%'
 if %ERRORLEVEL% neq 0 goto error
 
+rem Copy node from the bin directory...
+copy /y node.exe d:\node.exe
+
 echo Installing updated nodeiis
 msiexec /i iisnode-full-iis7-v0.2.7-x64.msi /passive
 if %ERRORLEVEL% neq 0 goto error

@@ -1097,6 +1097,7 @@
     <Compile Include="synchro-apps\samples\wrap.js" />
     <Content Include="bin\iisnode-full-iis7-v0.2.7-x64.msi" />
     <Content Include="bin\Microsoft.NodejsTools.WebRole.dll" />
+    <Content Include="bin\node.exe" />
     <Content Include="bin\SetupSite.ps1" />
     <Content Include="config.json" />
     <Content Include="dist\config.json" />
