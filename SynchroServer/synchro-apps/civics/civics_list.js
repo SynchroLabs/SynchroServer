@@ -44,11 +44,11 @@ exports.View =
     ]
 }
 
-function findAndLoadRepresentatives(context, session, viewModel)
+function * findAndLoadRepresentatives(context, session, viewModel)
 {
     try
     {
-        var reps = Synchro.waitFor(context, googleApi.callApiAsync, context, "https://www.googleapis.com/civicinfo/v2/representatives", { "address": viewModel.address });
+        var reps = yield Synchro.waitForAwaitable(context, googleApi.callApiAsync, context, "https://www.googleapis.com/civicinfo/v2/representatives", { "address": viewModel.address });
         
         if (!reps || !reps.offices || (reps.offices.length == 0))
         {
@@ -160,13 +160,13 @@ exports.InitializeViewModel = function (context, session, params, state)
     return viewModel;
 }
 
-exports.LoadViewModel = function (context, session, viewModel)
+exports.LoadViewModel = function * (context, session, viewModel)
 {
     // Only do the search/populate if we didn't already populated the list (from saved state) in InitViewModel above.
     //
     if ((viewModel.representatives === null) && viewModel.address)
     {
-        findAndLoadRepresentatives(context, session, viewModel);
+        yield findAndLoadRepresentatives(context, session, viewModel);
     }
 }
 

@@ -226,7 +226,7 @@ function loadApiProcessorsAsync(callback)
             bDebug = false; // Debugging of API processor not available in-proc, so don't even ask ;)
         }
 
-        apiManager.createApiProcessorAsync(synchroAppPath, bFork, bDebug, callback); // !!! yield ???
+        apiManager.createApiProcessorAsync(synchroAppPath, bFork, bDebug, callback);
     }
     
     function loadApiProcessorAsync(synchroAppPath, callback)

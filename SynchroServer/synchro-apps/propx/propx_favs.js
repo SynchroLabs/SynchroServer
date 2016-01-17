@@ -80,7 +80,7 @@ exports.InitializeViewModel = function(context, session, params, state)
     return viewModel;
 }
 
-exports.LoadViewModel = function(context, session, viewModel)
+exports.LoadViewModel = function * (context, session, viewModel)
 {
     // Only do the search/populate if we have favs and didn't already populated the list (from saved state) in InitViewModel above.
     //
@@ -91,7 +91,7 @@ exports.LoadViewModel = function(context, session, viewModel)
 
         try
         {
-            var props = Synchro.waitFor(context, getFavoriteProperties, session.favs);
+            var props = yield Synchro.waitForAwaitable(context, getFavoriteProperties, session.favs);
             if (props.response.listings)
             {
                 // Since we're going to be serializing the property list to the session (via the viewModel and possibly the nav stack),

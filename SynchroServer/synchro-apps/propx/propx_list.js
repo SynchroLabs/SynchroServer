@@ -138,12 +138,12 @@ function populateViewModelPropertiesFromResponse(viewModel, response)
     viewModel.isMore = viewModel.properties.length < viewModel.totalProperties;
 }
 
-function findAndLoadPropertiesByProximity(context, session, viewModel, page)
+function * findAndLoadPropertiesByProximity(context, session, viewModel, page)
 {
     try
     {
         var criteria = "centre_point=" + viewModel.searchPosition.latitude + "," + viewModel.searchPosition.longitude;
-        var props = Synchro.waitFor(context, searchForProperties, criteria, page);
+        var props = yield Synchro.waitForAwaitable(context, searchForProperties, criteria, page);
 
         viewModel.isLoading = false;
         viewModel.isLoadingMore = false;
@@ -173,12 +173,12 @@ function findAndLoadPropertiesByProximity(context, session, viewModel, page)
     }
 }
 
-function findAndLoadPropertiesByPlace(context, session, viewModel, page)
+function * findAndLoadPropertiesByPlace(context, session, viewModel, page)
 {
     try
     {
         var criteria = "place_name=" + (viewModel.searchLocation ? viewModel.searchLocation.place_name : viewModel.searchTerm);
-        var props = Synchro.waitFor(context, searchForProperties, criteria, page);
+        var props = yield Synchro.waitForAwaitable(context, searchForProperties, criteria, page);
 
         viewModel.isLoading = false;
         viewModel.isLoadingMore = false;
@@ -236,7 +236,7 @@ function findAndLoadPropertiesByPlace(context, session, viewModel, page)
     }
 }
 
-exports.LoadViewModel = function(context, session, viewModel)
+exports.LoadViewModel = function * (context, session, viewModel)
 {
     // Only do the search/populate if we didn't already populated the list (from saved state) in InitViewModel above.
     //
@@ -244,11 +244,11 @@ exports.LoadViewModel = function(context, session, viewModel)
     {
         if (viewModel.searchPosition)
         {
-            findAndLoadPropertiesByProximity(context, session, viewModel);
+            yield findAndLoadPropertiesByProximity(context, session, viewModel);
         }
         else
         {
-            findAndLoadPropertiesByPlace(context, session, viewModel);
+            yield findAndLoadPropertiesByPlace(context, session, viewModel);
         }
     }
 }
@@ -263,29 +263,29 @@ exports.Commands =
         return Synchro.pushAndNavigateTo(context, "propx_detail", { property: params.property }, state);
     },
 
-    locationSelected: function(context, session, viewModel, params)
+    locationSelected: function * (context, session, viewModel, params)
     {
         viewModel.locations = null;
         viewModel.searchTerm = null;
         viewModel.searchLocation = params.location;
         viewModel.message = "Searching listings in " + viewModel.searchLocation.title;
-        Synchro.interimUpdate(context);
-        findAndLoadPropertiesByPlace(context, session, viewModel);
+        yield Synchro.interimUpdateAwaitable(context);
+        yield findAndLoadPropertiesByPlace(context, session, viewModel);
     },
 
-    loadMore: function(context, session, viewModel, params)
+    loadMore: function * (context, session, viewModel, params)
     {
         viewModel.isMore = false; // Suppress "Load More..." while we're loading more
         viewModel.isLoadingMore = true;
-        Synchro.interimUpdate(context);
+        yield Synchro.interimUpdateAwaitable(context);
 
         if (viewModel.searchPosition)
         {
-            findAndLoadPropertiesByProximity(context, session, viewModel, viewModel.page + 1);
+            yield findAndLoadPropertiesByProximity(context, session, viewModel, viewModel.page + 1);
         }
         else
         {
-            findAndLoadPropertiesByPlace(context, session, viewModel, viewModel.page + 1);
+            yield findAndLoadPropertiesByPlace(context, session, viewModel, viewModel.page + 1);
         }
     },
 }
