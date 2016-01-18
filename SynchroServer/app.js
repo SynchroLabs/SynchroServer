@@ -226,6 +226,11 @@ function loadApiProcessorsAsync(callback)
             bDebug = false; // Debugging of API processor not available in-proc, so don't even ask ;)
         }
 
+        if (bDebug && semver.satisfies(process.version, ">= 5.0.0 <5.5.0"))
+        {
+            logger.warn("Versions of Node.js from 5.0.0 and up to, but not including, 5.4.0, are not stable in debug mode. Please upgrade to at least 5.4.0.");
+        }
+
         apiManager.createApiProcessorAsync(synchroAppPath, bFork, bDebug, callback);
     }
     

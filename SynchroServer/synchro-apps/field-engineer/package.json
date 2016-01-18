@@ -1,6 +1,6 @@
 {
   "name": "synchro-field-engineer",
-  "version": "0.1.0",
+  "version": "1.3.0",
   "description": "Synchro Field Engineer",
   "main": "fe_main",
   "author": "Bob Dickinson <bob@synchro.io> (http://synchro.io/)",
@@ -8,5 +8,5 @@
     "mssql": "^2.1.1"
   },
   "private": true,
-  "engines":  { "synchro" : "*" } 
+  "engines": { "synchro": ">= 1.3.0" }
 }
