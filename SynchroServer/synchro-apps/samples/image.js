@@ -33,19 +33,19 @@ function waitInterval(intervalMillis, callback)
 
 exports.Commands =
 {
-    imageTapped: function(context, session, viewModel, params)
+    imageTapped: function * (context, session, viewModel, params)
     {
         // We don't really need the count as a param from the tap command (since we have it the viewModel), we're just testing param
         // passing on image tap.
         //
         viewModel.message = "Image tapped: " + params.count;
         var thisTap = ++viewModel.nextTap;
-        Synchro.interimUpdate(context);                
-        Synchro.waitFor(context, waitInterval, 1000);
+        yield Synchro.interimUpdateAwaitable(context);
+        yield Synchro.waitForAwaitable(context, waitInterval, 1000);
         if (thisTap == viewModel.nextTap)
         {
             // If no other taps came in during the wait, then let's clear the message...
-            viewModel.message = "";            
+            viewModel.message = "";
         }
     },
 }

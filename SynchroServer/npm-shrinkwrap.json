@@ -422,8 +422,7 @@
     },
     "synchro-api": {
       "version": "1.3.0",
-      "from": "http://[host]/dist/[token]/synchro-api-1.3.0.tgz",
-      "resolved": "http://[host]/dist/[token]/synchro-api-1.3.0.tgz",
+      "from": "./node_modules/synchro-api/",
       "dependencies": {
         "bcryptjs": {
           "version": "2.1.0",
@@ -530,8 +529,6 @@
     },
     "synchro-aws": {
       "version": "1.3.0",
-      "from": "http://[host]/dist/[token]/synchro-aws-1.3.0.tgz",
-      "resolved": "http://[host]/dist/[token]/synchro-aws-1.3.0.tgz",
       "dependencies": {
         "aws-sdk": {
           "version": "2.1.21",
@@ -561,8 +558,6 @@
     },
     "synchro-azure": {
       "version": "1.3.0",
-      "from": "http://[host]/dist/[token]/synchro-azure-1.3.0.tgz",
-      "resolved": "http://[host]/dist/[token]/synchro-azure-1.3.0.tgz",
       "dependencies": {
         "azure": {
           "version": "0.9.16",
@@ -1027,8 +1022,6 @@
     },
     "synchro-studio": {
       "version": "1.3.0",
-      "from": "http://[host]/dist/[token]/synchro-studio-1.3.0.tgz",
-      "resolved": "http://[host]/dist/[token]/synchro-studio-1.3.0.tgz",
       "dependencies": {
         "express-hbs": {
           "version": "0.7.11",

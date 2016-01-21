@@ -29,9 +29,9 @@ exports.InitializeViewModel = function(context, session)
     return viewModel;
 }
 
-exports.LoadViewModel = function(context, session, viewModel)
+exports.LoadViewModel = function * (context, session, viewModel)
 {
-    Synchro.waitFor(context, waitInterval, 4000);    
+    yield Synchro.waitForAwaitable(context, waitInterval, 4000);
     viewModel.count = 10;
     viewModel.isLoading = false;
 }
@@ -43,17 +43,17 @@ function waitInterval(intervalMillis, callback)
 
 exports.Commands = 
 {
-    start: function(context, session, viewModel, params)
+    start: function * (context, session, viewModel, params)
     {
         viewModel.isCounting = true;
 
         while (viewModel.isCounting && (viewModel.count > 0))
         {
-            Synchro.waitFor(context, waitInterval, 1000);
+            yield Synchro.waitForAwaitable(context, waitInterval, 1000);
             if (viewModel.isCounting)
             {
-                viewModel.count--;            
-                Synchro.interimUpdate(context);                
+                viewModel.count--;
+                yield Synchro.interimUpdateAwaitable(context);
             }
         }
 

@@ -39,18 +39,18 @@ function waitInterval(intervalMillis, callback)
 
 exports.Commands =
 {
-    redTapped: function(context, session, viewModel)
+    redTapped: function * (context, session, viewModel)
     {
         viewModel.message = "Red tapped";
-        Synchro.interimUpdate(context);                
-        Synchro.waitFor(context, waitInterval, 1000);
+        yield Synchro.interimUpdateAwaitable(context);
+        yield Synchro.waitForAwaitable(context, waitInterval, 1000);
         viewModel.message = "";
     },
-    greenTapped: function(context, session, viewModel)
+    greenTapped: function * (context, session, viewModel)
     {
         viewModel.message = "Green tapped";
-        Synchro.interimUpdate(context);                
-        Synchro.waitFor(context, waitInterval, 1000);
+        yield Synchro.interimUpdateAwaitable(context);
+        yield Synchro.waitForAwaitable(context, waitInterval, 1000);
         viewModel.message = "";
     },
 }

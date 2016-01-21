@@ -73,7 +73,7 @@ exports.InitializeViewModel = function(context, session, params, state)
     return viewModel;
 }
 
-function loadJobs(context, viewModel, agentId)
+function * loadJobs(context, viewModel, agentId)
 {
     var fieldList = ["Status", "JobNumber", "EtaTime", "Title", "FullName", "HouseNumberOrName", "Street", "Town", "Postcode", "PrimaryContactNumber"];
     var statusColorMap = 
@@ -86,10 +86,10 @@ function loadJobs(context, viewModel, agentId)
     try
     {
         var connection = new sql.Connection(dbConfig); 
-        Synchro.waitFor(context, connection.connect.bind(connection));
+        yield Synchro.waitForAwaitable(context, connection.connect.bind(connection));
         var request = connection.request();
         request.input('agentId', sql.VarChar, agentId); // Prevent SQL injection by parameterizing
-        recordset = Synchro.waitFor(context, request.query.bind(request), "select " + fieldList.join(",") + " from Job inner join Customer on Job.CustomerId=CUstomer.Id where AgentId=@agentId");
+        recordset = yield Synchro.waitForAwaitable(context, request.query.bind(request), "select " + fieldList.join(",") + " from Job inner join Customer on Job.CustomerId=CUstomer.Id where AgentId=@agentId");
         viewModel.jobs = [];
         recordset.forEach(function(job)
         {
@@ -105,22 +105,22 @@ function loadJobs(context, viewModel, agentId)
     viewModel.isLoading = false;
 }
 
-exports.LoadViewModel = function(context, session, viewModel)
+exports.LoadViewModel = function * (context, session, viewModel)
 {
     // Only query for the jobs if we didn't already populate the list (from saved state) in InitViewModel above.
     //
     if (viewModel.jobs === null)
     {
-        loadJobs(context, viewModel, agentId1);
+        yield loadJobs(context, viewModel, agentId1);
     }
 }
 
 exports.Commands = 
 {
-    reload: function(context, session, viewModel, params)
+    reload: function * (context, session, viewModel, params)
     {
         viewModel.isLoading = true;
-        Synchro.interimUpdate(context); // Make sure client gets new isLoading value before loading
+        yield Synchro.interimUpdateAwaitable(context); // Make sure client gets new isLoading value before loading
         loadJobs(context, viewModel, agentId1);
     },
     jobSelected: function(context, session, viewModel, params)

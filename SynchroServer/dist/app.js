@@ -4,7 +4,7 @@ var path = require('path');
 var async = require('async');
 var semver = require('semver');
 var log4js = require('log4js');
-var wait = require('wait.for');
+var co = require('co');
 
 var synchroConfig = require('synchro-api/synchro-config');
 
@@ -68,28 +68,28 @@ logger.info("Synchro server loading - " + config.configDetails);
 var synchroApi = require('synchro-api');
 var synchroApiUrlPrefix = config.get("API_PATH_PREFIX");
 
-var apiManager = synchroApi.createApiProcessorManager(config.get('DEBUG_BASE_PORT'), config);
+var apiManager = synchroApi.createApiProcessorManager(config.get('DEBUG_BASE_PORT'), config); 
 
 // Create Synchro studio (unless config indicates not to)
 //
-var synchroStudio = null;
+var synchroStudio = null; 
 
 if (!config.get("NOSTUDIO"))
 {
     var synchroStudioModule = null;
-    
-    try
+
+    try 
     {
         synchroStudioModule = require('synchro-studio');
     }
-    catch (e)
+    catch (e) 
     {
         if (e instanceof Error && e.code === "MODULE_NOT_FOUND")
             logger.warn("Synchro Studio module (synchro-studio) not installed, no Studio services will be provided");
         else
             throw e;
     }
-    
+
     if (synchroStudioModule)
     {
         // We could just do this in the try above after the require, but we don't want to exception handler to handle
@@ -112,7 +112,7 @@ app.use(express.cookieParser());
 // is my guess) - for now we just omit expiration...
 app.use(express.cookieSession({ store: sessionStore, secret: 'sdf89f89fd7sdf7sdf', cookie: { maxAge: false, httpOnly: true } }));
 app.use(express.favicon());
-app.use(log4js.connectLogger(logger, { level: 'auto' }));
+app.use(log4js.connectLogger(logger, { level: 'auto' })); 
 app.use(express.query());
 app.use(express.json());
 app.use(express.urlencoded());
@@ -123,7 +123,7 @@ app.use(express.urlencoded());
 var appStaticResourcePath = config.get('APP_RESOURCE_PATH');
 if (appStaticResourcePath)
 {
-    app.use(synchroApiUrlPrefix + '/resources', express.static(appStaticResourcePath));
+    app.use(synchroApiUrlPrefix + '/resources', express.static(appStaticResourcePath));    
 }
 
 app.use(app.router);
@@ -140,12 +140,12 @@ if (synchroStudio)
     else
     {
         // Use built-in auth...
-        synchroStudio.addRoutes(app, config);
+        synchroStudio.addRoutes(app, config);        
     }
 }
 else
 {
-    app.get('/', function (request, response)
+    app.get('/', function(request, response)
     {
         response.send('Synchro server running...');
     });
@@ -153,7 +153,7 @@ else
 
 // Let the API processor handle requests to /api 
 //
-app.all(synchroApiUrlPrefix + '/:appPath', function (request, response)
+app.all(synchroApiUrlPrefix + '/:appPath', function(request, response) 
 {
     apiManager.processHttpRequest(request.params.appPath, request, response);
 });
@@ -178,24 +178,24 @@ function loadApiProcessorsAsync(callback)
         callback();
         return;
     }
-    
-    function loadApiProcessorAsyncInFiber(synchroAppPath, callback)
+
+    function * loadApiProcessorAsyncAwaitable(synchroAppPath, callback)
     {
         var synchroApp = synchroApps[synchroAppPath];
-        
+
         // We're going to load the module store (in proc) for the API processor that we're about to create so that
         // we can get the app definition and check version requirements before we create the API processor (which 
         // creation is async and might involve spawning a new process).
         //
         var moduleStoreSpec = 
- {
+        {
             packageRequirePath: config.get('MODULESTORE_PACKAGE'),
             serviceName: config.get('MODULESTORE_SERVICE'),
             serviceConfiguration: config.get('MODULESTORE')
         }
-        
-        var appModuleStore = apiManager.getAppModuleStore(synchroAppPath, synchroApp.container, moduleStoreSpec);
-        var appDefinition = appModuleStore.getAppDefinition();
+
+        var appModuleStore = yield apiManager.getAppModuleStoreAwaitable(synchroAppPath, synchroApp.container, moduleStoreSpec);
+        var appDefinition = yield appModuleStore.getAppDefinitionAwaitable();
         if (appDefinition.engines && appDefinition.engines.synchro)
         {
             // A Synchro engine version spec exists in the app being loaded, let's check it against the API version...
@@ -208,7 +208,7 @@ function loadApiProcessorsAsync(callback)
                 logger.error("App being loaded: \"" + appDefinition.name + "\" at path: \"" + synchroAppPath + "\"" +
                     " specified a synchro engine version requirement that was not met by the Synchro API on this server." +
                     " Synchro API version: \"" + apiPkg.version + "\", required version: \"" + appDefinition.engines.synchro + "\"");
-                
+
                 callback(null); // Could throw the above messages as an error by passing it as first param to callback, if desired
                 return;
             }
@@ -216,7 +216,7 @@ function loadApiProcessorsAsync(callback)
         
         var bFork = true;   // Run API processor forked
         var bDebug = (synchroStudio != null) && bFork;  // Enable debugging of API processor (only valid if running forked and studio present)
-        
+
         if (config.get('NOFORK'))
         {
             // This situation is typically for when you want to run this "app" itself under a local debugger, and
@@ -225,28 +225,36 @@ function loadApiProcessorsAsync(callback)
             bFork = false;  // Run API processor in-proc
             bDebug = false; // Debugging of API processor not available in-proc, so don't even ask ;)
         }
-        
+
+        if (bDebug && semver.satisfies(process.version, ">= 5.0.0 <5.4.0"))
+        {
+            logger.warn("Versions of Node.js from 5.0.0 and up to, but not including, 5.4.0, are not stable in debug mode. Please upgrade to at least 5.4.0.");
+        }
+
         apiManager.createApiProcessorAsync(synchroAppPath, bFork, bDebug, callback);
     }
     
     function loadApiProcessorAsync(synchroAppPath, callback)
     {
-        wait.launchFiber(loadApiProcessorAsyncInFiber, synchroAppPath, callback);
+        co(loadApiProcessorAsyncAwaitable, synchroAppPath, callback).catch(function(err)
+        {
+            logger.error("Error loading async processor:", err); 
+        });
     }
-    
+
     async.each(Object.keys(synchroApps), loadApiProcessorAsync, callback);
 }
 
 function startServerAsync(callback)
 {
-    server.listen(config.get('PORT'), function ()
+    server.listen(config.get('PORT'), function()
     {
         logger.info('Synchro server listening on port ' + this.address().port + ", node version: " + process.version);
         callback(null);
     });
 }
 
-async.series([loadApiProcessorsAsync, startServerAsync], function (err)
+async.series([loadApiProcessorsAsync, startServerAsync], function(err)
 {
     if (err)
     {

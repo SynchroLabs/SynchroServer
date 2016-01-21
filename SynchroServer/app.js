@@ -4,7 +4,7 @@ var path = require('path');
 var async = require('async');
 var semver = require('semver');
 var log4js = require('log4js');
-var wait = require('wait.for');
+var co = require('co');
 
 var synchroConfig = require('synchro-api/synchro-config');
 
@@ -179,7 +179,7 @@ function loadApiProcessorsAsync(callback)
         return;
     }
 
-    function loadApiProcessorAsyncInFiber(synchroAppPath, callback)
+    function * loadApiProcessorAsyncAwaitable(synchroAppPath, callback)
     {
         var synchroApp = synchroApps[synchroAppPath];
 
@@ -194,8 +194,8 @@ function loadApiProcessorsAsync(callback)
             serviceConfiguration: config.get('MODULESTORE')
         }
 
-        var appModuleStore = apiManager.getAppModuleStore(synchroAppPath, synchroApp.container, moduleStoreSpec);
-        var appDefinition = appModuleStore.getAppDefinition();
+        var appModuleStore = yield apiManager.getAppModuleStoreAwaitable(synchroAppPath, synchroApp.container, moduleStoreSpec);
+        var appDefinition = yield appModuleStore.getAppDefinitionAwaitable();
         if (appDefinition.engines && appDefinition.engines.synchro)
         {
             // A Synchro engine version spec exists in the app being loaded, let's check it against the API version...
@@ -226,12 +226,20 @@ function loadApiProcessorsAsync(callback)
             bDebug = false; // Debugging of API processor not available in-proc, so don't even ask ;)
         }
 
+        if (bDebug && semver.satisfies(process.version, ">= 5.0.0 <5.4.0"))
+        {
+            logger.warn("Versions of Node.js from 5.0.0 and up to, but not including, 5.4.0, are not stable in debug mode. Please upgrade to at least 5.4.0.");
+        }
+
         apiManager.createApiProcessorAsync(synchroAppPath, bFork, bDebug, callback);
     }
     
     function loadApiProcessorAsync(synchroAppPath, callback)
     {
-        wait.launchFiber(loadApiProcessorAsyncInFiber, synchroAppPath, callback);
+        co(loadApiProcessorAsyncAwaitable, synchroAppPath, callback).catch(function(err)
+        {
+            logger.error("Error loading async processor:", err); 
+        });
     }
 
     async.each(Object.keys(synchroApps), loadApiProcessorAsync, callback);

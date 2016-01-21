@@ -29,18 +29,18 @@ function waitInterval(intervalMillis, callback)
 
 exports.Commands =
 {
-    text: function(context, session, viewModel)
+    text: function * (context, session, viewModel)
     {
         viewModel.message = "Caption button";
-        Synchro.interimUpdate(context);                
-        Synchro.waitFor(context, waitInterval, 1000);
+        yield Synchro.interimUpdateAwaitable(context);
+        yield Synchro.waitForAwaitable(context, waitInterval, 1000);
         viewModel.message = "";
     },
-    image: function(context, session, viewModel)
+    image: function * (context, session, viewModel)
     {
         viewModel.message = "Image button";
-        Synchro.interimUpdate(context);                
-        Synchro.waitFor(context, waitInterval, 1000);
+        yield Synchro.interimUpdateAwaitable(context);
+        yield Synchro.waitForAwaitable(context, waitInterval, 1000);
         viewModel.message = "";
     },
 }
