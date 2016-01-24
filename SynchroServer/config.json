@@ -2,8 +2,13 @@
   "APPS": {
     "samples": {
       "container": "samples"
+    },
+    "propx": {
+      "container": "propx"
+    },
+    "civics": {
+        "container": "civics"
     }
   },
-  "APP_RESOURCE_PREFIX": "http://localhost:1337/api/resources/",
-  "SYNCHRO_APPS": []
+  "APP_RESOURCE_PREFIX": "http://localhost:1337/api/resources/"
 }
