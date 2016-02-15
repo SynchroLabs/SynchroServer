@@ -27,6 +27,7 @@ exports.InitializeViewModel = function (context, session)
             { caption: "Countdown Sample", view: "countdown" },
             { caption: "Launch URL", view: "launchurl" },
             { caption: "Styles", view: "styles" },
+            { caption: "Game", view: "game" },
             { caption: "Movies", view: "react" },
             { caption: "Movies2", view: "react2" },
             { caption: "Toggle", view: "toggle" },
