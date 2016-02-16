@@ -22,13 +22,14 @@ exports.View =
     title: "Lights Out",
     elements:
     [
-        { control: "text", value: "Turn Out the Lights", fontsize: 12 },
-
-        { control: "stackpanel", orientation: "Horizontal", binding: { foreach: "board" }, contents: [
-            { control: "rectangle", height: "75", width: "75", fill: "{background}", 
-              binding: { foreach: "$data", onTap: { command: "squareTapped", row: "{$parent.$index}", col: "{$index}" } } },
+        { control: "stackpanel", orientation: "Vertical", margin: 0, width: "*", contents: [
+            { control: "text", value: "Turn Out the Lights", fontsize: 12, horizontalAlignment: "Center" },
+            { control: "stackpanel", orientation: "Horizontal", margin: 0, horizontalAlignment: "Center", binding: { foreach: "board" }, contents: [
+                { control: "rectangle", height: 75, width: 75, margin: 5,  fill: "{background}", 
+                  binding: { foreach: "$data", onTap: { command: "squareTapped", row: "{$parent.$index}", col: "{$index}" } } },
+            ] },
+            { control: "text", value: "Turns: {turnCount}, lights: {lights}", fontsize: "12", horizontalAlignment: "Center" }
         ] },
-        { control: "text", value: "Turns: {turnCount}, lights: {lights}", fontsize: "12" }
     ]
 }
 
