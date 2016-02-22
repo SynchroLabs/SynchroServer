@@ -268,3 +268,65 @@ async.series([loadApiProcessorsAsync, startServerAsync], function(err)
         logger.debug("Synchro server up and running!");
     }
 });
+
+function areAllProcessorsComplete()
+{
+    var apiProcessors = apiManager.getApiProcessors();
+    for (var path in apiProcessors)
+    {
+        if (!apiProcessors[path].isShutdown())
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+function * orderlyShutdown()
+{
+    // Sometimes Azure does a restart where the forked child processors are not down shutting down when it tries to
+    // fire Synchro back up, and then it fails on startup because all of the processor debug ports are still in use.
+    //
+    // This is an attempt to delay shutdown of the main process until all of the forked child processors are done
+    // shutting down...
+    //
+    logger.info("Orderly shutdown - checking processors");
+    for (var i = 0; i < 10; i++)
+    {
+        if (areAllProcessorsComplete())
+        {
+            logger.info("All processors complete, terminating process");
+            process.exit();
+        }
+        
+        logger.info("Waiting, then checking processors again");
+        yield function (done) { setInterval(done, 500) } // Wait 500ms;
+    }
+    
+    logger.error("One or more processors did not complete, timed out waiting, terminating process");
+    process.exit();
+}
+
+process.on('SIGTERM', function ()
+{
+    console.log('SIGTERM - preparing to exit.');
+    co(orderlyShutdown).catch(function (err)
+    {
+        logger.error("Error in SIGTERM shutdown:", err);
+    });
+});  
+
+process.on('SIGINT', function ()
+{
+    console.log('SIGINT - preparing to exit.');
+    co(orderlyShutdown).catch(function (err)
+    {
+        logger.error("Error in SIGINT shutdown:", err);
+    });
+});
+
+process.on('exit', function ()
+{
+    logger.info('Process exit');
+});
+ 
