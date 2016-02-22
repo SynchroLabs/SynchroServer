@@ -5,11 +5,12 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <Name>SynchroServer</Name>
     <RootNamespace>MaaasServer</RootNamespace>
-    <NameOfLastUsedPublishProfile>maaas - Cloud Web Deploy</NameOfLastUsedPublishProfile>
+    <NameOfLastUsedPublishProfile>apisynchro - Web Deploy</NameOfLastUsedPublishProfile>
     <NodeExePath />
     <NodeExeArguments>
     </NodeExeArguments>
-    <ScriptArguments>-n</ScriptArguments>
+    <ScriptArguments>
+    </ScriptArguments>
     <StartWebBrowser>True</StartWebBrowser>
     <LaunchUrl />
   </PropertyGroup>
@@ -1067,6 +1068,7 @@
     <Compile Include="synchro-apps\samples\toggle.js" />
     <Compile Include="synchro-apps\samples\webview.js" />
     <Compile Include="synchro-apps\samples\wrap.js" />
+    <None Include="apisynchro - Web Deploy.pubxml" />
     <Content Include="bin\iisnode-full-iis7-v0.2.7-x64.msi" />
     <Content Include="bin\Microsoft.NodejsTools.WebRole.dll" />
     <Content Include="bin\node.exe" />
