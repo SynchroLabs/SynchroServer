@@ -117,15 +117,6 @@ app.use(express.query());
 app.use(express.json());
 app.use(express.urlencoded());
 
-// Serve client app resources locally (can be removed if not needed in your config).  Note that this route must be added before
-// the app.router below in order for it to get a crack at the request.
-//
-var appStaticResourcePath = config.get('APP_RESOURCE_PATH');
-if (appStaticResourcePath)
-{
-    app.use(synchroApiUrlPrefix + '/resources', express.static(appStaticResourcePath));    
-}
-
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -157,6 +148,16 @@ app.all(synchroApiUrlPrefix + '/:appPath', function(request, response)
 {
     apiManager.processHttpRequest(request.params.appPath, request, response);
 });
+
+// This will serve static resources (primarily intended to support images) from the resource directory of any installed app.
+// This is useful for local dev/test, but you might want to remove it for production if your resources are server from a CDN
+// or other more appropriate solution.
+// 
+app.all(synchroApiUrlPrefix + '/:appPath/resources/:resource', function(request, response) 
+{
+    response.sendfile(__dirname + '/' + config.get('APP_ROOT_PATH') + '/' + request.params.appPath + '/resources/' + request.params.resource);
+});
+
 
 var server = http.createServer(app);
 

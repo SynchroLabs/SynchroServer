@@ -1,6 +1,6 @@
 // Hello page
 //
-var img = "http://blob.synchro.io/resources/cloud_system_256.png";
+var imgCloud = Synchro.getResourceUrl("cloud_system_256.png");
 
 exports.View =
 {
@@ -8,7 +8,7 @@ exports.View =
     elements:
     [
         { control: "button", caption: "Button", foreground: "CornflowerBlue", background: "Black", width: 125, binding: "text" },
-        { control: "button", resource: img, width: 125, height: 125, binding: "image" },
+        { control: "button", resource: imgCloud, width: 125, height: 125, binding: "image" },
         { control: "text", value: "{message}", fontsize: 12 },
     ]
 }

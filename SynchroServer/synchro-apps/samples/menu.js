@@ -1,5 +1,7 @@
 // Menu page
 //
+var imgCloud = Synchro.getResourceUrl("cloud_system_256.png");
+
 exports.View =
 {
     title: "Synchro Samples",
@@ -7,7 +9,7 @@ exports.View =
     [
         { control: "stackpanel", width: "*", contents: [
             { control: "border", border: "Red", horizontalAlignment: "Center", borderThickness: 10, cornerRadius: 15, padding: { top: 15, bottom: 15, left: 50, right: 50 }, margin: { top: 10, bottom: 25 }, background: "Blue", contents: [
-                { control: "image", width: 150, height: 150, resource: "http://blob.synchro.io/resources/cloud_system_256.png" },
+                { control: "image", width: 150, height: 150, resource: imgCloud },
             ]
             },
             { control: "button", caption: "{caption}", binding: { foreach: "pages", command: "goToView", view: "{view}" } },

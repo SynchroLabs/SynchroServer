@@ -1,7 +1,7 @@
 ﻿// Sandbox page
 //
-var userImage =  "http://blob.synchro.io/resources/user.png";
-var profileImage = "http://blob.synchro.io/resources/cloud_system_256.png";
+var userImage =  Synchro.getResourceUrl("user.png");
+var profileImage = Synchro.getResourceUrl("cloud_system_256.png");
 
 exports.View =
 {

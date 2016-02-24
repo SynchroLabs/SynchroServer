@@ -9,6 +9,5 @@
     "civics": {
         "container": "civics"
     }
-  },
-  "APP_RESOURCE_PREFIX": "http://localhost:1337/api/resources/"
+  }
 }

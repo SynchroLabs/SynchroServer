@@ -45,7 +45,7 @@ exports.View =
 
 function imageUrl(img)
 {
-    return "http://blob.synchro.io/resources/" + img + ".jpg";
+    return Synchro.getResourceUrl(img + ".jpg");
 }
 
 exports.InitializeViewModel = function (context, session)
