@@ -16,7 +16,6 @@ navigate to each of the following directories and run "npm install" there also:
     node_modules/synchro-studio
 
     synchro-apps
-    synchro-apps/field-engineer
 
 ## Configuration Mechanism
 

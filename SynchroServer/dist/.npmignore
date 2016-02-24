@@ -1,0 +1,4 @@
+# npmignore
+
+# Internal build process instructions
+RELEASE.md 
