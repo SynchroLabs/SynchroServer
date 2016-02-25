@@ -2,9 +2,9 @@
 
 ## Install and run from repo:
 
-1) Clone repo
+1) Clone this repo to your machine
 
-2) Install npm dependencies
+2) Go to SynchroServer/SynchroServer and install npm dependencies:
 
     npm install
 
@@ -17,37 +17,24 @@ navigate to each of the following directories and run "npm install" there also:
 
     synchro-apps
 
-## Configuration Mechanism
+3) Install SynchroSamples
 
-Synchro supports several mechanisms for configuration, and those mechanisms can even be combined as appropriate.  Synchro configuration is processed with the following precedence:
+Clone the [SynchroSamples repo](https://github.com/SynchroLabs/SynchroSamples) into your SynchroServer/SynchroServer/synchro-apps directory.
 
-1) Command-line parameters
+Then install SynchroSamples into your config by doing:
 
-To see the list of supported command line parameters:
+```
+$ synchro add SynchroSamples samples
+```
 
-    node app.js --help
+4) Run
 
-2) Environment variables
+In SynchroServer/SynchroServer do either `npm start` or `node app.js` to run Synchro server.
 
-When setting a Synchro config element using an environment variable, you must prefix the element name with "SYNCHRO__".  If the element is located in an object hierarchy, you may represent the element path by using the "__" separator.  For example, to set an element that would be expressed in JSON like this:
+5) Verify
 
-    "MODULESTORE":
-    {
-    	"DIRECTORY": "somedir"
-    }
+You should be able to point a client at api/samples on your server and verify that everything is working.  If you don't see the Synchro cloud image on the Samples menu page, then you may need to modify your HOST config value.
 
-You would set an environment variable like so:
+## WARNING
 
-    set SYNCHRO__MODULESTORE__DIRECTORY=somedir
-
-3) Configuration file
-
-The configuration file is JSON encoded.  It can be specified via the command line, using the -c parameter.  It can also be specified using the `SYNCHRO_CONFIG` environment variable.  If no configuration file is specified, Synchro will look for a file called `synchro.json`.  If that file is not found, no configuration file will be used.
-
-4) Defaults
-
-Synchro contains reasonable defaults that allow it to run in local, development mode with no explicit configuration.  If you just want to get up and running, you can ignore configuration for now and just run.
-
-## Configuration Elements
-
-!!! Document settings, including all services and their config elements
+The SynchrServer project has a gitignore setting that will ignore any apps you install in synchro-apps.  This will allow you to install and run apps in your server dev environment without those apps being part of the SynchroServer project.  You may either install apps using `synchro install` or by cloning repos into synchro-apps and using `synchro add` (as described above).  The one potential issue here is that since the SynchroServer git project believes that it owns the entire directory structure, certain commmands (like `git clean`) could cause any uncommitted changes in repos located inside of the synchro-apps directory to be lost.

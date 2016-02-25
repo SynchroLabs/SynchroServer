@@ -161,14 +161,17 @@ $RECYCLE.BIN/
 # RDD - NTVS Analysis (local file)
 .ntvs_analysis.dat
 
+# RDD
+/*/dist/*.tgz
+
 # RDD - Include top-level Synchro modules, but exclude all other node_modules...
 /*/node_modules/*
 !/*/node_modules/synchro-*/
 !/*/node_modules/synchro-*/*
 /*/node_modules/synchro-*/*.tgz
 /*/node_modules/synchro-*/node_modules/
-/*/synchro-apps/node_modules/*
-/*/synchro-apps/**/node_modules/*
+
+/*/synchro-apps/*
 
 # RDD - Sublime editor 
 *.sublime-project

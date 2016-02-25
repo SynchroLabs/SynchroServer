@@ -150,14 +150,21 @@ app.all(synchroApiUrlPrefix + '/:appPath', function(request, response)
 });
 
 // This will serve static resources (primarily intended to support images) from the resource directory of any installed app.
-// This is useful for local dev/test, but you might want to remove it for production if your resources are server from a CDN
-// or other more appropriate solution.
+// This is useful for local dev/test, but you might want to remove it for production if your resources are served from a CDN
+// or other more appropriate solution (which will also require you to set APP_RESOURCE_PREFIX - see docs).
 // 
 app.all(synchroApiUrlPrefix + '/:appPath/resources/:resource', function(request, response) 
 {
-    response.sendfile(__dirname + '/' + config.get('APP_ROOT_PATH') + '/' + request.params.appPath + '/resources/' + request.params.resource);
+    var container = config.get("APPS:" + request.params.appPath + ":container");
+    if (container)
+    {
+        response.sendfile(__dirname + '/' + config.get('APP_ROOT_PATH') + '/' + container + '/resources/' + request.params.resource);
+    }
+    else
+    {
+        res.status(404).send('Not such app at this location to provide resource');
+    }
 });
-
 
 var server = http.createServer(app);
 
@@ -358,4 +365,3 @@ process.on('exit', function ()
 {
     logger.info('Process exit');
 });
- 
