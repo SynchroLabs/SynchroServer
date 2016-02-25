@@ -243,7 +243,25 @@ function loadApiProcessorsAsync(callback)
         });
     }
 
-    async.each(Object.keys(synchroApps), loadApiProcessorAsync, callback);
+    function loadAllProcessors()
+    {
+        async.each(Object.keys(synchroApps), loadApiProcessorAsync, callback);
+    }
+
+    if (config.get('NOFORK'))
+    {
+        loadAllProcessors();
+    }
+    else
+    {
+        // Extra protection for restart case where all forked child processes are not yet shut down (and thus ports are in use)
+        //
+        logger.debug("Waiting 500ms before launching api processors");
+        setTimeout(function()
+        {
+            loadAllProcessors();
+        }, 500);
+    }
 }
 
 function startServerAsync(callback)
@@ -283,6 +301,9 @@ function areAllProcessorsComplete()
     return true;
 }
 
+// Note that if you launch Synchro via "npm start" you may see terminal output after the prompt returns.  For more 
+// info, see: https://github.com/npm/npm/issues/4603
+//
 function * orderlyShutdown()
 {
     // Sometimes Azure does a restart where the forked child processors are not down shutting down when it tries to
@@ -292,16 +313,23 @@ function * orderlyShutdown()
     // shutting down...
     //
     logger.info("Orderly shutdown - checking processors");
-    for (var i = 0; i < 10; i++)
+
+    // Loop is exponential intervals (5 times 2 to the i), so an i value of 11 will yield approximately 10 seconds total.
+    // This should be overkill (on dev machines it completes typically after the first wait or two, approx 10-20ms total).
+    //
+    var interval = 5;
+    for (var i = 0; i < 11; i++)
     {
         if (areAllProcessorsComplete())
         {
             logger.info("All processors complete, terminating process");
             process.exit();
+            return;
         }
         
-        logger.info("Waiting, then checking processors again");
-        yield function (done) { setInterval(done, 500) } // Wait 500ms;
+        logger.info("Waiting %dms, then checking processors again", interval);
+        yield function (done) { setTimeout(done, interval) }
+        interval *= 2;
     }
     
     logger.error("One or more processors did not complete, timed out waiting, terminating process");
@@ -310,7 +338,7 @@ function * orderlyShutdown()
 
 process.on('SIGTERM', function ()
 {
-    console.log('SIGTERM - preparing to exit.');
+    logger.info('SIGTERM - preparing to exit.');
     co(orderlyShutdown).catch(function (err)
     {
         logger.error("Error in SIGTERM shutdown:", err);
@@ -319,7 +347,7 @@ process.on('SIGTERM', function ()
 
 process.on('SIGINT', function ()
 {
-    console.log('SIGINT - preparing to exit.');
+    logger.info('SIGINT - preparing to exit.');
     co(orderlyShutdown).catch(function (err)
     {
         logger.error("Error in SIGINT shutdown:", err);
