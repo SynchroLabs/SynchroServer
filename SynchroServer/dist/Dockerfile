@@ -11,4 +11,5 @@ COPY . /usr/src/app
 # Change this to match your Synchro Server PORT
 EXPOSE 1337 
 
-CMD [ "npm", "start" ]
+# npm start doesn't wait for ordered showdown on exit, so we just launch node directly
+CMD [ "node", "app.js" ]
