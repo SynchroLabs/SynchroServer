@@ -1,6 +1,6 @@
 {
   "name": "synchro-server",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "Synchro Server",
   "homepage": "http://synchro.io/",
   "dependencies": {
