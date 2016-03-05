@@ -4,7 +4,7 @@
 
 ### Update and publish the Synchro modules:
 
-For each of synchro-api, synchro-aws, synchro-azure, and synchro-studio:
+For each of synchro-api and synchro-studio:
 
 * Update version in package.json
 * delete any previous tarball

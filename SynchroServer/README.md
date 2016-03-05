@@ -11,8 +11,6 @@
 navigate to each of the following directories and run "npm install" there also:
 
     node_modules/synchro-api
-    node_modules/synchro-aws
-    node_modules/synchro-azure
     node_modules/synchro-studio
 
     synchro-apps
