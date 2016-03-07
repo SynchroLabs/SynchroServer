@@ -180,3 +180,4 @@ $RECYCLE.BIN/
 /packages/**
 SynchroServer/config_local.json
 SynchroServer/config_azure.json
+SynchroServer/config_bluemix.json
