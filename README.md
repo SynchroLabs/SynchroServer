@@ -2,6 +2,8 @@
 
 ## Install and run server
 
+Test [#40]{SynchroLabs/SynchroServer/issues/40}
+
 Go to the SynchroServer directory under this directory and follow the installation instructions in the README found there.
 
 ## Deploy to Azure Web Service (api.synchro.io)
