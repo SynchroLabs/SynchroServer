@@ -1,4 +1,8 @@
 {
-    "APPS": {
+  "APP_PATH_PREFIX": "/app",
+  "APPS": {
+    "samples": {
+      "container": "SynchroSamples"
     }
+  }
 }

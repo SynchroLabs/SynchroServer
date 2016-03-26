@@ -67,8 +67,36 @@ logger.info("Synchro server loading - " + config.configDetails);
 //
 var synchroApi = require('synchro-api');
 var synchroApiUrlPrefix = config.get("API_PATH_PREFIX");
+var synchroAppUrlPrefix = config.get("APP_PATH_PREFIX");
 
 var apiManager = synchroApi.createApiProcessorManager(config.get('DEBUG_BASE_PORT'), config); 
+
+var synchroWeb = null;
+
+if (synchroAppUrlPrefix)
+{
+    var synchroWebModule = null;
+
+    try 
+    {
+        synchroWebModule = require('synchro-web');
+    }
+    catch (e) 
+    {
+        if (e instanceof Error && e.code === "MODULE_NOT_FOUND")
+            logger.warn("Synchro Web app server module (synchro-web) not installed, no Web Apps will be provided");
+        else
+            throw e;
+    }
+
+    if (synchroWebModule)
+    {
+        // We could just do this in the try above after the require, but we don't want to exception handler to handle
+        // anything except the specific exception of module not found on requiring the web module.
+        //
+        synchroWeb = new synchroWebModule(config, synchroAppUrlPrefix, synchroApiUrlPrefix);
+    }
+}
 
 // Create Synchro studio (unless config indicates not to)
 //
@@ -119,6 +147,12 @@ app.use(express.urlencoded());
 
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
+
+if (synchroWeb)
+{
+    synchroWeb.addMiddleware(app);
+    synchroWeb.addRoutes(app);
+}
 
 if (synchroStudio)
 {
