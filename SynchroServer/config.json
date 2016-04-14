@@ -3,13 +3,6 @@
   "APPS": {
     "samples": {
       "container": "SynchroSamples"
-    },
-    "civics": {
-      "container": "SynchroCivics",
-      "GOOGLE_CIVICS_KEY": "AIzaSyB_ESzKtxOVt3tHF-5QO9jknVLpWuuvLJw"
-    },
-    "propx": {
-      "container": "SynchroPropX"
     }
   }
 }
