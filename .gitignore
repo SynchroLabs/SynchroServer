@@ -186,6 +186,3 @@ $RECYCLE.BIN/
 SynchroServer/config_local.json
 SynchroServer/config_azure.json
 SynchroServer/config_bluemix.json
-
-# Built by browserify
-SynchroServer/node_modules/synchro-web/public/script/bundle.js
