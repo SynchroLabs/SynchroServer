@@ -124,7 +124,7 @@ if (!config.get("NOSTUDIO"))
         // anything except the specific exception of module not found on requiring the studio module.
         //
         var synchroStudioUrlPrefix = config.get("STUDIO_PATH_PREFIX");
-        synchroStudio = new synchroStudioModule(config, synchroStudioUrlPrefix, apiManager);
+        synchroStudio = new synchroStudioModule(config, synchroStudioUrlPrefix, apiManager, synchroAppUrlPrefix);
     }
 }
 
