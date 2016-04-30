@@ -5,6 +5,7 @@ var async = require('async');
 var semver = require('semver');
 var log4js = require('log4js');
 var co = require('co');
+var cors = require('cors');
 
 var synchroConfig = require('synchro-api/synchro-config');
 
@@ -131,6 +132,8 @@ if (!config.get("NOSTUDIO"))
 // Now let's set up the web / api servers...
 //
 var app = express();
+
+app.use(cors());
 
 var MemoryStore = express.session.MemoryStore;
 var sessionStore = new MemoryStore();
