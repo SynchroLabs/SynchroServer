@@ -12,8 +12,9 @@
     "log4js": "^0.6.21",
     "nconf": "^0.7.1",
     "semver": "^5.0.3",
-    "synchro-api": "",
-    "synchro-studio": ""
+    "synchro-api": "*",
+    "synchro-studio": "*",
+    "synchro-web": "*"
   },
   "private": true,
   "scripts": {
