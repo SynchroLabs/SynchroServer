@@ -23,6 +23,7 @@
     "test-api": "mocha node_modules/synchro-api/test"
   },
   "devDependencies": {
+    "browserify": "^13.0.0",
     "co-mocha": "^1.1.2",
     "mocha": "^2.3.4"
   },
