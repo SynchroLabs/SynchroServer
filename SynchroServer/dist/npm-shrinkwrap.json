@@ -1,6 +1,6 @@
 {
   "name": "synchro-server",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "dependencies": {
     "abbrev": {
       "version": "1.0.7",
@@ -1739,19 +1739,19 @@
       "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-2.0.0.tgz"
     },
     "synchro-api": {
-      "version": "1.3.5",
-      "from": "http://[host]/dist/[token]/synchro-api-1.3.5.tgz",
-      "resolved": "http://[host]/dist/[token]/synchro-api-1.3.5.tgz"
+      "version": "1.3.6",
+      "from": "http://[host]/dist/[token]/synchro-api-1.3.6.tgz",
+      "resolved": "http://[host]/dist/[token]/synchro-api-1.3.6.tgz"
     },
     "synchro-studio": {
-      "version": "1.3.5",
-      "from": "http://[host]/dist/[token]/synchro-studio-1.3.5.tgz",
-      "resolved": "http://[host]/dist/[token]/synchro-studio-1.3.5.tgz"
+      "version": "1.3.6",
+      "from": "http://[host]/dist/[token]/synchro-studio-1.3.6.tgz",
+      "resolved": "http://[host]/dist/[token]/synchro-studio-1.3.6.tgz"
     },
     "synchro-web": {
-      "version": "1.3.5",
-      "from": "http://[host]/dist/[token]/synchro-web-1.3.5.tgz",
-      "resolved": "http://[host]/dist/[token]/synchro-web-1.3.5.tgz",
+      "version": "1.3.6",
+      "from": "http://[host]/dist/[token]/synchro-web-1.3.6.tgz",
+      "resolved": "http://[host]/dist/[token]/synchro-web-1.3.6.tgz",
       "dependencies": {
         "extend": {
           "version": "3.0.0",
