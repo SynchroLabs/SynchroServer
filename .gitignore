@@ -8,7 +8,7 @@
 # example, the .DS_Store exclude stopped working until I moved these up here).
 #
 SynchroServer/node_modules/*
-!SynchroServer/node_modules/synchro-*/*
+!SynchroServer/node_modules/synchro-*
 SynchroServer/node_modules/synchro-*/*.tgz
 SynchroServer/node_modules/synchro-*/node_modules/
 
