@@ -46,11 +46,13 @@
     <Compile Include="node_modules\synchro-api\lib\api-request-processor.js" />
     <Compile Include="node_modules\synchro-api\lib\api.js" />
     <Compile Include="node_modules\synchro-api\lib\app-services.js" />
+    <Compile Include="node_modules\synchro-api\lib\co-helper.js" />
     <Compile Include="node_modules\synchro-api\lib\file-module-store.js" />
     <Compile Include="node_modules\synchro-api\lib\file-session-store.js" />
     <Compile Include="node_modules\synchro-api\lib\filter.js" />
     <Compile Include="node_modules\synchro-api\lib\module-manager.js" />
     <Compile Include="node_modules\synchro-api\lib\objectmon.js" />
+    <Compile Include="node_modules\synchro-api\lib\pkgcloud-module-store.js" />
     <Compile Include="node_modules\synchro-api\lib\reader-writer.js" />
     <Compile Include="node_modules\synchro-api\lib\redis-session-store.js" />
     <Compile Include="node_modules\synchro-api\lib\resource-resolver.js" />
@@ -64,6 +66,7 @@
     <Compile Include="node_modules\synchro-api\test\module-manager-test.js" />
     <Compile Include="node_modules\synchro-api\test\module-test.js" />
     <Compile Include="node_modules\synchro-api\test\objectmon-test.js" />
+    <Compile Include="node_modules\synchro-api\test\pkgcloud-test.js" />
     <Compile Include="node_modules\synchro-api\test\reader-writer-test.js" />
     <Compile Include="node_modules\synchro-api\test\synchro-config-test.js" />
     <Compile Include="node_modules\synchro-api\test\test.js" />
@@ -359,7 +362,6 @@
     <Compile Include="node_modules\synchro-web\client\controls\web-control-wrapper.js" />
     <Compile Include="node_modules\synchro-web\client\controls\web-edit-wrapper.js" />
     <Compile Include="node_modules\synchro-web\client\controls\web-gridview-wrapper.js" />
-    <Compile Include="node_modules\synchro-web\client\controls\web-image-toggle-wrapper.js" />
     <Compile Include="node_modules\synchro-web\client\controls\web-image-wrapper.js" />
     <Compile Include="node_modules\synchro-web\client\controls\web-listbox-wrapper.js" />
     <Compile Include="node_modules\synchro-web\client\controls\web-listview-wrapper.js" />
@@ -371,6 +373,7 @@
     <Compile Include="node_modules\synchro-web\client\controls\web-slider-wrapper.js" />
     <Compile Include="node_modules\synchro-web\client\controls\web-stack-panel-wrapper.js" />
     <Compile Include="node_modules\synchro-web\client\controls\web-text-wrapper.js" />
+    <Compile Include="node_modules\synchro-web\client\controls\web-toggle-button-wrapper.js" />
     <Compile Include="node_modules\synchro-web\client\controls\web-toggle-wrapper.js" />
     <Compile Include="node_modules\synchro-web\client\controls\web-webview-wrapper.js" />
     <Compile Include="node_modules\synchro-web\client\controls\web-wrap-panel-wrapper.js" />
@@ -379,6 +382,7 @@
     <Compile Include="node_modules\synchro-web\client\core\command-instance.js" />
     <Compile Include="node_modules\synchro-web\client\core\control-wrapper.js" />
     <Compile Include="node_modules\synchro-web\client\core\device-metrics.js" />
+    <Compile Include="node_modules\synchro-web\client\core\glyph-mapper.js" />
     <Compile Include="node_modules\synchro-web\client\core\json.js" />
     <Compile Include="node_modules\synchro-web\client\core\page-view.js" />
     <Compile Include="node_modules\synchro-web\client\core\state-manager.js" />
@@ -421,6 +425,7 @@
     <Content Include="node_modules\synchro-api\test\testapp\package.json" />
     <Content Include="node_modules\synchro-api\test\testconfig\altconfig.json" />
     <Content Include="node_modules\synchro-api\test\testconfig\config.json" />
+    <Content Include="node_modules\synchro-studio\LICENSE.txt" />
     <Content Include="node_modules\synchro-studio\package.json" />
     <Content Include="node_modules\synchro-studio\public\images\cloud_system_256.png" />
     <Content Include="node_modules\synchro-studio\public\stylesheets\style.css" />
