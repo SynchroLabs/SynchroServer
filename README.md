@@ -1,23 +1,18 @@
 # Synchro
 
-## Install and run server
+This project, Synchro Server, is supported by Synchro Labs, Inc.  For more information, see https://synchro.io
 
-Go to the SynchroServer directory under this directory and follow the installation instructions in the README found there.
+## Synchro App Development
 
-## Deploy to Azure Web Service (api.synchro.io)
+If you want to install Synchro Server in order to build and deploy Synchro apps, you should use the Synchro Command Line Interface.
 
-1) Update the Synchro app code in synchro-apps (Samples, Civics, etc) on the Azure blob store, as appropriate
+    $npm install -g synchro
+    synchro init
 
-2) Copy config_azure.json (not checked in) over config.json
+For details on the Synchro CLI: https://www.npmjs.com/package/synchro
 
-3) Publish SynchroServer project using VS
+For step-by-step instructions: https://synchro.io/getstarted
 
-## Installation Notes
+## Synchro Server Core Development
 
-There can be long path issues in Azure packaging and publishing.  To avoid these:
-
-1) Project should be in as shallow a directory as possible (C:\Dev\SynchroServer)
-
-2) TEMP and TMP environment vars should both point to a shallow directory (C:\Temp)
-
-3) ServiceOutputDirectory should be something short (C:\Azure\) - see: http://govada.blogspot.com/2011/12/windows-azure-package-build-error.html
+If you want to modify the Synchro Server platform itself, go to the SynchroServer directory under this directory and follow the installation instructions in the README found there.
