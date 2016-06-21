@@ -15,6 +15,13 @@ SynchroServer/node_modules/synchro-*/node_modules/
 # RDD - Exclude local Synchro apps
 /*/synchro-apps/*
 
+# RDD - VS / Azure files
+.vs/*
+*.sln
+*.njsproj
+*.config
+*.pubxml
+
 # User-specific files
 *.suo
 *.user
