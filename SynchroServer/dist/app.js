@@ -241,22 +241,32 @@ function loadApiProcessorsAsync(callback)
 
         var appModuleStore = yield apiManager.getAppModuleStoreAwaitable(synchroAppPath, synchroApp.container, moduleStoreSpec);
         var appDefinition = yield appModuleStore.getAppDefinitionAwaitable();
-        if (appDefinition.engines && appDefinition.engines.synchro)
+        if (appDefinition)
         {
-            // A Synchro engine version spec exists in the app being loaded, let's check it against the API version...
-            //
-            if (!semver.satisfies(apiPkg.version, appDefinition.engines.synchro))
+            if (appDefinition.engines && appDefinition.engines.synchro)
             {
-                // For now we're just going to log an error message for the app in question, but we will continue to load
-                // other apps and start the server.
+                // A Synchro engine version spec exists in the app being loaded, let's check it against the API version...
                 //
-                logger.error("App being loaded: \"" + appDefinition.name + "\" at path: \"" + synchroAppPath + "\"" +
-                    " specified a synchro engine version requirement that was not met by the Synchro API on this server." +
-                    " Synchro API version: \"" + apiPkg.version + "\", required version: \"" + appDefinition.engines.synchro + "\"");
+                if (!semver.satisfies(apiPkg.version, appDefinition.engines.synchro))
+                {
+                    // For now we're just going to log an error message for the app in question, but we will continue to load
+                    // other apps and start the server.
+                    //
+                    logger.error("App being loaded: \"" + appDefinition.name + "\" at path: \"" + synchroAppPath + "\"" +
+                        " specified a synchro engine version requirement that was not met by the Synchro API on this server." +
+                        " Synchro API version: \"" + apiPkg.version + "\", required version: \"" + appDefinition.engines.synchro + "\"");
 
-                callback(null); // Could throw the above messages as an error by passing it as first param to callback, if desired
-                return;
+                    callback(null); // Could throw the above messages as an error by passing it as first param to callback, if desired
+                    return;
+                }
             }
+        }
+        else
+        {
+            // No appDefinition provided by module store
+            logger.error("No app definition found for app at path: %s, app not loaded", synchroAppPath);
+            callback(null); // Could throw the above messages as an error by passing it as first param to callback, if desired
+            return;
         }
         
         var bFork = true;   // Run API processor forked
@@ -283,7 +293,9 @@ function loadApiProcessorsAsync(callback)
     {
         co(loadApiProcessorAsyncAwaitable, synchroAppPath, callback).catch(function(err)
         {
-            logger.error("Error loading async processor:", err); 
+            logger.error("Error loading async processor:", err);
+            // !!! This should kill app start, but does not (err never seems to get out of here)
+            throw(err);
         });
     }
 
