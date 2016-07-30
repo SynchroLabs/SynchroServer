@@ -1,5 +1,7 @@
 var express = require('express');
 var http = require('http');
+var https = require('https');
+var fs = require('fs');
 var path = require('path');
 var async = require('async');
 var semver = require('semver');
@@ -254,7 +256,51 @@ app.all(synchroApiUrlPrefix + '/:appPath/resources/:resource', function(request,
     }
 });
 
-var server = http.createServer(app);
+// SSL support
+//
+// For raw key/cert, use SSL_KEY and SSL_CERT.  To refer to key and/or cert files, use SSL_KEY_PATH and SSL_CERT_PATH.
+//
+// Note: It will generally be the case that SSL is terminated upstream from the Synchro Server.  When an upstream proxy terminates SSL, it
+//       should add an "x-arr-ssl" header to the request to indicate to Synchro Server that the connection was secure (arr is for Application
+//       Request Routing).  The upstream proxy that terminates SSL should also either deny non-SSL requests or ensure that the "x-arr-ssl" 
+//       request header is not present on non-SSL requests.  Microsoft Azure terminates SSL and adds this header automatically.
+//
+// Note: Synchro Server will serve HTTP *OR* HTTPS, but not both.  This is by design.  HTTP should only be used for local development, or
+//       in production when SSL is terminated upstream.  There is no use case where serving both HTTP and HTTPS would be appropriate.
+//
+var key = config.get("SSL_KEY");
+var cert = config.get("SSL_CERT");
+
+if (!key)
+{
+    var keyPath = config.get("SSL_KEY_PATH");
+    if (keyPath)
+    {
+        key = fs.readFileSync(keyPath);
+    }
+}
+
+if (!cert)
+{
+    var certPath = config.get("SSL_CERT_PATH");
+    if (certPath)
+    {
+        cert = fs.readFileSync(certPath);
+    }
+}
+
+var server;
+
+if (key && cert)
+{
+    logger.info("Synchro Server is using SSL");
+    server = https.createServer({key: key, cert: cert}, app);
+}
+else
+{
+    logger.info("Synchro Server is not using SSL - if this is a production server, SSL should be used (but may be terminated upstream)");
+    server = http.createServer(app);
+}
 
 if (synchroStudio)
 {
