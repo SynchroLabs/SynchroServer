@@ -193,3 +193,4 @@ $RECYCLE.BIN/
 SynchroServer/config_local.json
 SynchroServer/config_azure.json
 SynchroServer/config_bluemix.json
+SynchroServer/config_joyent.json

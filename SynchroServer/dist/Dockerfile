@@ -24,6 +24,10 @@ WORKDIR /usr/src/app
 # Bundle app source
 COPY . /usr/src/app
 
+# Install deps (/node_modules not copied above due to setting in .dockerignore)
+RUN npm install
+RUN cd synchro-apps && npm install
+
 # Expose the SYNCHRO_PORT set above
 EXPOSE $SYNCHRO__PORT 
 

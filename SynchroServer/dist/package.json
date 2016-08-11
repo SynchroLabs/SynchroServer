@@ -1,6 +1,6 @@
 {
   "name": "synchro-server",
-  "version": "1.4.4",
+  "version": "1.5.0",
   "description": "Synchro Server",
   "homepage": "http://synchro.io/",
   "license" : "MIT",
@@ -13,9 +13,9 @@
     "log4js": "^0.6.21",
     "nconf": "^0.7.1",
     "semver": "^5.0.3",
-    "synchro-api": "^1.4.4",
-    "synchro-studio": "^1.4.4",
-    "synchro-web": "^1.4.4"
+    "synchro-api": "^1.5.0",
+    "synchro-studio": "^1.5.0",
+    "synchro-web": "^1.5.0"
   },
   "private": true,
   "scripts": {

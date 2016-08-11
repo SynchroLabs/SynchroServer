@@ -151,7 +151,7 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 app.use(app.router);
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { maxAge: config.get('STATIC_CACHE_MAXAGE') }));
 
 if (synchroWeb)
 {
@@ -181,7 +181,7 @@ else
     });
 }
 
-app.get('/health', function(request, response)
+app.get(config.get('HEALTH_CHECK_PATH'), function(request, response)
 {
     co(function * ()
     {
@@ -240,15 +240,39 @@ app.all(synchroApiUrlPrefix + '/:appPath', function(request, response)
 });
 
 // This will serve static resources (primarily intended to support images) from the resource directory of any installed app.
-// This is useful for local dev/test, but you might want to remove it for production if your resources are served from a CDN
-// or other more appropriate solution (which will also require you to set APP_RESOURCE_PREFIX - see docs).
-// 
+// This is useful for local dev/test, but in production you will often use a CDN (via a system-wdie or app-specific
+// APP_RESOURCE_PREFIX).  In that case, this handler will never get called, so it's not really hurting anything.
+//
 app.all(synchroApiUrlPrefix + '/:appPath/resources/:resource', function(request, response) 
 {
     var container = config.get("APPS:" + request.params.appPath + ":container");
     if (container)
     {
-        response.sendfile(__dirname + '/' + config.get('APP_ROOT_PATH') + '/' + container + '/resources/' + request.params.resource);
+        var moduleStore = synchroApi.createModuleStore(config);
+        if (moduleStore.localFileStore)
+        {
+            logger.debug("Getting resource from file store...");
+            response.sendfile(__dirname + '/' + config.get('APP_ROOT_PATH') + '/' + container + '/resources/' + request.params.resource, { maxAge: config.get('STATIC_CACHE_MAXAGE') });
+        }
+        else
+        {
+            logger.debug("Getting resource from module store...");
+            co(function * ()
+            {
+                var appModuleStore = yield moduleStore.getAppModuleStoreAwaitable(container);
+                var content = yield appModuleStore.getModuleSourceAwaitable('resources/' + request.params.resource);
+
+                if (!response.getHeader('Cache-Control'))
+                {
+                    response.setHeader('Cache-Control', 'public, max-age=' + (config.get('STATIC_CACHE_MAXAGE') / 1000));
+                } 
+                response.end(content, 'binary');
+
+            }).catch(function(err)
+            {
+                logger.error("Error getting resource:", err);
+            });
+        }
     }
     else
     {
@@ -615,7 +639,6 @@ function * stopRunningProcessors(exitCode)
         // Stop and remove processor (note that aren't waiting around for it to shut down)
         //
         apiProcessors[apiProcessorPath].shutdown();
-        delete apiProcessors[apiProcessorPath];
     }
 
     yield orderlyShutdown(exitCode);
@@ -664,16 +687,26 @@ process.on('SIGHUP', function ()
 process.on('SIGTERM', function ()
 {
     logger.info('SIGTERM - preparing to exit.');
-    co(orderlyShutdown).catch(function (err)
+
+    co(function * ()
+    {
+        yield stopRunningProcessors(); // A param here will be propogated to process.exit() as the exit code (future?)
+
+    }).catch(function(err)
     {
         logger.error("Error in SIGTERM shutdown:", err);
     });
-});  
+});
 
 process.on('SIGINT', function ()
 {
     logger.info('SIGINT - preparing to exit.');
-    co(orderlyShutdown).catch(function (err)
+
+    co(function * ()
+    {
+        yield stopRunningProcessors(); // A param here will be propogated to process.exit() as the exit code (future?)
+
+    }).catch(function(err)
     {
         logger.error("Error in SIGINT shutdown:", err);
     });

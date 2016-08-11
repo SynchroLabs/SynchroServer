@@ -1,5 +1,7 @@
 var express = require('express');
 var http = require('http');
+var https = require('https');
+var fs = require('fs');
 var path = require('path');
 var async = require('async');
 var semver = require('semver');
@@ -149,7 +151,7 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 app.use(app.router);
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { maxAge: config.get('STATIC_CACHE_MAXAGE') }));
 
 if (synchroWeb)
 {
@@ -168,7 +170,7 @@ if (synchroStudio)
     else
     {
         // Use built-in auth...
-        synchroStudio.addRoutes(app, config);        
+        synchroStudio.addRoutes(app, config);
     }
 }
 else
@@ -179,6 +181,57 @@ else
     });
 }
 
+app.get(config.get('HEALTH_CHECK_PATH'), function(request, response)
+{
+    co(function * ()
+    {
+        var health = { 'healthy': true };
+
+        // Check each child processor for health...
+        //
+        var apiProcessors = apiManager.getApiProcessors();
+        var apiProcessorPaths = Object.keys(apiProcessors);
+        for (var i = 0; i < apiProcessorPaths.length; i++)
+        {
+            var apiProcessorPath = apiProcessorPaths[i];
+            var apiProcessor = apiProcessors[apiProcessorPath];
+
+            logger.debug("Checking health of processor for app at path: '%s'", apiProcessorPath);
+
+            try
+            {
+                var processorHealth = yield apiProcessor.healthCheck();
+                if (!processorHealth)
+                {
+                    health.healthy = false;
+                }
+                health[apiProcessorPath] = { 'health': processorHealth };
+            }
+            catch (err)
+            {
+                health.healthy = false;
+                health[apiProcessorPath] = { 'health': false, 'reason': 'error', 'message': err.message };
+            }
+        }
+
+        if (health.healthy)
+        {
+            response.send(health);
+        }
+        else
+        {
+            response.status(500).send(health);
+        }
+
+    }).catch(function(err)
+    {
+        // Very unlikely we'd ever hit this - would have to be a logical/code error in the reqest processing above
+        //
+        logger.error("Error checking health:", err);
+        response.status(500).send({ 'healthy': false, 'error': 'Error checking health', 'message': err.message});
+    });
+});
+
 // Let the API processor handle requests to /api 
 //
 app.all(synchroApiUrlPrefix + '/:appPath', function(request, response) 
@@ -187,15 +240,39 @@ app.all(synchroApiUrlPrefix + '/:appPath', function(request, response)
 });
 
 // This will serve static resources (primarily intended to support images) from the resource directory of any installed app.
-// This is useful for local dev/test, but you might want to remove it for production if your resources are served from a CDN
-// or other more appropriate solution (which will also require you to set APP_RESOURCE_PREFIX - see docs).
-// 
+// This is useful for local dev/test, but in production you will often use a CDN (via a system-wdie or app-specific
+// APP_RESOURCE_PREFIX).  In that case, this handler will never get called, so it's not really hurting anything.
+//
 app.all(synchroApiUrlPrefix + '/:appPath/resources/:resource', function(request, response) 
 {
     var container = config.get("APPS:" + request.params.appPath + ":container");
     if (container)
     {
-        response.sendfile(__dirname + '/' + config.get('APP_ROOT_PATH') + '/' + container + '/resources/' + request.params.resource);
+        var moduleStore = synchroApi.createModuleStore(config);
+        if (moduleStore.localFileStore)
+        {
+            logger.debug("Getting resource from file store...");
+            response.sendfile(__dirname + '/' + config.get('APP_ROOT_PATH') + '/' + container + '/resources/' + request.params.resource, { maxAge: config.get('STATIC_CACHE_MAXAGE') });
+        }
+        else
+        {
+            logger.debug("Getting resource from module store...");
+            co(function * ()
+            {
+                var appModuleStore = yield moduleStore.getAppModuleStoreAwaitable(container);
+                var content = yield appModuleStore.getModuleSourceAwaitable('resources/' + request.params.resource);
+
+                if (!response.getHeader('Cache-Control'))
+                {
+                    response.setHeader('Cache-Control', 'public, max-age=' + (config.get('STATIC_CACHE_MAXAGE') / 1000));
+                } 
+                response.end(content, 'binary');
+
+            }).catch(function(err)
+            {
+                logger.error("Error getting resource:", err);
+            });
+        }
     }
     else
     {
@@ -203,7 +280,51 @@ app.all(synchroApiUrlPrefix + '/:appPath/resources/:resource', function(request,
     }
 });
 
-var server = http.createServer(app);
+// SSL support
+//
+// For raw key/cert, use SSL_KEY and SSL_CERT.  To refer to key and/or cert files, use SSL_KEY_PATH and SSL_CERT_PATH.
+//
+// Note: It will generally be the case that SSL is terminated upstream from the Synchro Server.  When an upstream proxy terminates SSL, it
+//       should add an "x-arr-ssl" header to the request to indicate to Synchro Server that the connection was secure (arr is for Application
+//       Request Routing).  The upstream proxy that terminates SSL should also either deny non-SSL requests or ensure that the "x-arr-ssl" 
+//       request header is not present on non-SSL requests.  Microsoft Azure terminates SSL and adds this header automatically.
+//
+// Note: Synchro Server will serve HTTP *OR* HTTPS, but not both.  This is by design.  HTTP should only be used for local development, or
+//       in production when SSL is terminated upstream.  There is no use case where serving both HTTP and HTTPS would be appropriate.
+//
+var key = config.get("SSL_KEY");
+var cert = config.get("SSL_CERT");
+
+if (!key)
+{
+    var keyPath = config.get("SSL_KEY_PATH");
+    if (keyPath)
+    {
+        key = fs.readFileSync(keyPath);
+    }
+}
+
+if (!cert)
+{
+    var certPath = config.get("SSL_CERT_PATH");
+    if (certPath)
+    {
+        cert = fs.readFileSync(certPath);
+    }
+}
+
+var server;
+
+if (key && cert)
+{
+    logger.info("Synchro Server is using SSL");
+    server = https.createServer({key: key, cert: cert}, app);
+}
+else
+{
+    logger.info("Synchro Server is not using SSL - if this is a production server, SSL should be used (but may be terminated upstream)");
+    server = http.createServer(app);
+}
 
 if (synchroStudio)
 {
@@ -212,111 +333,153 @@ if (synchroStudio)
     synchroStudio.onServerCreated(server);
 }
 
-// Here is all the asynchronous startup stuff...
-//
-function loadApiProcessorsAsync(callback)
+function * initSynchroAppsConfig(moduleStore)
 {
-    var synchroApps = config.get('APPS');
-    if (!synchroApps || Object.keys(synchroApps).length == 0)
+    // Load the APPS config from either config.json (local) or from the module store...
+    //
+    // We're just going to look in the APPS key of the config.json store (to see if there is dictionary of apps, or a
+    // string indicating a module store file to use).  We look in this store specifically so as not to pick up any
+    // apps state that may have gotten into the config via environment variables.
+    //
+    var config_json = config.stores["config.json"].store;
+    var synchroAppsConfig = config_json['APPS'];
+
+    if (typeof synchroAppsConfig === 'object')
     {
-        logger.error("No Synchro apps defined (via the \"APPS\" key in config) - no apps will be started");
-        callback();
-        return;
+        logger.info("Apps defined in config.json");
+        return false; // Apps config from config.json
     }
-
-    function * loadApiProcessorAsyncAwaitable(synchroAppPath, callback)
+    else
     {
-        var synchroApp = synchroApps[synchroAppPath];
-
-        // We're going to load the module store (in proc) for the API processor that we're about to create so that
-        // we can get the app definition and check version requirements before we create the API processor (which 
-        // creation is async and might involve spawning a new process).
+        // Apps config (if any) is in a module store file
         //
-        var moduleStoreSpec = 
+        // We put apps config in a specially named store representing the module file (so we can replace it on reload as needed).
+        //
+        var moduleStoreAppsStore = config.stores["module_store_apps"];
+        moduleStoreAppsStore.reset();
+
+        var moduleStoreAppFile = 'apps.json'; // default module store file
+        if (typeof synchroAppsConfig === 'string')
         {
-            packageRequirePath: config.get('MODULESTORE_PACKAGE'),
-            serviceName: config.get('MODULESTORE_SERVICE'),
-            serviceConfiguration: config.get('MODULESTORE')
+            moduleStoreAppFile = synchroAppsConfig; // explicit module store file
         }
 
-        var appModuleStore = yield apiManager.getAppModuleStoreAwaitable(synchroAppPath, synchroApp.container, moduleStoreSpec);
-        var appDefinition = yield appModuleStore.getAppDefinitionAwaitable();
-        if (appDefinition)
+        var moduleStoreAppConfig = yield moduleStore.getStoreFileAwaitable(moduleStoreAppFile);
+        if (moduleStoreAppConfig)
         {
-            if (appDefinition.engines && appDefinition.engines.synchro)
-            {
-                // A Synchro engine version spec exists in the app being loaded, let's check it against the API version...
-                //
-                if (!semver.satisfies(apiPkg.version, appDefinition.engines.synchro))
-                {
-                    // For now we're just going to log an error message for the app in question, but we will continue to load
-                    // other apps and start the server.
-                    //
-                    logger.error("App being loaded: \"" + appDefinition.name + "\" at path: \"" + synchroAppPath + "\"" +
-                        " specified a synchro engine version requirement that was not met by the Synchro API on this server." +
-                        " Synchro API version: \"" + apiPkg.version + "\", required version: \"" + appDefinition.engines.synchro + "\"");
+            logger.info("Loading module store APPS config from module store:", moduleStoreAppFile);
+            var moduleStoreApps = JSON.parse(moduleStoreAppConfig);
 
-                    callback(null); // Could throw the above messages as an error by passing it as first param to callback, if desired
-                    return;
-                }
-            }
+            moduleStoreAppsStore.store['APPS'] = moduleStoreApps;
         }
         else
         {
-            // No appDefinition provided by module store
-            logger.error("No app definition found for app at path: %s, app not loaded", synchroAppPath);
-            callback(null); // Could throw the above messages as an error by passing it as first param to callback, if desired
-            return;
+            logger.error("No APPS config found in module store at:", moduleStoreAppFile);
         }
-        
-        var bFork = true;   // Run API processor forked
-        var bDebug = (synchroStudio != null) && bFork;  // Enable debugging of API processor (only valid if running forked and studio present)
 
-        if (config.get('NOFORK'))
+        return true; // Apps config loaded/reloaded from module store file
+    }
+}
+
+// Here is all the asynchronous startup stuff...
+//
+function * loadApiProcessorAwaitable(moduleStore, synchroAppPath, synchroApp)
+{
+    // We're going to load the module store (in proc) for the API processor that we're about to create so that
+    // we can get the app definition and check version requirements before we create the API processor (which 
+    // creation is async and might involve spawning a new process).
+    //
+    var appModuleStore = yield moduleStore.getAppModuleStoreAwaitable(synchroApp.container);
+    var appDefinition = yield appModuleStore.getAppDefinitionAwaitable();
+    if (appDefinition)
+    {
+        if (appDefinition.engines && appDefinition.engines.synchro)
         {
-            // This situation is typically for when you want to run this "app" itself under a local debugger, and
-            // you want to be able to debug the api processor and actual Synchro module code also.
+            // A Synchro engine version spec exists in the app being loaded, let's check it against the API version...
             //
-            bFork = false;  // Run API processor in-proc
-            bDebug = false; // Debugging of API processor not available in-proc, so don't even ask ;)
+            if (!semver.satisfies(apiPkg.version, appDefinition.engines.synchro))
+            {
+                // For now we're just going to log an error message for the app in question, but we will continue to load
+                // other apps and start the server.
+                //
+                logger.error("App being loaded: \"" + appDefinition.name + "\" at path: \"" + synchroAppPath + "\"" +
+                    " specified a synchro engine version requirement that was not met by the Synchro API on this server." +
+                    " Synchro API version: \"" + apiPkg.version + "\", required version: \"" + appDefinition.engines.synchro + "\"");
+                return;
+            }
         }
-
-        if (bDebug && semver.satisfies(process.version, ">= 5.0.0 <5.4.0"))
-        {
-            logger.warn("Versions of Node.js from 5.0.0 and up to, but not including, 5.4.0, are not stable in debug mode. Please upgrade to at least 5.4.0.");
-        }
-
-        apiManager.createApiProcessorAsync(synchroAppPath, bFork, bDebug, callback);
+    }
+    else
+    {
+        // No appDefinition provided by module store
+        logger.error("No app definition found for app at path: %s, app not loaded", synchroAppPath);
+        return;
     }
     
-    function loadApiProcessorAsync(synchroAppPath, callback)
+    var bFork = true;   // Run API processor forked
+    var bDebug = (synchroStudio != null) && bFork;  // Enable debugging of API processor (only valid if running forked and studio present)
+
+    if (config.get('NOFORK'))
     {
-        co(loadApiProcessorAsyncAwaitable, synchroAppPath, callback).catch(function(err)
-        {
-            logger.error("Error loading async processor:", err);
-            // !!! This should kill app start, but does not (err never seems to get out of here)
-            throw(err);
-        });
+        // This situation is typically for when you want to run this "app" itself under a local debugger, and
+        // you want to be able to debug the api processor and actual Synchro module code also.
+        //
+        bFork = false;  // Run API processor in-proc
+        bDebug = false; // Debugging of API processor not available in-proc, so don't even ask ;)
     }
 
-    function loadAllProcessors()
+    if (bDebug && semver.satisfies(process.version, ">= 5.0.0 <5.4.0"))
     {
-        async.each(Object.keys(synchroApps), loadApiProcessorAsync, callback);
+        logger.warn("Versions of Node.js from 5.0.0 and up to, but not including, 5.4.0, are not stable in debug mode. Please upgrade to at least 5.4.0.");
+    }
+
+    return yield apiManager.createApiProcessorAwaitable(synchroAppPath, bFork, bDebug);
+}
+
+function * loadApiProcessorsAwaitable()
+{
+    var moduleStore = synchroApi.createModuleStore(config);
+
+    yield initSynchroAppsConfig(moduleStore);
+
+    var synchroApps = config.get('APPS');
+    if (!synchroApps || Object.keys(synchroApps).length == 0)
+    {
+        logger.error("No Synchro apps defined - no apps will be started");
+        return;
+    }
+
+    // Dump apps to verify config - this includes apps from file config (local or module store) as well as from env vars.
+    // 
+    var synchroAppPaths = Object.keys(synchroApps);
+    for (var i = 0; i < synchroAppPaths.length; i++)
+    {
+        logger.debug("Found app at path: %s, container: %s", synchroAppPaths[i], synchroApps[synchroAppPaths[i]].container);
+    }
+
+    
+    function * loadAllProcessorsAwaitable()
+    {
+        var synchroAppPaths = Object.keys(synchroApps);
+        for (var i = 0; i < synchroAppPaths.length; i++)
+        {
+            var synchroAppPath = synchroAppPaths[i];
+            var synchroApp = synchroApps[synchroAppPath];
+            yield loadApiProcessorAwaitable(moduleStore, synchroAppPath, synchroApp);
+        }
     }
 
     if (config.get('NOFORK'))
     {
-        loadAllProcessors();
+        yield loadAllProcessorsAwaitable();
     }
     else
     {
         // Extra protection for restart case where all forked child processes are not yet shut down (and thus ports are in use)
         //
         logger.debug("Waiting 500ms before launching api processors");
-        setTimeout(function()
-        {
-            loadAllProcessors();
-        }, 500);
+        yield function(done){setTimeout(done, 500)};
+        yield loadAllProcessorsAwaitable();
     }
 }
 
@@ -329,20 +492,89 @@ function startServerAsync(callback)
     });
 }
 
-async.series([loadApiProcessorsAsync, startServerAsync], function(err)
+// Make the running set of apps match the configured set of apps (start and stop app processors as required), and reload any 
+// still-running app processors.
+//
+function * reloadProcessors()
 {
-    if (err)
+    // Note: We are only supporting the case where the APPS configuration can be changed at runtime (and reloaded while
+    //       running) if it is specificed in a module store file.
+    //
+    //       Supporting APPS changes from config.json or environment vars is problematic for a number of reasons, not
+    //       least of which is that we wouldn't support any other configuration changes from those sources (service 
+    //       definitions, PORT, etc).
+    //
+    var moduleStore = synchroApi.createModuleStore(config);
+
+    if (yield initSynchroAppsConfig(moduleStore))
     {
-        // !!! This gets called if an individual app throws an exception on load, but other apps will load and the server
-        //     will still start.  Investigate whether we really want to bail on startup here, and if so, how to do that.
+        // APPS definition in module store may have changed
         //
-        logger.error("Failed to start: " + err);
+        var synchroApps = config.get('APPS');
+
+        // Make a shallow copy of the configured apps list (so we can remove apps from it as we process them below).
+        //
+        var configuredAppsBeingProcessed = {};
+        var synchroAppPaths = Object.keys(synchroApps);
+        for (var i = 0; i < synchroAppPaths.length; i++)
+        {
+            logger.debug("Found configured app at path: %s, container: %s", synchroAppPaths[i], synchroApps[synchroAppPaths[i]].container);
+            configuredAppsBeingProcessed[synchroAppPaths[i]] = synchroApps[synchroAppPaths[i]]; 
+        }
+
+        // Go through running apps list and process against configured-apps-being-processed list.  
+        //
+        var apiProcessors = apiManager.getApiProcessors();
+        var apiProcessorPaths = Object.keys(apiProcessors);
+        for (var i = 0; i < apiProcessorPaths.length; i++)
+        {
+            var apiProcessorPath = apiProcessorPaths[i];
+
+            if (configuredAppsBeingProcessed[apiProcessorPath])
+            {
+                logger.info("App at path: '%s' in new configuration is already running - reloading processor", apiProcessorPath);
+
+                // Reload processor
+                //
+                //  !!! It would be nice if we could tell whether this was required - timestamp?
+                //
+                yield apiProcessors[apiProcessorPath].reloadModuleAwaitable();
+
+                // This app has been processed, remove it from the "being processed" list
+                //
+                delete configuredAppsBeingProcessed[apiProcessorPath];
+            }
+            else
+            {
+                logger.info("App at path: '%s' is currently running but not found in new configuration - stopping processor", apiProcessorPath);
+
+                // Stop and remove processor (note that aren't waiting around for it to shut down)
+                //
+                apiProcessors[apiProcessorPath].shutdown();
+                delete apiProcessors[apiProcessorPath];
+            }
+        }
+
+        // Any apps remaining in configured-apps-being-processed list are new.  Add/start processors for each.
+        //
+        if (Object.keys(configuredAppsBeingProcessed).length > 0)
+        {
+            var newAppPaths = Object.keys(configuredAppsBeingProcessed);
+            for (var i = 0; i < newAppPaths.length; i++)
+            {
+                var newAppPath = newAppPaths[i];
+                var newApp = configuredAppsBeingProcessed[newAppPath];
+                logger.info("App at path: '%s' in new configuration is not currently running - starting processor", newAppPath);
+
+                // Start processor (we are waiting for this to complete)
+                //
+                // !!! What if this throws an exception?  Should we exit the app?  Continue starting other processors?
+                //
+                yield loadApiProcessorAwaitable(moduleStore, newAppPath, newApp);
+            }
+        }
     }
-    else
-    {
-        logger.debug("Synchro server up and running!");
-    }
-});
+}
 
 function areAllProcessorsComplete()
 {
@@ -360,8 +592,10 @@ function areAllProcessorsComplete()
 // Note that if you launch Synchro via "npm start" you may see terminal output after the prompt returns.  For more 
 // info, see: https://github.com/npm/npm/issues/4603
 //
-function * orderlyShutdown()
+function * orderlyShutdown(exitCode)
 {
+    var code = exitCode || 0;
+
     // Sometimes Azure does a restart where the forked child processors are not down shutting down when it tries to
     // fire Synchro back up, and then it fails on startup because all of the processor debug ports are still in use.
     //
@@ -389,28 +623,96 @@ function * orderlyShutdown()
     }
     
     logger.error("One or more processors did not complete, timed out waiting, terminating process");
-    process.exit();
+    process.exit(code);
 }
+
+function * stopRunningProcessors(exitCode)
+{
+    var apiProcessors = apiManager.getApiProcessors();
+    var apiProcessorPaths = Object.keys(apiProcessors);
+    for (var i = 0; i < apiProcessorPaths.length; i++)
+    {
+        var apiProcessorPath = apiProcessorPaths[i];
+
+        logger.info("Shutting down app at path: '%s'", apiProcessorPath);
+
+        // Stop and remove processor (note that aren't waiting around for it to shut down)
+        //
+        apiProcessors[apiProcessorPath].shutdown();
+    }
+
+    yield orderlyShutdown(exitCode);
+}
+
+// This is basically our main run function body...
+//
+co(function * ()
+{
+    yield loadApiProcessorsAwaitable();
+    yield function(done){startServerAsync(done)};
+    logger.debug("Synchro server up and running!");
+
+}).catch(function(err)
+{
+    // It would be nice to be able to throw an err here to cause a failure to start / orderly shutdown.  Because we're 
+    // in a promise, any error we throw here will just get eaten by the promise.  If we just do a process.exit(), we can
+    // potentially leave child processes running and zombie ports in use (at least for some period of time).  Shutdown is
+    //  complicated by the fact that we are only partially started up at this point.
+    //
+    //
+    // In order to shut down cleanly, we have to signal any started processors (which can coorespond to child processes) 
+    // to shut down, and then wait for them to actually shut down.
+    //
+    logger.error("Failed to start:", err);
+
+    co(function * ()
+    {
+        yield stopRunningProcessors(); // A param here will be propogated to process.exit() as the exit code (future?)
+
+    }).catch(function(err)
+    {
+        logger.error("Error shutting down:", err);
+    });
+});
+
+process.on('SIGHUP', function ()
+{
+    logger.info('SIGHUP');
+    co(reloadProcessors).catch(function (err)
+    {
+        logger.error("Error in SIGHUP:", err);
+    });
+});  
 
 process.on('SIGTERM', function ()
 {
     logger.info('SIGTERM - preparing to exit.');
-    co(orderlyShutdown).catch(function (err)
+
+    co(function * ()
+    {
+        yield stopRunningProcessors(); // A param here will be propogated to process.exit() as the exit code (future?)
+
+    }).catch(function(err)
     {
         logger.error("Error in SIGTERM shutdown:", err);
     });
-});  
+});
 
 process.on('SIGINT', function ()
 {
     logger.info('SIGINT - preparing to exit.');
-    co(orderlyShutdown).catch(function (err)
+
+    co(function * ()
+    {
+        yield stopRunningProcessors(); // A param here will be propogated to process.exit() as the exit code (future?)
+
+    }).catch(function(err)
     {
         logger.error("Error in SIGINT shutdown:", err);
     });
 });
 
-process.on('exit', function ()
+process.on('exit', function (code)
 {
-    logger.info('Process exit');
+    logger.info('Process exiting with code:', code);
 });
