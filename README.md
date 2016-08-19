@@ -1,5 +1,7 @@
 # Synchro
 
+[![Build Status](https://travis-ci.org/SynchroLabs/SynchroServer.svg?branch=master)](https://travis-ci.org/SynchroLabs/SynchroServer)
+
 This project, Synchro Server, is supported by Synchro Labs, Inc.  For more information, see https://synchro.io
 
 ## Synchro App Development
