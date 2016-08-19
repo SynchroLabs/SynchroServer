@@ -5,4 +5,4 @@ node_js:
     - "6"
     - "5"
     - "4"
-script: cd SynchroServer && npm install && npm test
+script: cd SynchroServer && npm update -g && npm install && npm test
