@@ -54,4 +54,4 @@ cd ../..
 # Tag the releease, commit the changes made above, and push
 git tag -a ${VERS} -m "Release: ${VERS}"
 git commit -a -m "Release: ${VERS}"
-git push origin --folow-tags
+git push origin --follow-tags
