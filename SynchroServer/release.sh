@@ -41,13 +41,12 @@ npm_version ${VERS}
 cd ../..
 
 # Update dist
+cp package.json dist
+cp app.js dist
 npm prune -production # Remove any devDependenies so they don't generate errors in npm-shinkwrap
 npm shrinkwrap
 mv npm-shrinkwrap.json dist
-cp app.js dist
-cd dist
-npm_version ${VERS}
-cd synchro-apps
+cd dist/synchro-apps
 npm_version ${VERS}
 cd ../..
 

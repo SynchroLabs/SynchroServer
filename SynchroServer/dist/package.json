@@ -4,6 +4,19 @@
   "description": "Synchro Server",
   "homepage": "http://synchro.io/",
   "license": "MIT",
+  "contributors": [
+    {
+      "name": "Bob Dickinson",
+      "email": "bob@synchro.io"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SynchroLabs/SynchroServer"
+  },
+  "bugs": {
+    "url": "https://github.com/SynchroLabs/SynchroServer/issues"
+  },
   "dependencies": {
     "async": "^0.9.0",
     "co": "^4.6.0",
@@ -13,13 +26,19 @@
     "log4js": "^0.6.21",
     "nconf": "^0.7.1",
     "semver": "^5.0.3",
-    "synchro-api": "^1.5.4",
-    "synchro-studio": "^1.5.4",
-    "synchro-web": "^1.5.4"
+    "synchro-api": "*",
+    "synchro-studio": "*",
+    "synchro-web": "*"
   },
-  "private": true,
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "npm run test-api",
+    "test-api": "mocha node_modules/synchro-api/test"
+  },
+  "devDependencies": {
+    "browserify": "^13.0.0",
+    "co-mocha": "^1.1.2",
+    "mocha": "^2.3.4"
   },
   "engines": {
     "node": ">= 0.12"

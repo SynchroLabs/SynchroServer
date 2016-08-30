@@ -3,6 +3,20 @@
   "version": "1.5.5",
   "description": "Synchro Server",
   "homepage": "http://synchro.io/",
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Bob Dickinson",
+      "email": "bob@synchro.io"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SynchroLabs/SynchroServer"
+  },
+  "bugs": {
+    "url": "https://github.com/SynchroLabs/SynchroServer/issues"
+  },
   "dependencies": {
     "async": "^0.9.0",
     "co": "^4.6.0",
@@ -16,7 +30,6 @@
     "synchro-studio": "*",
     "synchro-web": "*"
   },
-  "private": true,
   "scripts": {
     "start": "node app.js",
     "test": "npm run test-api",
