@@ -51,6 +51,6 @@ npm_version ${VERS}
 cd ../..
 
 # Tag the releease, commit the changes made above, and push
-git tag -a ${VERS} -m "Release: ${VERS}"
 git commit -a -m "Release: ${VERS}"
+git tag -a ${VERS} -m "Release: ${VERS}"
 git push origin --follow-tags
