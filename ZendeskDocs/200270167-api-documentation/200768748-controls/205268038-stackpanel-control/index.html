@@ -1,0 +1,44 @@
+
+<html>
+  <head>
+    <meta charset='UTF-8'>
+    <link rel='stylesheet' href='http://output.jsbin.com/gefofo.css' />
+  </head>
+  <body>
+    <div id='container'>
+    
+      <h1>StackPanel Control</h1>
+      <h3>Overview:</h3>
+<p>The <code>stackpanel</code> control is a container control for organizing child controls in a linear layout on a single line. The <code>orientation</code> of that linear layout can be either horizontal or vertical.</p>
+<p>Child controls can align themselves perpendicular to the layout direction via their <code>horizontalAlignment</code> or <code>verticalAlignment</code> attributes. So, for example, in a vertical stackpanel, child controls can set the <code>horizontalAlignment</code> property to indicate how they should be aligned horizontally.</p>
+<h3>Attributes:</h3>
+<ul>
+<li><a href="/hc/en-us/articles/219657607">Common Control Attributes</a></li>
+<li><code>orientation</code> = [Vertical], Horizontal</li>
+<li><code>padding</code> (<a class="internal present" href="https://github.com/SynchroLabs/Synchro/wiki/Thickness-Specification">thickness</a>)</li>
+<li><code>contents</code></li>
+</ul>
+<h3>Example:</h3>
+<pre><code>{ control: "stackpanel", orientation: "Horizontal", margin: { top: 10 }, contents: [
+    { control: "button", caption: "Login", width: 125, binding: "login" },
+    { control: "button", caption: "Cancel", verticalAlignment: "Top", width: 125, binding: "cancel" },
+] },
+</code></pre>
+<h3>Notes:</h3>
+<h4>Flexible Space Allocation</h4>
+<p>Any space remaining in the layout direction will be divided between any "star-sized" children based on their specified weight.</p>
+<p>A dimension specified as "*" will have a weight of 1. If a quantity precedes the star size, then that quantity specifies the weight. For example, "3*" specifies a weight of 3. Each control gets a proportion of the space equal to the proportion of their specified weight to the total of all specified weights.</p>
+<p>In the example below, the text control width will be computed, then any remaining width available in the stackpanel with be divided between the edit control and the rectangle, with the edit control receiving 1/4 of that space, and the rectangle receiving 3/4.</p>
+<pre><code>{ control: "stackpanel", width: "480", height: "*", orientation: "Horizontal", contents: [
+    { control: "text", value: "Caption" },
+    { control: "edit", binding: "userName", width: "*" },
+    { control: "rectangle", fill: "Green", width: "3*", height: "25" }, <br />] }</code></pre>
+<h4>Alignment</h4>
+<p>Controls in a <code>stackpanel</code> will always be aligned with the start of the stackpanel in the orientation direction. That is to say that in a vertical stackpanel, child controls will start at the top, and in a horizontal stackpanel, child controls will start at the left. If you would like to add space before, between, or after the stackpanel contents, there are a couple of ways to do that.</p>
+<p>If you simply want to align the controls as a group, you can surround your stackpanel with a <code>border</code> control and then align the child stackpanel within the border. If you want more flexibility, you can instead add "spacer" elements around your stackpanel contents (such as <code>rectangle</code> controls with no <code>fill</code> color set) and you can even use star sizing on those controls to get flexible spacing.</p>
+<p>Items in a <code>stackpanel</code> may be aligned in the opposite dimension of the <code>stackpanel</code> orientation.  For example, in a vertical <code>stackpanel</code>, each item may be horizontally aligned Left, Center, or Right (via the <code>horizontalAlignment</code> attribute), or might have a <code>width</code> set to "*" to indicate that it should stretch to fill the panel horizontally.</p>
+      
+    </div>
+  </body>
+</html>
+    

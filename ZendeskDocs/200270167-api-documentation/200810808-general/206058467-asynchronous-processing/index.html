@@ -1,0 +1,176 @@
+
+<html>
+  <head>
+    <meta charset='UTF-8'>
+    <link rel='stylesheet' href='http://output.jsbin.com/gefofo.css' />
+  </head>
+  <body>
+    <div id='container'>
+    
+      <h1>Asynchronous Processing</h1>
+      <p>When Synchro calls one of your module entry points, the expectation is that you will complete your logic as quickly as possible without blocking, and in no case take more than 100 milliseconds. This is necessary both for the client interface to appear responsive and to avoid blocking Node from processing other requests.</p>
+<p>If you need to perform long-running / asynchronous processing, you will need to do so using <code>Synchro.yieldAwaitable()</code> and associated helpers as provided below. Using <code>yieldAwaitable</code> will both streamline your module design and automatically share the session and view model state between potentially multiple processors running against a given module instance. </p>
+<h2>Synchro Asynchronous Processing with Generators/Yield+CO</h2>
+<div>There are a number of different approaches to doing asynchronous processing in Node.  A true async/await solution for Node is coming in the future, but until then we can do better than the de facto standard of “callback hell”.  For a good overview of possible approaches to asynchronous processing in Node, see <a href="https://thomashunter.name/blog/the-long-road-to-asyncawait-in-javascript/">this article</a>.</div>
+<div> </div>
+<div>Synchro provides a mechanism for asynchronous processing in user code that is based on <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*">generator functions</a> and the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/yield">yield</a> keyword, combined with the <a href="https://www.npmjs.com/package/co">co library</a>.  Generator functions and yield are available in contemporary versions of Node (they have been fully supported since v0.12.0).  The co library is stable and widely used (820+ npm libraries depend on co as of early 2016). </div>
+<div> </div>
+<div>A generator function is a special kind of function which can be exited and later re-entered, and is most commonly used to implement asynchronous operations.  A generator function is declared by placing an asterisk after the “function” keyword in the function declaration.  The “yield" keyword may be used inside of a generator function, allowing asynchronous processing of a variety of objects or functions.  Since Synchro use the co library wrapper to call all user code, a generator function in Synchro user code may yield anything that <a href="https://www.npmjs.com/package/co#yieldables">co considers yieldable</a> (including thunks to async callbacks, Promises, other generator functions, and more).  </div>
+<div> </div>
+<div>This is what a generator function looks like:</div>
+<div> </div>
+<pre><code>function * doStuffAwaitable (param) // &lt;- Generator
+{
+    var foo = yield doFirstThingAwaitable(); // &lt;- yield
+    doSecondThing();
+    return yield doThirdThingAwaitable(foo, param); // &lt;- yield
+}</code></pre>
+<div> </div>
+<div>All Synchro module entry points, including application hook functions, can be implemented as either plain functions or as  generator functions.  If the user code provided at the entry point will yield at any point, then it must be implemented as a generator function. </div>
+<h2>Concurrent Request Processing and Synchronization</h2>
+<div>There are two aspects of asynchronous processing that are important to understand and handle appropriately in any Node application, including a Synchro app.  The first is “flow of control”, which is the mechanism used to execute the instructions of processing functions and to report completion and any results to the system.  The generator/yield+co support outlined above is how we deal with flow of control in Synchro, allowing you to enter your function at the top and exit at the bottom, with the ability to yield asynchronously in between as needed, without having to worry about callbacks or any other signaling.</div>
+<div> </div>
+<div>The other issue is “concurrent request processing”, which is the mechanism of dealing with the prospect of other requests being processed while your request is yielding to an asynchronous operation.  Node is single-threaded with respect to request processing.  As long as you do not yield, you can guarantee that no other request is being processed while your request is being processed.  But as soon as you perform an asynchronous operation in your processing, then you have to account for the fact that other requests could have been processed while your request was waiting, and those other requests could have changed the state of the system (this is true irrespective of the async approach being used). </div>
+<div> </div>
+<div>In Synchro, we provide helper functions for asynchronous processing that deal with synchronizing access to the system state (namely the session and the viewModel).  When you call <code>yieldAwaitable</code> or <code>interimUpdateAwaitable</code>, those functions write the session and viewModel state before yielding, and recover them after yielding, meaning that any requests being processed while your request is waiting will see any changes your request had made to the session or viewModel before it yielded, and that your request will in turn see any changes made by other requests when control is returned.  This can be very useful, for example in a case where you are doing a long running operation and the user can elect to cancel the operation (after each stage of the operation you can check the viewModel to see if another request indicated that the operation should terminate).  A major caveat related to this is that you should not write to the session or viewModel inside of any asynchronous processing code (anything processed inside of a call to <code>yieldAwaitable</code>), as those changes will be lost when control is returned from the Synchro async helper functions.</div>
+<div>
+<h2>Asynchronous Processing using Synchro Helper Functions</h2>
+</div>
+<div>To implement asynchronous processing in your Synchro user code you must implement your entry point as a generator function and you must then yield using <code>yieldAwaitable</code>.  You may provide interim/partial updates to the client during asynchronous processing using <code>interimUpdateAwaitable</code>.  Lastly, you may use <code>isActiveInstance</code> during asynchronous processing to determine whether the user has navigated away from your module instance (and you should stop any ongoing operation).  You must use the "yield" keyword when calling any Synchro helper function implemented as a generator, which are those functions with the suffix "Awaitable".</div>
+<div> </div>
+<div>Detailed documention for these and other functions can be found in <a href="/hc/articles/206058127">Built-in Helper Functions</a>. </div>
+<h3>Synchro.yieldAwaitable</h3>
+<pre><code>yield Synchro.yieldAwaitable(context, yieldable)
+</code></pre>
+<p><code>yieldAwaitable</code> allows for asynchronous yielding to anything that the <a href="https://www.npmjs.com/package/co#yieldables">co library considers yieldable</a>, including Promises, generator functions, etc.  </p>
+<p>When you yield using <code>yieldAwaitable</code> you will pass the current context and the yieldable.  Any result produced by the yieldable will be returned by <code>yieldAwaitable</code>.  Any error produced by the yieldable will be thrown from <code>yieldAwaitable</code>.</p>
+<p>One of the most common uses of <code>yieldAwaitable</code> is to make asynchronous calls to functions implemented using <a href="http://thenodeway.io/posts/understanding-error-first-callbacks/">Node-style async completion callbacks</a>. That is to say that it can be used to call any async function that takes as its last argument a completion callback function, where that callback function takes two parameters - an error and a result.  In order to call a Node-style async callback using <code>yieldAwaitable</code>, you must wrap your async function call in a thunk (a function that takes a single parameter, the callback, and calls your async code in its body). </p>
+<p>Below is an example of wrapping a simple async function with a thunk and yielding to it.  The async function will, after a specified delay, simulate a random dice roll of a die with the indicated number of sides:</p>
+<pre>function slowDiceRollAsync(sides, delay, callback) // Standard Node-style async function
+{
+    setTimeout(function()
+    {
+        var dieValue = Math.floor((Math.random() * sides) + 1);
+        callback(null, dieValue);
+    }, 
+    delay);
+}
+</pre>
+<p>And below is how you might call that from a Synchro command: <code></code></p>
+<pre>exports.Commands = 
+{
+    onRoll: function * (context, session, viewModel, params) // &lt;- Generator function
+    {
+        // Roll a 6-sided die with a 100ms delay...
+        //
+        viewModel.roll = yield Synchro.yieldAwaitable(context, function(cb){ slowDiceRollAsync(100, 6, cb) }); // &lt;- yield
+    }
+}</pre>
+<p>Below is another example of yielding to a Promise.  It includes a simple function that produces a Promise that, when resolved, will after a specified delay simulate a random dice roll of a die with the indicated number of sides:</p>
+<pre>function slowDiceRollPromise(sides, delay) // Function that returns a Promise
+{<br />    return new Promise(function(resolve) <br />    {<br />        setTimeout(function() <br />        {<br />            var dieValue = Math.floor((Math.random() * sides) + 1);<br />            resolve(dieValue);<br />        }, <br />        delay);<br />    });<br />}
+</pre>
+<p>And below is how you might call that from a Synchro command:<code></code></p>
+<pre>exports.Commands = 
+{
+    onRoll: function * (context, session, viewModel, params) // &lt;- Generator function
+    {
+        // Roll a 6-sided die with a 100ms delay...
+        //
+        viewModel.roll = yield Synchro.yieldAwaitable(context, slowDiceRollPromise(100, 6)); // &lt;- yield
+    }
+}</pre>
+<h3>Synchro.interimUpdateAwaitable</h3>
+<pre><code>yield Synchro.interimUpdateAwaitable(context)
+</code></pre>
+<p><code>interimUpdateAwaitable</code> provides a partial viewModel update back to the client, while allowing the server module to continue processing. It is important to call <code>interimUpdateAwaitable</code> before invoking an async or long running call using <code>yieldAwaitable</code> if there are any ViewModel changes that need to be sent back to the client before the async processing completes (for example, if an indicator in the ViewModel is set to communicate the waiting state back to the user's View).</p>
+<h3>Synchro.isActiveInstance</h3>
+<pre><code>Synchro.isActiveInstance(context)
+</code></pre>
+<p><code>isActiveInstance</code> indicates whether the page/instance being processed is the active instance. If it returns <code>false</code>, that means that the instance that the calling code is processing is not current (has been navigated away from). In this case, no viewModel updates will be sent to the client.</p>
+<p>If your async processing is incremental, such that you are calling <code>yieldAwaitable</code> in a loop, then you should check <code>isActiveInstance</code> each time through the loop, and if it returns false, you should abandon the loop (as any further processing on behalf of the obsolete page/instance is not useful)</p>
+<p>Following is an example of a simple asynchronous loop demonstrating these principles:</p>
+<pre><code>while (Synchro.isActiveInstance(context) &amp;&amp; !viewModel.cancelled)
+{
+    yield Synchro.interimUpdateAwaitable(context);
+    yield Synchro.yieldAwaitable(context, someYieldable);
+    viewModel.progress++;
+} 
+</code></pre>
+<h2>Delayed ViewModel Initialization</h2>
+<p>There is one very common case where modules implement async or long-running processing, which is during initialization of the view model. In order to make this common task easy, and to make up for the fact that you cannot call <code>interimUpdate</code> before the view model has been initialized, we have provided a mechanism for doing delayed viewmodel intialization.</p>
+<p>If a page needs to perform an asynchronous or long-running task when it is loaded, it may establish an initial view model in <code>InitializeViewModel</code> and then further populate that view model asynchronously in <code>LoadViewModel</code>. The initial view model and corresponding view will be returned to the client at the completion of<code>InitializeViewModel</code> (and subsequent view rendering), so that the client can render the initial user interface. Then <code>LoadViewModel</code> will be called to complete subsequent view model loading/population. It is common to set some kind of <em>waiting</em> indicator in the initial view model, then clear that when the final view model is returned.</p>
+<h2>Putting it all together</h2>
+<p>The Synchro sample <strong>countdown</strong> illustrates all of these principles in one fairly straighforward module:</p>
+<pre>// Countdown page
+//
+exports.View =
+{
+    title: "Countdown",
+    elements: 
+    [
+        { control: "stackpanel", orientation: "Horizontal", visibility: "{isLoading}", contents: [
+            { control: "progressring", height: 50, width: 50, value: "{isLoading}", verticalAlignment: "Center" },
+            { control: "text", value: "Loading...", color: "Red", fontsize: 24, verticalAlignment: "Center" },
+        ] },
+        { control: "stackpanel", orientation: "Vertical", visibility: "{!isLoading}", contents: [
+            { control: "text", value: "Count: {count}", color: "Green", font: { size: 24, bold: true } },
+            { control: "progressbar", value: "{count}", minimum: 0, maximum: 10, width: 300 },
+            { control: "button", caption: "Start Countdown", binding: "start", visibility: "{!isCounting}" },
+            { control: "button", caption: "Pause Countdown", binding: "stop", visibility: "{isCounting}" },
+        ] }
+    ]
+}
+
+exports.InitializeViewModel = function(context, session)
+{
+    var viewModel =
+    {
+        count: 0,
+        isLoading: true,
+        isCounting: false
+    }
+    return viewModel;
+}
+
+exports.LoadViewModel = function * (context, session, viewModel) // &lt;- Generator function
+{
+    yield Synchro.yieldAwaitable(context, function(cb){ waitInterval(4000, cb) }); // &lt;- yield  
+    viewModel.count = 10;
+    viewModel.isLoading = false;
+}
+
+function waitInterval(intervalMillis, callback)
+{
+    setTimeout(function(){callback()}, intervalMillis);
+}
+
+exports.Commands = 
+{
+    start: function * (context, session, viewModel, params) // &lt;- Generator function
+    {
+        viewModel.isCounting = true;
+
+        while (Synchro.isActiveInstance(context) &amp;&amp; viewModel.isCounting &amp;&amp; (viewModel.count &gt; 0))
+        {
+            yield Synchro.yieldAwaitable(context, funciton(cb){ waitInterval(1000, cb) }); // &lt;- yield
+            if (viewModel.isCounting)
+            {
+                viewModel.count--;            
+                yield Synchro.interimUpdateAwaitable(context); // &lt;- yield               
+            }
+        }
+
+        viewModel.isCounting = false;
+    },
+    stop: function(context, session, viewModel, params)
+    {
+        viewModel.isCounting = false;
+    },
+}</pre>
+<p>Note that this module is implemented such that the user may hit a button that invokes the <strong>stop</strong> command while the async loop is running. This can be accomplished because our loop in the <strong>start</strong> command handler is yielding to Node such that the <strong>stop</strong> command can be executed during the loop, and further, since the Synchro async helpers insure proper sharing of the instance (view model) state, both commands can access it.</p>
+      
+    </div>
+  </body>
+</html>
+    

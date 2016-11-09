@@ -1,0 +1,148 @@
+
+<html>
+  <head>
+    <meta charset='UTF-8'>
+    <link rel='stylesheet' href='http://output.jsbin.com/gefofo.css' />
+  </head>
+  <body>
+    <div id='container'>
+    
+      <h1>View Style Helper</h1>
+      <p>Synchro provides a "Style Helper" module to assist in applying styles in your application.  </p>
+<p>You are certainly free to build a module like this yourself if the provided style helper module doesn't meet your needs (the style helper module is itself a standalone module - it does not rely on anything internal to Synchro).</p>
+<p>The Synchro Style Helper module does the following:</p>
+<ul>
+<li>Applies default styles to controls in your View based on control type</li>
+<li>Merges app default styles into your ViewModel</li>
+<li>Filters styles based on operating system</li>
+</ul>
+<h3>Applies Default Styles</h3>
+<p>If you want to provide styling for every control of a certain type it can get pretty cumbersome to specify the style on every instance of the control, like this:</p>
+<pre><code>{ control: "text", style: "txtStyle", value: "Hello" },
+{ control: "text", style: "txtStyle", value: "World" },
+{ control: "button", style: "btnStyle", caption: "Submit", binding: "OnClick" }</code></pre>
+<p>The Style Helper will automatically apply a style to each control based on the control type.</p>
+<h3>Merges App Default Styles</h3>
+<p>It is often useful to define a set of application-wide styles to use on every page of your app.  In order to use those styles on your controls, you need to move those styles to the ViewModel of the page.</p>
+<p>In addition, it may be the case that you want to override some of your application-wide styles on a given page.</p>
+<p>The Style Helper will merge only those application-wide styles that are actually referenced from the View on a page, and will merge them in such a way that any style values specified in the ViewModel will override corresponding application-wide style values.</p>
+<h3>Filters Styles Based on OS</h3>
+<p>It may be useful to have different style values for different operating systems.  The Style Helper module provides a mechanism for applying operating system filters to produce a clean set of styles for the current operating system.  There are two types operating system filters, <code>os_value</code> for selecting a single value, and <code>os_merge</code> to select a group of attribute values.</p>
+<p><code>os_value</code> selects the appropriate value from those listed and replaces itself with that value.</p>
+<p><code>os_merge</code> selects the appropriate set of attributes from those listed and replaces itself with that set of (zero or more) attributes.</p>
+<p>Following is an example of how these filters are used.</p>
+<pre><code>editStyle:
+{
+    fontsize: { os_value: { iOS: 9, Android: 10, Windows: 11, default: 12 } },
+    os_merge: 
+    {
+        iOS: 
+        {
+            color: "Blue"
+        },
+        Windows:
+        {
+            color: "Blue",
+            background: "Black"
+        },
+        default:
+        {
+            background: "Green"
+        }
+    }
+}</code></pre>
+<h3>Usage</h3>
+<p>Include the style helper:</p>
+<pre><code>var styleHelper = require("synchro-api/style-helper");</code></pre>
+<p>Call the all-in-one helper function (passing your style mappings and default styles, if any):</p>
+<pre><code>exports.InitializeView = function(context, session, viewModel, view, metrics, isViewMetricsUpdate)
+{
+    console.log("Processing styles");
+    styleHelper.processViewAndViewModelStyles(viewModel, view, metrics, appStyleMappings, appStyles);
+}</code></pre>
+<p>There are also functions provided to do each of the functions of the Style Helper individually:</p>
+<pre><code>addDefaultStylesToView (view, defaultStyleMapping)</code></pre>
+<p>Given a view, visit each control element, and if there is a default style mapping cooresponding to the control name, add the default style to the control (if any styles are defined on the control, add to end of list, else create new style attribute and set it to the default style). The passed-in view is modified in place.</p>
+<pre><code>mergeStyles (viewModel, appStyles, viewOrList)</code></pre>
+<p>Merges the provided app-level styles into the viewModel (in place). You may specify which of the provided styles are to be merged via with "viewOrList" parameter:</p>
+<ul>
+<li>If "viewOrList" is undefined (not provided in call) or null, all app styles will be merged.</li>
+<li>If "viewOrList" is an object (typically a View), then all styles referenced by the object will be merged.</li>
+<li>If "viewOrList" is an array, then the app styles matching elements of the array will be merged. If the array is empty, then of course no app styles will be merged.</li>
+</ul>
+<p>Individual settings for styles defined in the viewModel will override any corresponding app style settings.</p>
+<pre><code>filterStyles (viewModel, deviceMetrics)</code></pre>
+<p>Apply filters to the supplied viewModel (in place)<br /> </p>
+<h3>Applying Styles in an Application Hook</h3>
+<p>In practice, the best way to apply application-wide styles using the Style Helper is via an application hook.  In this way, the Style Helper will be called for you on each page automatically.  </p>
+<p>For more information on how application hooks work, see <a href="/hc/en-us/articles/215438528">Application Hooks</a>.</p>
+<p>Below is an example of such a hook. </p>
+<pre><code>// App-wide Style Hook
+//
+// This module illustrates using application hook functionality to apply styles across an application.
+//
+var styleHelper = require("synchro-api/style-helper");
+
+// The mappings below define the default style to add to each control of the key type in the view.
+//
+var appStyleMappings = 
+{
+    "button": "btnStyle",
+    "text": "txtStyle"
+}
+
+// The "app" styles below will be merged in to any styles provided in the viewModel.  Only app styles that are actually 
+// referenced from the view will be merged.  Also, the app styles are merged in such that any style values provided in the
+// viewModel will override the cooresponding app style.
+//
+var appStyles = 
+{
+    btnStyle:
+    {
+        color: "CornflowerBlue",
+        background: "DarkSlateGray",
+    },
+    txtStyle:
+    {
+        fontsize: 12
+    },
+    stackStyle:
+    {
+        orientation: "Horizontal"
+    },
+    editStyle:
+    {
+        // These aren't really meaningful style values - they're just included as an example of how platform filtering
+        // can be done on style values.
+        //
+        fontsize: { os_value: { iOS: 9, Android: 10, Windows: 11, default: 12 } },
+        os_merge: 
+        {
+            iOS: 
+            {
+                color: "Blue"
+            },
+            Windows:
+            {
+                color: "Blue",
+                background: "Black"
+            },
+            default:
+            {
+                background: "Green"
+            }
+        }
+    }
+}
+
+exports.AfterInitializeView = function(route, routeModule, context, session, viewModel, view, metrics, isViewMetricsUpdate)
+{
+    console.log("Processing styles");
+    styleHelper.processViewAndViewModelStyles(viewModel, view, metrics, appStyleMappings, appStyles);
+}</code></pre>
+<p> </p>
+      
+    </div>
+  </body>
+</html>
+    

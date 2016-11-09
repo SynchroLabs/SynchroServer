@@ -1,0 +1,89 @@
+
+<html>
+  <head>
+    <meta charset='UTF-8'>
+    <link rel='stylesheet' href='http://output.jsbin.com/gefofo.css' />
+  </head>
+  <body>
+    <div id='container'>
+    
+      <h1>Built-in Helper Functions</h1>
+      <p>Synchro provides a number of built-in commands in the Synchro namespace. These are automatically made accessible to Synchro modules (no "require" is necessary).</p>
+<h3>Synchro.getResourceUrl</h3>
+<pre><code>Synchro.getResourceUrl(resource)
+</code></pre>
+<p><code>getResourceUrl</code> uses the resource mapper provided in the Synchro application configuration to resolve resource names to full URLs that can be used to access those resources.</p>
+<h3>Synchro.navigateTo</h3>
+<pre><code>Synchro.navigateTo(context, route, params)
+</code></pre>
+<p><code>navigateToView</code> navigates between Synchro views. The <code>route</code> describes the path to the desired view, and <code>params</code>, if present, is an object that is passed to the IntializeViewModel function of the module being navigated to.</p>
+<p>For more details, see <a href="/hc/en-us/articles/206058697">Navigation Support</a>.</p>
+<h3>Synchro.pushAndNavigateTo</h3>
+<pre><code>Synchro.pushAndNavigateTo(context, route, params, state)
+</code></pre>
+<p><code>pushAndNavigateToView</code> navigates between Synchro views. It works like <code>navigateTo</code>, except that is also pushes the current view on to the back stack, so that it can be accessed later using <code>Synchro.pop</code> or <code>Synchro.popTo</code>. In addition, any <code>state</code> provided will be passed to the InitializeViewModel function of this view when it is navigated back to via<code>Synchro.pop</code> or <code>Synchro.popTo</code>.</p>
+<p>For more details, see <a href="/hc/en-us/articles/206058697">Navigation Support</a>.</p>
+<h3>Synchro.pop</h3>
+<pre><code>Synchro.pop(context)
+</code></pre>
+<p><code>pop</code> navigates to the most recent view stored on the back stack.</p>
+<p>For more details, see <a href="/hc/en-us/articles/206058697">Navigation Support</a>.</p>
+<h3>Synchro.popTo</h3>
+<pre><code>Synchro.popTo(context, route)
+</code></pre>
+<p><code>popTo</code> navigates to the most recent view stored on the back stack which has a route matching the supplied <code>route</code>.</p>
+<p>For more details, see <a href="/hc/en-us/articles/206058697">Navigation Support</a>.</p>
+<h3>Synchro.showMessage</h3>
+<pre><code>Synchro.showMessage(context, messageBox)
+</code></pre>
+<p><code>showMessage</code> causes the client device to show a message using the native message/alert mechanism on the device. Below is an example showing the components of the messageBox:</p>
+<pre><code>{
+    title: "Caption",
+    message: "This is the message",
+    options:
+    [
+        { label: "Ok", command: "doOK" },
+        { label: "Cancel" }
+    ]
+}
+</code></pre>
+<p>The <code>title</code> is optional. The <code>options</code> are also optional. If no <code>options</code> are provided, the message box will have a single Close button that dismisses the message box. Up to three options may be provided. Each option will generate a button with a label as specified in the <code>label</code> attribute of the option. An option with a <code>command</code> attribute will result in the message box being dismissed and that command issued when the corresponding button is clicked. An option without a <code>command</code> attribute result in a button that simply dismisses the message box.</p>
+<h3>Synchro.launchUrl</h3>
+<pre><code>Synchro.launchUrl(context, primaryUrl, secondaryUrl)
+</code></pre>
+<p><code>launchUrl</code> will attempt to launch the provided primary URL. If that fails, typically because there is no handler for the URL scheme, and if a secondary URL is provided, then the secondary URL will be launched.</p>
+<p>One common use case would be to try to launch a custom scheme URL, like twitter://user?screen_name=foo, to launch the Twitter app (if installed). If not, you could fall back to a seconday URL to launch the Twitter page in the browser, like http://twitter.com/foo.</p>
+<h3>Synchro.yieldAwaitable</h3>
+<pre><code>yield Synchro.yieldAwaitable(context, yieldable)
+</code></pre>
+<p><code>yieldAwaitable</code> allows for asynchronous processing of any object that the <a href="https://www.npmjs.com/package/co">co</a> library considers <a href="https://www.npmjs.com/package/co#yieldables">yieldable</a> (in practice this will often be a thunk wrapping a <a href="http://thenodeway.io/posts/understanding-error-first-callbacks/">Node-style async completion callback</a>, and can also be a Promise or a generator function, among other things).</p>
+<p>If the yielded object or async function returns an error, that error will be thrown by <code>yieldAwaitable</code>, otherwise <code>yieldAwaitable</code> will return any result produced by the yieldable (via the completion callback, Promise result, etc).</p>
+<p><strong>Note: <code>yieldAwaitable</code> is an asynchronous generator function. It may only be called from an asynchronous generator function, and it must be preceded by the keyword "yield".</strong></p>
+<p>For more details, see <a href="/hc/en-us/articles/206058467">Asynchronous Processing</a>.</p>
+<h3>Synchro.interimUpdateAwaitable</h3>
+<pre><code>yield Synchro.interimUpdateAwaitable(context)
+</code></pre>
+<p><code>interimUpdateAwaitable</code> provides a partial viewModel update back to the client, while allowing the server module to continue processing. It is important to call <code>interimUpdateAwaitable</code> in most cases before invoking an async or long running call using <code>yieldAwaitable</code>, typically with some indicator in the ViewModel that will communicate the waiting state back to the user's View.</p>
+<p><strong>Note: <code>interimUpdatedAwaitable</code> is an asynchronous generator function. It may only be called from an asynchronous generator function, and it must be preceded by the keyword "yield".</strong></p>
+<p>For more details, see <a href="/hc/en-us/articles/206058467">Asynchronous Processing</a>.</p>
+<h3>Synchro.isActiveInstance</h3>
+<pre><code> Synchro.isActiveInstance(context)
+</code></pre>
+<p><code>isActiveInstance</code> indicates whether the page/instance being processed is the active instance. If it returns <code>false</code>, that means that the instance that the calling code is processing is not current (has been navigated away from). In this case, no viewModel updates will be sent to the client.</p>
+<p>If your async processing is incremental, such that you are calling <code>yieldAwaitable</code> in a loop, then you should check <code>isActiveInstance</code> each time through the loop, and if it returns false, you should abandon the loop (as any further processing on behalf of the obsolete page/instance is not useful)</p>
+<p>For more details, see <a href="/hc/en-us/articles/206058467">Asynchronous Processing</a>.</p>
+<h3>Synchro.getMetrics</h3>
+<pre><code>Synchro.getMetrics(context)
+</code></pre>
+<p><code>getMetrics</code> returns a <code>metrics</code> object containing <code>DeviceMetrics</code> and <code>ViewMetrics</code>.</p>
+<p>For more details, see <a href="/hc/en-us/articles/205267858">Device and View Metrics</a>.</p>
+<h3>Synchro.getConfig</h3>
+<pre><code>Synchro.getConfig(context, key)
+</code></pre>
+<p><code>getConfig</code> will return a value representing the application-level configuration defined for the provided <strong>key</strong>.</p>
+<p>Please see the Application Configuration section of <a href="/hc/en-us/articles/205274228">Server Configuration</a> for more details on setting application configuration values.</p>
+      
+    </div>
+  </body>
+</html>
+    

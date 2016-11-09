@@ -1,0 +1,94 @@
+
+<html>
+  <head>
+    <meta charset='UTF-8'>
+    <link rel='stylesheet' href='http://output.jsbin.com/gefofo.css' />
+  </head>
+  <body>
+    <div id='container'>
+    
+      <h1>Layout Filtering</h1>
+      <h2>Filtering Overview</h2>
+<p>While Synchro applications strive to run well with a single view on all platforms, there are cases where it is appropriate, even necessary, to customize the actual view definition for a page/screen. Layout filtering is the mechanism that provides this support.</p>
+<p>Layout filtering pre-processes the view for a given application page or screen, filtering the elements that apply based on the current device metrics, view metrics, or view model, and then passes the resulting view to the mobile client. The most common filters are based on device metrics such as the client operating system, device type, or screen size, and view metrics, most commonly the current orientation.</p>
+<h2>Filtering Caveats</h2>
+<p>There are many tools and techniques for flexible layouts in Synchro, and it will very often be the case that highly flexible layouts that adapt well to different device sizes and orientations can be achieved without layout filtering.</p>
+<p>As just one example, if you had a page that primarily consisted of a list of items, where you wanted to display details of the selected item next to the list, but only when in portrait mode and only on wide screen devices, you could compute the desired visibility of the details control container, store that in your view model, and then data-bind that value to the visibility attribute of the details control container. The layout would then adjust automatically (even responding to device rotation), with no layout filtering required. If however, you wanted the list to be a no-select list with a bound command to launch a separate details page in one mode, and a single-select list with the current selection data-bound such that it drove the details display on the same page in the other mode, you would need layout filtering.</p>
+<p>Layouts that change due to layout filtering will cause the client to re-render the layout, which may result in a slight delay and/or may lose some display state when switching (especially when switching back and forth). While these visual artifacts are fairly minor, they are best avoided when possible.</p>
+<h2>Element Filtering</h2>
+<p>Any view element may contain a filter specifying criteria for inclusion of that element in the final rendered view. If the filter criteria is met, the element is included, and if not, it is excluded. In either case, the filter specification itself is removed from the element when the final view is rendered.</p>
+<p>A filter consists of a value specification and a qualifier. The value specification may use one of the following value domains as its attribute:</p>
+<ul>
+<li><code>deviceMetric</code></li>
+<li><code>viewMetric</code></li>
+<li><code>viewModel</code></li>
+</ul>
+<p>The contents of the value specification attribute should be an appropriate device metric, view metric, or view model member. Please refer to the complete list of <a class="internal present" href="https://github.com/SynchroLabs/SynchroServer/wiki/Device-and-View-Metrics">Device and View Metrics</a> for more details on the values that you may use for filtering in those domains.</p>
+<p>The qualifier may use one of the following relationship specification values as its attribute:</p>
+<ul>
+<li><code>is</code> - equals value, or if value is array, is present in array</li>
+<li><code>isnot</code> - not equals value, or if value is array, is not present in array</li>
+<li><code>lt</code> - less than</li>
+<li><code>lte</code> - less than or equal to</li>
+<li><code>gt</code> - greater than</li>
+<li><code>gte</code> - greater than or equal to</li>
+</ul>
+<p>The contents of the qualifier attribute should be the value to be used for the comparison (or, in the case of <code>is</code> or <code>isnot</code>, optionally an array of values).</p>
+<p>One of each of these two attribute types are combined to form an object that is the contents of a <code>filter</code> attribute on the element to be filtered. For example:</p>
+<pre>{ control: "text", filter: { deviceMetric: "deviceType", is: "Tablet" }, value: "Tablets Rule!" },
+{ control: "text", filter: { viewMetric: "widthInches", gt: 6.0 }, value: "Wide Screen" },</pre>
+<p>More than one value may be provided when using the <code>is</code> (or <code>isnot</code>) relationship attribute, in which case the filter checks to see if the value matches (or does not match) any value in the attribute array, for example:</p>
+<pre>{ control: "text", filter: { deviceMetric: "os", is: ["Windows", "WinPhone"] }, value: "Microsoft Rules!" },</pre>
+<p>More than one filter can be specified on an element by using an array of filter objects, such as:</p>
+<pre>{ control: "text", filter: [{ deviceMetric: "deviceType", is: "Tablet" }, { viewMetric: "widthInches", gt: 6.0 }], value: "Wide screen tablet" },</pre>
+<p>In this case, the filters are treated as an <em>and</em> (all filters must pass in order for the element to be included in the rendered view).</p>
+<h2>Selection Filtering</h2>
+<p>It is possible to have a set of elements with mutually exclusive filters to guarantee that a single element is present in the final layout, such as:</p>
+<pre>{ control: "text", filter: { deviceMetric: "deviceType", is: "Phone" }, value: "Device is Phone!" },
+{ control: "text", filter: { deviceMetric: "deviceType", is: "Tablet" }, value: "Device is Tablet!" },</pre>
+<p>In addition, there are "selector" container elements that can assist in scenarios where more complex filtering logic is required.</p>
+<ul>
+<li><code>select: "First"</code> - This will select the first child element to replace this element (after removing any non-qualifying child elements based on filter criteria).</li>
+<li><code>select: "All"</code> - This will select all child elements to replace this element (typically used to group like elements)</li>
+</ul>
+<p>Note: select:First and element disqualification via filter criteria are performed first, for the entire layout, followed by select:All. This allows select:All elements to be contained in a select:First element (a common scenario).</p>
+<p>It is common for the final element in a select:First to have no filter criteria, and thus serve as the default (the element chosen when no other elements pass their filter criteria).</p>
+<p>Examples:</p>
+<pre>{ select: "First", contents: [
+    { control: "text", filter: { deviceMetric: "os", is: "iOS" }, value: "iOS rules!" },
+    { control: "text", filter: { deviceMetric: "os", is: "Android" }, value: "Android rules!" },
+    { control: "text", value: "Some kind of Windows platform rules!" },
+    ]},
+
+{ select: "First", contents: [
+    { control: "text", filter: { deviceMetric: "os", is: ["Windows", "WinPhone"] }, value: "Microsoft OS",  },
+    { control: "text", value: "Non-Microsoft OS" },
+    ]},</pre>
+<p>Here is a real-word example to include specific auxiliary control elements based on the OS (platform), using select:All child elements for grouping:</p>
+<pre>{ select: "First", contents: [
+    { select: "All", filter: { deviceMetric: "os", is: "Windows" }, contents: [
+        { control: "commandBar.button", text: "Add", icon: "Add", commandBar: "Bottom", commandType: "Secondary", binding: "increment" },
+        { control: "commandBar.button", text: "Subtract", icon: "Remove", commandBar: "Bottom", commandType: "Secondary", binding: "decrement"},
+        { control: "commandBar.button", text: "Reset", icon: "Stop", commandBar: "Bottom", binding: "reset" },
+        ]},
+    { select: "All", filter: { deviceMetric: "os", is: "WinPhone" }, contents: [
+        { control: "appBar.button", text: "Add", icon: "add",  binding: "increment" },
+        { control: "appBar.button", text: "Subtract", icon: "minus", binding: "decrement"},
+        { control: "appBar.button", text: "Reset", icon: "refresh", binding: "reset" },
+        ]},
+    { select: "All", filter: { deviceMetric: "os", is: "Android" }, contents: [
+        { control: "actionBar.item", text: "Add", binding: "increment" },
+        { control: "actionBar.item", text: "Subtract", binding: "decrement", enabled: "{count}" },
+        { control: "actionBar.item", text: "Reset", icon: "ic_action_refresh", showAsAction: "IfRoom", binding: "reset" },
+        ]},
+    { select: "All", filter: { deviceMetric: "os", is: "iOS" }, contents: [
+        { control: "navBar.button", systemItem: "Trash", binding: "reset", enabled: "{count}" },
+        { control: "toolBar.button", text: "Add", icon: "plus-symbol-mini", binding: "increment" },
+        { control: "toolBar.button", text: "Subtract", icon: "minus-symbol-mini", binding: "decrement" },
+        ]},
+    ]},</pre>
+      
+    </div>
+  </body>
+</html>
+    
