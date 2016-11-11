@@ -142,7 +142,6 @@ DEPENDENCIES
   github-pages (= 104)
   jekyll-feed (~> 0.6)
   json
-  minima (~> 2.0)
 
 BUNDLED WITH
    1.13.6
