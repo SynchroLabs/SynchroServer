@@ -1,0 +1,6 @@
+{
+  "name": "Synchro Server",
+  "tagline": "Synchro Server platform documentation",
+  "body": "### Synchro Server docs\r\nAre coming here soon...\r\n\r\n### Code samples\r\n```\r\nconsole.log(\"Hello\");\r\n```\r\n\r\nOr \r\n\r\n    console.log(\"Hello\");\r\n\r\nThe end",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
