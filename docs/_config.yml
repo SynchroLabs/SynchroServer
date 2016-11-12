@@ -13,6 +13,7 @@
 # you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
+#
 title: Synchro Labs
 email: support@synchro.io
 description: > # this means to ignore newlines until "baseurl:"
@@ -22,6 +23,47 @@ baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: synchrolabs
 github_username:  SynchroLabs
+
+# Document collections
+#
+collections:
+  tutorial:
+    permalink: /:collection/:slug
+    output: true
+  general:
+    permalink: /:collection/:slug
+    output: true
+  controls:
+    permalink: /:collection/:slug
+    output: true
+  samples:
+    permalink: /:collection/:slug
+    output: true
+
+# Default layout (per collection)
+#
+defaults:
+  - scope:
+      path: ""
+      type: tutorial
+    values:
+      layout: page
+  - scope:
+      path: ""
+      type: general
+    values:
+      layout: page
+  - scope:
+      path: ""
+      type: controls
+    values:
+      layout: page
+  - scope:
+      path: ""
+      type: samples
+    values:
+      layout: page
+
 
 # Build settings
 markdown: kramdown
