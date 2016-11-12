@@ -28,16 +28,16 @@ github_username:  SynchroLabs
 #
 collections:
   tutorial:
-    permalink: /:collection/:slug
+    permalink: :collection/:slug
     output: true
   general:
-    permalink: /:collection/:slug
+    permalink: :collection/:slug
     output: true
   controls:
-    permalink: /:collection/:slug
+    permalink: :collection/:slug
     output: true
   samples:
-    permalink: /:collection/:slug
+    permalink: :collection/:slug
     output: true
 
 # Default layout (per collection)
