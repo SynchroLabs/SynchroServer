@@ -19,7 +19,7 @@ email: support@synchro.io
 description: > # this means to ignore newlines until "baseurl:"
   This is the Synchro Labs documentation site (under development). Check back
   later for some real docs.
-baseurl: "" # the subpath of your site, e.g. /blog
+baseurl: "/SynchroServer" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: synchrolabs
 github_username:  SynchroLabs
@@ -28,16 +28,16 @@ github_username:  SynchroLabs
 #
 collections:
   tutorial:
-    permalink: :collection/:slug
+    permalink: /:collection/:slug
     output: true
   general:
-    permalink: :collection/:slug
+    permalink: /:collection/:slug
     output: true
   controls:
-    permalink: :collection/:slug
+    permalink: /:collection/:slug
     output: true
   samples:
-    permalink: :collection/:slug
+    permalink: /:collection/:slug
     output: true
 
 # Default layout (per collection)
