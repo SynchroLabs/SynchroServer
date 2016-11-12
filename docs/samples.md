@@ -5,5 +5,5 @@ permalink: /samples/
 ---
 
 {% for sample in site.samples %}
-  <a href="{{ sample.url }}">{{ sample.title }}</a>
+  <a href="{{ site.baseurl }}{{ sample.url }}">{{ sample.title }}</a>
 {% endfor %}
