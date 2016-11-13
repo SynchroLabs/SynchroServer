@@ -5,26 +5,26 @@ description: The border control is a container that holds a single control and d
 
 {{ page.description }}
 
-# Attributes:
+## Attributes:
 
 * [Common Control Attributes](common)
-* `border` (color)
-* `borderThickness` (thickness)
+* `border` ([color](../general/color))
+* `borderThickness` ([thickness](../general/thickness))
 * `cornerRadius`
-* `padding` (thickness)
-* `background` (color)
+* `padding` ([thickness](../general/thickness))
+* `background` ([color](../general/color))
 * `contents`
 
-# Bindings:
+## Bindings:
 
 * `onTap` (command + params)
 
-# Example:
+## Example:
 
     { control: "border", border: "Red", borderThickness: 10, cornerRadius: 5, padding: 10, background: "Blue", contents: [
         { control: "rectangle", width: "{content}", height: "{content}", fill: "Green" },
     ] }
 
-# Note:
+## Note:
 
 The child of a border control can align itself within the border via the child control's `horizontalAlignment` or `verticalAlignment` attributes.
