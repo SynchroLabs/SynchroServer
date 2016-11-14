@@ -1,6 +1,8 @@
 ---
 layout: default
 ---
+{% assign collection = site.collections | where: "label", {{page.collection}} | first %}
+
 <article class="post">
 
   <header class="post-header">

@@ -26,21 +26,34 @@ github_username:  SynchroLabs
 
 # Document collections
 #
+# Data in collections is a little tricky to access from templates.  You have to do this to get the collection:
+#
+#    {% assign collection = site.collections | where: "label", {{page.collection}} | first %}
+#
+# Then you can access collection data using {{ collection.yourProp }}
+#
 collections:
   tutorial:
     permalink: /:collection/:slug
     output: true
+    name: 'Tutorial'
   general:
     permalink: /:collection/:slug
     output: true
+    name: 'General'
   controls:
     permalink: /:collection/:slug
     output: true
+    name: 'Controls'
   samples:
     permalink: /:collection/:slug
     output: true
+    name: 'Samples'
 
 # Default layout (per collection)
+#
+# Note: Anything we put under 'values' will be the default front matter value for pages at the given path, and can this
+#       be accessed in a template using {{ page.yourProp }}
 #
 defaults:
   - scope:
