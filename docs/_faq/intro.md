@@ -9,7 +9,9 @@ Synchro allows you to create feature-rich, robust, and secure cross-platform mob
 mobile devices, but run on the server, and are updateble in real-time. And it allows you to do this in a fraction of the
 amount of code required by other mobile application development platforms.
 
-![Synchro Overview]({{ site.baseurl }}/assets/img/users.png)
+<p align="center">
+    <img src="{{ site.baseurl }}/assets/img/users.png" alt="Synchro Overview"/>
+</p>
 
 To the user a Synchro-built app presents as a no-compromise native mobile app, and to developers and administrators it
 presents as a web app. It's really the best of both worlds.
@@ -43,7 +45,7 @@ in your ViewModel implementation to make this happen (you don't have to notify a
 don't have to tell us which data elements we need to observe - we just figure it out and handle it automatically).
 
 <p align="center">
-    <img src="{{ site.baseurl }}/assets/img/synchro-mvvm.png"/>
+    <img src="{{ site.baseurl }}/assets/img/synchro-mvvm.png" alt="MVVM"/>
 </p>
 
 The diagram above shows how we implement our client-server MVVM solution. Your Synchro app will consist of a View and
@@ -65,7 +67,7 @@ client OS your user is running. You do have the ability to tweak and tune your a
 other device metrics), but that's usually not necessary.
 
 <p align="center">
-    <img src="{{ site.baseurl }}/assets/img/platforms.jpg"/>
+    <img src="{{ site.baseurl }}/assets/img/platforms.jpg" alt="Platforms"/>
 </p>
 
 ----
@@ -86,7 +88,7 @@ Xamarin implementation, and 1/4 the amout of code of the Appcelerator Titanium i
 up to all of them in terms of native look-and-feel, functionality, and responsiveness.
 
 <p align="center">
-    <img src="{{ site.baseurl }}/assets/img/loc.png"/>
+    <img src="{{ site.baseurl }}/assets/img/loc.png" alt="Lines of Code"/>
 </p>
 
 The Synchro implementation of PropertyCross is 242 lines of code, and that includes the view templates that define the page

@@ -1,8 +1,12 @@
 ---
 layout: page
 title: FAQ
+description: Frequently Asked Questions
 permalink: /faq/
+weight: 5
 ---
+
+## {{ page.description }}
 
 {% assign items = site.faq | sort: 'weight' %}
 {% for item in items %}

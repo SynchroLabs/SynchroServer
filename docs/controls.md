@@ -1,8 +1,12 @@
 ---
 layout: page
 title: Controls
+description: Synchro Control Configuration and Usage
 permalink: /controls/
+weight: 2
 ---
+
+## {{ page.description }}
 
 {% for control in site.controls %}
   <p>
