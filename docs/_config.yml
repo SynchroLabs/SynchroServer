@@ -17,8 +17,7 @@
 title: Synchro Labs
 email: support@synchro.io
 description: > # this means to ignore newlines until "baseurl:"
-  This is the Synchro Labs documentation site (under development). Check back
-  later for some real docs.
+  This is the Synchro Labs documentation site.
 baseurl: "/SynchroServer" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: synchrolabs
@@ -49,6 +48,10 @@ collections:
     permalink: /:collection/:slug
     output: true
     name: 'Samples'
+  faq:
+    permalink: /:collection/:slug
+    output: true
+    name: 'Frequently Asked Questions'
 
 # Default layout (per collection)
 #
@@ -74,6 +77,11 @@ defaults:
   - scope:
       path: ""
       type: samples
+    values:
+      layout: page
+  - scope:
+      path: ""
+      type: faq
     values:
       layout: page
 
