@@ -16,45 +16,47 @@ referred to them using the `style` attribute of the relevant controls.
 
 __Module: hello7.js - [View on GitHub](https://github.com/SynchroLabs/SynchroTutorial/blob/master/hello7.js)__
 
-    exports.InitializeViewModel = function(context, session) {
-        return {
-            firstName: "Jane",
-            lastName: "Smith",
-            textStyle: { fontsize: 12, verticalAlignment: "Center" },
-            labelStyle: { width: 200, textAlignment: "Right" },
-            editStyle: { width: 240 }
-        }
+<pre><code>
+exports.InitializeViewModel = function(context, session) {
+    return {
+        firstName: "Jane",
+        lastName: "Smith",
+        <span class="mark">textStyle: { fontsize: 12, verticalAlignment: "Center" },</span>
+        <span class="mark">labelStyle: { width: 200, textAlignment: "Right" },</span>
+        <span class="mark">editStyle: { width: 240 }</span>
     }
+}
 
-    exports.View =
-    {
-        title: "Hello World 7",
-        elements:
-        [
-            { control: "text", value: "Enter your name:", font: { size: "{textStyle.fontsize}", bold: true } },
-            { control: "stackpanel", orientation: "Horizontal", contents: [
-                { control: "text", value: "First name:", style: "textStyle, labelStyle" },
-                { control: "edit", binding: "firstName", style: "textStyle, editStyle" },
-            ] },
-            { control: "stackpanel", orientation: "Horizontal", contents: [
-                { control: "text", value: "Last name:", style: "textStyle, labelStyle" },
-                { control: "edit", binding: "lastName", style: "textStyle, editStyle" },
-            ] },
-            { control: "text", value: "eval('Hello ' + ({firstName} + ' ' + {lastName}).toUpperCase())", style: "textStyle" },
-            { control: "button", caption: "Submit", binding: "onSubmit", enabled: "eval({firstName} && {lastName})" },
-        ]
-    }
+exports.View =
+{
+    title: "Hello World 7",
+    elements:
+    [
+        { control: "text", value: "Enter your name:", font: { <span class="mark">size: "{textStyle.fontsize}",</span> bold: true } },
+        { control: "stackpanel", orientation: "Horizontal", contents: [
+            { control: "text", value: "First name:", <span class="mark">style: "textStyle, labelStyle"</span> },
+            { control: "edit", binding: "firstName", <span class="mark">style: "textStyle, editStyle"</span> },
+        ] },
+        { control: "stackpanel", orientation: "Horizontal", contents: [
+            { control: "text", value: "Last name:", <span class="mark">style: "textStyle, labelStyle"</span> },
+            { control: "edit", binding: "lastName", <span class="mark">style: "textStyle, editStyle"</span> },
+        ] },
+        { control: "text", value: "eval('Hello ' + ({firstName} + ' ' + {lastName}).toUpperCase())", <span class="mark">style: "textStyle"</span> },
+        { control: "button", caption: "Submit", binding: "onSubmit", enabled: "eval({firstName} && {lastName})" },
+    ]
+}
 
-    exports.Commands =
+exports.Commands =
+{
+    onSubmit: function(context, session, viewModel)
     {
-        onSubmit: function(context, session, viewModel)
-        {
-            Synchro.showMessage(context, { 
-                title: "Hello World", 
-                message: "User name: " + viewModel.firstName + " " + viewModel.lastName 
-            });
-        }
+        Synchro.showMessage(context, { 
+            title: "Hello World", 
+            message: "User name: " + viewModel.firstName + " " + viewModel.lastName 
+        });
     }
+}
+</code></pre>
 
 ![Hello 7]({{ site.baseurl }}/assets/img/hello7.png)
 

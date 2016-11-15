@@ -15,32 +15,34 @@ _userName_ has a value.
 
 __Module: hello4.js - [View on GitHub](https://github.com/SynchroLabs/SynchroTutorial/blob/master/hello4.js)__
 
-    exports.InitializeViewModel = function(context, session)
-    {
-        return {
-            userName: "Jane Smith"
-        };
-    }
-
-    exports.View = {
-        title: "Hello World 4",
-        elements: [
-            { control: "edit", binding: "userName", placeholder: "enter name" },
-            { control: "text", value: "Hello {userName}", visibility: "{userName}" },
-            { control: "button", caption: "Submit", binding: "onSubmit", enabled: "{userName}" }
-        ]
+<pre><code>
+exports.InitializeViewModel = function(context, session)
+{
+    return {
+        userName: "Jane Smith"
     };
+}
 
-    exports.Commands =
+exports.View = {
+    title: "Hello World 4",
+    elements: [
+        { control: "edit", binding: "userName", placeholder: "enter name" },
+        { control: "text", value: "Hello {userName}", visibility: "{userName}" },
+        <span class="mark">{ control: "button", caption: "Submit", binding: "onSubmit", enabled: "{userName}" }</span>
+    ]
+};
+
+<span class="mark">exports.Commands =
+{
+    onSubmit: function(context, session, viewModel)
     {
-        onSubmit: function(context, session, viewModel)
-        {
-            Synchro.showMessage(context, {
-                title: "Hello World",
-                message: "User name: " + viewModel.userName
-            });
-        }
+        Synchro.showMessage(context, {
+            title: "Hello World",
+            message: "User name: " + viewModel.userName
+        });
     }
+}</span>
+</code></pre>
 
 The module will look like this on mobile client (the Hello message and "Submit" button state will reflect the contents of the user name
 in real-time): 

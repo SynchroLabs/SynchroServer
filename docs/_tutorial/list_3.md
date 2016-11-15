@@ -20,75 +20,77 @@ regenerated (reloaded).  In addition, any changes made by a child view (and stor
 
 __Module: list3.js - [View on GitHub](https://github.com/SynchroLabs/SynchroTutorial/blob/master/list3.js)__
 
-    var imgUser = Synchro.getResourceUrl("user.png");
+<pre><code>
+var imgUser = Synchro.getResourceUrl("user.png");
 
-    exports.InitializeViewModel = function(context, session, params, state)
+exports.InitializeViewModel = function(context, session, params, state)
+{
+<span class="mark">    var viewModel = state;
+    if (viewModel == null)
     {
-        var viewModel = state;
-        if (viewModel == null)
-        {
-            viewModel = { isLoading: true };
-        }
-        else if (session.updatedPerson)
-        {
-            viewModel.people[session.updatedPerson.index] = session.updatedPerson.person;
-            delete session.updatedPerson;
-        }
-
-        return viewModel;
+        viewModel = { isLoading: true };
+    }
+    else if (session.updatedPerson)
+    {
+        viewModel.people[session.updatedPerson.index] = session.updatedPerson.person;
+        delete session.updatedPerson;
     }
 
-    exports.LoadViewModel = function * (context, session, viewModel)
-    {
-        if (viewModel.people === undefined)
-        {
-            yield Synchro.yieldAwaitable(context, function(callback){ setTimeout(callback, 4000) });
-            viewModel.people = [
-                 { first: "Betsy", last: "Braddock" }, 
-                 { first: "Steven", last: "Rogers" }, 
-                 { first: "Natasha", last: "Romanoff" }, 
-                 { first: "Tony", last: "Stark" }, 
-                 { first: "Wade", last: "Wilson" }, 
-            ];
-            viewModel.isLoading = false;
-        }
-    }
+    return viewModel;</span>
+}
 
-    exports.View =
-    {
-        title: "List 3",
-        elements:
-        [
-            { control: "stackpanel", orientation: "Vertical", visibility: "{isLoading}", contents: [
-                { control: "progressring", value: "{isLoading}", verticalAlignment: "Center" },
-                { control: "text", value: "Loading...", color: "Red", font: { size: 24, bold: true }, verticalAlignment: "Center" },
-            ] },
-            { control: "stackpanel", orientation: "Vertical", width: "*", contents: [
-                { control: "listview", select: "None", width: "*", 
-                  binding: { items: "people", onItemClick: { command: "onSelected", person: "{$data}", index: "{$index}" } }, 
-                  itemTemplate:
-                    { control: "stackpanel", orientation: "Horizontal", width: "*", padding: 5, contents: [
-                        { control: "image", resource: imgUser, height: 50, width: 50, verticalAlignment: "Center" },
-                        { control: "stackpanel", orientation: "Vertical", contents: [
-                            { control: "text", value: "{first}" },
-                            { control: "text", value: "{last}" },
-                        ] },
+exports.LoadViewModel = function * (context, session, viewModel)
+{
+    <span class="mark">if (viewModel.people === undefined)
+    {</span>
+        yield Synchro.yieldAwaitable(context, function(callback){ setTimeout(callback, 4000) });
+        viewModel.people = [
+             { first: "Betsy", last: "Braddock" }, 
+             { first: "Steven", last: "Rogers" }, 
+             { first: "Natasha", last: "Romanoff" }, 
+             { first: "Tony", last: "Stark" }, 
+             { first: "Wade", last: "Wilson" }, 
+        ];
+        viewModel.isLoading = false;
+    <span class="mark">}</span>
+}
+
+exports.View =
+{
+    title: "List 3",
+    elements:
+    [
+        { control: "stackpanel", orientation: "Vertical", visibility: "{isLoading}", contents: [
+            { control: "progressring", value: "{isLoading}", verticalAlignment: "Center" },
+            { control: "text", value: "Loading...", color: "Red", font: { size: 24, bold: true }, verticalAlignment: "Center" },
+        ] },
+        { control: "stackpanel", orientation: "Vertical", width: "*", contents: [
+            { control: "listview", select: "None", width: "*", 
+              binding: { items: "people", <span class="mark">onItemClick: { command: "onSelected", person: "{$data}", index: "{$index}"</span> } }, 
+              itemTemplate:
+                { control: "stackpanel", orientation: "Horizontal", width: "*", padding: 5, contents: [
+                    { control: "image", resource: imgUser, height: 50, width: 50, verticalAlignment: "Center" },
+                    { control: "stackpanel", orientation: "Vertical", contents: [
+                        { control: "text", value: "{first}" },
+                        { control: "text", value: "{last}" },
                     ] },
-                },
-            ] },
-        ]
-    }
+                ] },
+            },
+        ] },
+    ]
+}
 
-    exports.Commands = 
+exports.Commands = 
+{
+<span class="mark">    onSelected: function (context, session, viewModel, params)
     {
-        onSelected: function (context, session, viewModel, params)
-        {
-            return Synchro.pushAndNavigateTo(context, "hello8", params, viewModel);
-        },
-    }
+        return Synchro.pushAndNavigateTo(context, "hello8", params, viewModel);
+    },</span>
+}
+</code></pre>
 
-The view will be generated as in the previous example with a 4 second delay and "loading" status, unless we are returning from a child view,
-in which case the list view will be restored instantly.
+The view will be generated as in the previous example with a 4 second delay and "loading" status, unless we are returning
+from a child view, in which case the list view will be restored instantly.
 
 When an item in the list is clicked, the onSelected command will be called, and the child view will be activated. 
 
@@ -99,43 +101,45 @@ is pressed, any edits are stored in the session object (for the parent to proces
 
 __Module: hello8.js - [View on GitHub](https://github.com/SynchroLabs/SynchroTutorial/blob/master/hello8.js)__
 
-    exports.InitializeViewModel = function(context, session, params, state) {
-        return {
-            firstName: params.person.first,
-            lastName: params.person.last,
-            index: params.index,
-            textStyle: { fontsize: 12, verticalAlignment: "Center" },
-            labelStyle: { width: 200, textAlignment: "Right" },
-            editStyle: { width: 240 }
-        }
+<pre><code>
+exports.InitializeViewModel = function(context, session, params, state) {
+    return {
+        firstName: <span class="mark">params.person.first,</span>
+        lastName: <span class="mark">params.person.last,</span>
+        <span class="mark">index: params.index,</span>
+        textStyle: { fontsize: 12, verticalAlignment: "Center" },
+        labelStyle: { width: 200, textAlignment: "Right" },
+        editStyle: { width: 240 }
     }
+}
 
-    exports.View =
-    {
-        title: "Hello World 8",
-        elements:
-        [
-            { control: "text", value: "Enter name:", font: { size: "{textStyle.fontsize}", bold: true } },
-            { control: "stackpanel", orientation: "Horizontal", contents: [
-                { control: "text", value: "First name:", style: "textStyle, labelStyle" },
-                { control: "edit", binding: "firstName", style: "textStyle, editStyle" },
-            ] },
-            { control: "stackpanel", orientation: "Horizontal", contents: [
-                { control: "text", value: "Last name:", style: "textStyle, labelStyle" },
-                { control: "edit", binding: "lastName", style: "textStyle, editStyle" },
-            ] },
-            { control: "button", caption: "Submit", binding: "onSubmit", enabled: "eval({firstName} && {lastName})" },
-        ]
-    }
+exports.View =
+{
+    title: "Hello World 8",
+    elements:
+    [
+        { control: "text", value: "Enter name:", font: { size: "{textStyle.fontsize}", bold: true } },
+        { control: "stackpanel", orientation: "Horizontal", contents: [
+            { control: "text", value: "First name:", style: "textStyle, labelStyle" },
+            { control: "edit", binding: "firstName", style: "textStyle, editStyle" },
+        ] },
+        { control: "stackpanel", orientation: "Horizontal", contents: [
+            { control: "text", value: "Last name:", style: "textStyle, labelStyle" },
+            { control: "edit", binding: "lastName", style: "textStyle, editStyle" },
+        ] },
+        { control: "button", caption: "Submit", binding: "onSubmit", enabled: "eval({firstName} && {lastName})" },
+    ]
+}
 
-    exports.Commands =
+exports.Commands =
+{
+    onSubmit: function(context, session, viewModel)
     {
-        onSubmit: function(context, session, viewModel)
-        {
-            session.updatedPerson = { index: viewModel.index, person: { first: viewModel.firstName, last: viewModel.lastName }};
-            Synchro.pop(context);
-        }
+<span class="mark">        session.updatedPerson = { index: viewModel.index, person: { first: viewModel.firstName, last: viewModel.lastName }};
+        Synchro.pop(context);</span>
     }
+}
+</code></pre>
 
 The name can be edited in the child view below, and the changes will be displayed on the parent list view page. 
 

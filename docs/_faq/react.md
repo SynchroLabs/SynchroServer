@@ -129,7 +129,7 @@ Following is the React Native sample “Movies” app from the
         return (
           <View style={styles.container}>
             <Image
-              source={{uri: movie.posters.thumbnail}}
+              source={uri: movie.posters.thumbnail}
               style={styles.thumbnail}
             /<
             <View style={styles.rightContainer}>

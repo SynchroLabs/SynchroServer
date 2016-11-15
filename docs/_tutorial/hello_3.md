@@ -20,20 +20,22 @@ between client and server).
 
 __Module: hello3.js - [View on GitHub](https://github.com/SynchroLabs/SynchroTutorial/blob/master/hello3.js)__
 
-    exports.InitializeViewModel = function(context, session)
-    {
-        return {
-            userName: "Jane Smith"
-        };
-    }
-
-    exports.View = {
-        title: "Hello World 3",
-        elements: [
-            { control: "edit", binding: "userName", placeholder: "enter name" },
-            { control: "text", value: "Hello {userName}", visibility: "{userName}" }
-        ]
+<pre><code>
+exports.InitializeViewModel = function(context, session)
+{
+    return {
+        userName: "Jane Smith"
     };
+}
+
+exports.View = {
+    title: "Hello World 3",
+    elements: [
+        <span class="mark">{ control: "edit", binding: "userName", placeholder: "enter name" },</span>
+        { control: "text", value: "Hello {userName}", <span class="mark">visibility: "{userName}"</span> }
+    ]
+};
+</code></pre>
 
 This module will look like this on mobile client (and will update in real-time as the the user name is edited): 
 

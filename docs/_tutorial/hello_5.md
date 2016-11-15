@@ -12,35 +12,37 @@ fields.  And the Submit button will only be enabled if BOTH fields contain a val
 
 __Module: hello5.js - [View on GitHub](https://github.com/SynchroLabs/SynchroTutorial/blob/master/hello5.js)__
 
-    exports.InitializeViewModel = function(context, session) {
-        return {
-            firstName: "Jane",
-            lastName: "Smith",
-        }
+<pre><code>
+exports.InitializeViewModel = function(context, session) {
+    return {
+        <span class="mark">firstName: "Jane",</span>
+        <span class="mark">lastName: "Smith",</span>
     }
+}
 
-    exports.View =
-    {
-        title: "Hello World",
-        elements:
-        [
-            { control: "edit", binding: "firstName", placeholder: "first name" },
-            { control: "edit", binding: "lastName", placeholder: "last name" },
-            { control: "text", value: "eval('Hello ' + ({firstName} + ' ' + {lastName}).toUpperCase())" },
-            { control: "button", caption: "Submit", binding: "onSubmit", enabled: "eval({firstName} && {lastName})" },
-        ]
-    }
+exports.View =
+{
+    title: "Hello World",
+    elements:
+    [
+        <span class="mark">{ control: "edit", binding: "firstName", placeholder: "first name" },</span>
+        <span class="mark">{ control: "edit", binding: "lastName", placeholder: "last name" },</span>
+        { control: "text", value: "<span class="mark">eval('Hello ' + ({firstName} + ' ' + {lastName}).toUpperCase())</span>" },
+        { control: "button", caption: "Submit", binding: "onSubmit", enabled: "<span class="mark">eval({firstName} && {lastName})</span>" },
+    ]
+}
 
-    exports.Commands =
+exports.Commands =
+{
+    onSubmit: function(context, session, viewModel)
     {
-        onSubmit: function(context, session, viewModel)
-        {
-            Synchro.showMessage(context, { 
-                title: "Hello World", 
-                message: "User name: " + viewModel.firstName + " " + viewModel.lastName 
-            });
-        }
+        Synchro.showMessage(context, { 
+            title: "Hello World", 
+            message: "User name: " + <span class="mark">viewModel.firstName + " " + viewModel.lastName</span> 
+        });
     }
+}
+</code></pre>
 
 This module will appear as below on mobile devices (the Welcome text and "Submit" button state will reflect to contents of the first and last
 name fields, in real-time): 

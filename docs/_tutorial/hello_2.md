@@ -10,19 +10,20 @@ The following code shows initialization of a simple ViewModel and shows a View p
 
 __Module: hello2.js - [View on GitHub](https://github.com/SynchroLabs/SynchroTutorial/blob/master/hello2.js)__
 
-    exports.InitializeViewModel = function(context, session)
-    {
-        return {
-            userName: "Jane Smith"
-        };
-    }
-
-    exports.View = {
-        title: "Hello World 2",
-        elements: [
-            { control: "text", value: "Hello {userName}" }
-        ]
+<pre><code><span class="mark">exports.InitializeViewModel = function(context, session)
+{
+    return {
+        userName: "Jane Smith"
     };
+}</span>
+
+exports.View = {
+    title: "Hello World 2",
+    elements: [
+        { control: "text", value: "Hello <span class="mark">{userName}</span>" }
+    ]
+};
+</code></pre>
 
 As you can see below, the View is showing the data from the ViewModel. 
 

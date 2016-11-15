@@ -13,14 +13,16 @@ If you want to get an idea of the controls supported in Synchro Views, check out
 
 __Module: hello1.js - [View on GitHub](https://github.com/SynchroLabs/SynchroTutorial/blob/master/hello1.js)__
 
-    exports.View =
-    {
-        title: "Hello World 1",
-        elements:
-        [
-            { control: "text", value: "Hello World" },
-        ]
-    }
+<pre><code>
+exports.View =
+{
+    title: "Hello World 1",
+    elements:
+    [
+        { control: "text", value: "Hello World" },
+    ]
+}
+</code></pre>
 
 The View above would be rendered on native mobile clients like this: 
 

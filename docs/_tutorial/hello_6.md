@@ -13,42 +13,44 @@ what is essentially a table style layout.  With Synchro, it is possible to make 
 
 __Module: hello6.js - [View on GitHub](https://github.com/SynchroLabs/SynchroTutorial/blob/master/hello6.js)__
 
-    exports.InitializeViewModel = function(context, session) {
-        return {
-            firstName: "Jane",
-            lastName: "Smith",
-        }
+<pre><code>
+exports.InitializeViewModel = function(context, session) {
+    return {
+        firstName: "Jane",
+        lastName: "Smith",
     }
+}
 
-    exports.View =
-    {
-        title: "Hello World 6",
-        elements:
-        [
-            { control: "text", value: "Enter your name:", font: { bold: true } },
-            { control: "stackpanel", orientation: "Horizontal", contents: [
-                { control: "text", value: "First name:", verticalAlignment: "Center", width: 200 },
-                { control: "edit", binding: "firstName", verticalAlignment: "Center", width: 240 },
-            ] },
-            { control: "stackpanel", orientation: "Horizontal", contents: [
-                { control: "text", value: "Last name:", verticalAlignment: "Center", width: 200 },
-                { control: "edit", binding: "lastName", verticalAlignment: "Center", width: 240 },
-            ] },
-            { control: "text", value: "eval('Hello ' + ({firstName} + ' ' + {lastName}).toUpperCase())" },
-            { control: "button", caption: "Submit", binding: "onSubmit", enabled: "eval({firstName} && {lastName})" },
-        ]
-    }
+exports.View =
+{
+    title: "Hello World 6",
+    elements:
+    [
+        <span class="mark">{ control: "text", value: "Enter your name:", font: { bold: true } },</span>
+        <span class="mark">{ control: "stackpanel", orientation: "Horizontal", contents: [</span>
+            <span class="mark">{ control: "text", value: "First name:", verticalAlignment: "Center", width: 200 },</span>
+            { control: "edit", binding: "firstName", <span class="mark">verticalAlignment: "Center", width: 240</span> },
+        ] },
+        <span class="mark">{ control: "stackpanel", orientation: "Horizontal", contents: [</span>
+            <span class="mark">{ control: "text", value: "Last name:", verticalAlignment: "Center", width: 200 },</span>
+            { control: "edit", binding: "lastName", <span class="mark">verticalAlignment: "Center", width: 240</span> },
+        ] },
+        { control: "text", value: "eval('Hello ' + ({firstName} + ' ' + {lastName}).toUpperCase())" },
+        { control: "button", caption: "Submit", binding: "onSubmit", enabled: "eval({firstName} && {lastName})" },
+    ]
+}
 
-    exports.Commands =
+exports.Commands =
+{
+    onSubmit: function(context, session, viewModel)
     {
-        onSubmit: function(context, session, viewModel)
-        {
-            Synchro.showMessage(context, { 
-                title: "Hello World", 
-                message: "User name: " + viewModel.firstName + " " + viewModel.lastName 
-            });
-        }
+        Synchro.showMessage(context, { 
+            title: "Hello World", 
+            message: "User name: " + viewModel.firstName + " " + viewModel.lastName 
+        });
     }
+}
+</code></pre>
 
 ![Hello 6]({{ site.baseurl }}/assets/img/hello6.png)
 
