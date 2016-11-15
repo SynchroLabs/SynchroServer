@@ -11,4 +11,4 @@ To run the docs locally, from the docs directory, run:
 
     bundle exec jekyll serve
 
-The docs can be viewed at: <docs.synchro.io/>
+The docs can be viewed at: <http://docs.synchro.io>
