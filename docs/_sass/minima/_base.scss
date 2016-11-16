@@ -4,12 +4,8 @@
 body, h1, h2, h3, h4, h5, h6,
 p, blockquote, pre, hr,
 dl, dd, ol, ul, figure {
-  margin: 0;
+  /* margin: 0; */
   padding: 0;
-}
-
-span.mark {
-    background-color: yellow;
 }
 
 /**
@@ -131,19 +127,22 @@ blockquote {
  */
 pre,
 code {
-  font-size: 15px;
-  border: 1px solid $grey-color-light;
-  border-radius: 3px;
-  background-color: #eef;
+  border-radius: 4px;
 }
 
 code {
-  padding: 1px 5px;
+  padding: 2px 4px;
+  color: #c7254e;
+  background-color: #f9f2f4;
 }
 
 pre {
-  padding: 8px 12px;
+  font-size: 13px;
+  padding: 9.5px;
+  border: 1px solid #ccc;
   overflow-x: auto;
+  color: #333;
+  background-color: #f8f8f8;
 
   > code {
     border: 0;
@@ -152,7 +151,9 @@ pre {
   }
 }
 
-
+span.mark {
+    background-color: yellow;
+}
 
 /**
  * Wrapper

@@ -1,6 +1,6 @@
 ---
 title: Introduction to Synchro
-weight: 1
+weight: -1
 ---
 
 # What is Synchro?
