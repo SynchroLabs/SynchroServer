@@ -3,6 +3,7 @@ layout: page
 title: Controls
 description: Synchro Control Configuration and Usage
 permalink: /controls/
+collection: controls
 weight: 2
 ---
 

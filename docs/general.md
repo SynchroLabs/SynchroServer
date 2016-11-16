@@ -3,6 +3,7 @@ layout: page
 title: General
 description: Synchro Architecture, Design, Usage, and API Documentation
 permalink: /general/
+collection: general
 weight: 1
 ---
 

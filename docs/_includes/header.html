@@ -6,6 +6,8 @@
 
     <a class="site-title" href="{{ "/" | relative_url}}">{{ site.title | escape }}</a>
 
+    <input id="site-search" type="text" placeholder="Search docs..." class="search-input" autocomplete="off" spellcheck="false" dir="auto">
+
     <nav class="site-nav">
       <span class="menu-icon">
         <svg viewBox="0 0 18 15" width="18px" height="15px">
@@ -17,9 +19,11 @@
 
       <div class="trigger">
         {% assign pages = site.pages | sort: 'weight' %}
+        {% assign theCollection = page.collection %}
         {% for page in pages %}
+          {% capture pageTitle %}{{ page.title | downcase}}{% endcapture %}
           {% if page.title %}
-          <a class="page-link" href="{{ page.url | relative_url }}">{{ page.title | escape }}</a>
+          <a class="page-link {% if pageTitle == theCollection %}page-selected{% endif %}" href="{{ page.url | relative_url }}">{{ page.title | escape }}</a>
           {% endif %}
         {% endfor %}
       </div>

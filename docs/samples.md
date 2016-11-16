@@ -3,6 +3,7 @@ layout: page
 title: Samples
 description: Synchro Samples
 permalink: /samples/
+collection: samples
 weight: 4
 ---
 

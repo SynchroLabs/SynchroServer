@@ -3,6 +3,7 @@ layout: page
 title: FAQ
 description: Frequently Asked Questions
 permalink: /faq/
+collection: faq
 weight: 5
 ---
 

@@ -27,6 +27,34 @@
   vertical-align: bottom;
 }
 
+/**
+ * Search 
+ */
+
+.algolia-autocomplete {
+  position: relative;
+  vertical-align: top;
+  margin-top: 18px;
+}
+
+.search-input {
+  height: 30px;
+  line-height: 30px;
+  font-size: 16px;
+  box-sizing: border-box;
+  padding: 0 15px 0 30px;
+  border: 1px solid #e3e3e3;
+  color: #2c3e50;
+  outline: none;
+  border-radius: 15px;
+  margin-left: 20px;
+  margin-right: 10px;
+  transition: border-color 0.2s ease;
+  background: #fff url(http://vuejs.org/images/search.png) 8px 5px no-repeat;
+  background-size: 20px;
+  vertical-align: middle !important;
+}
+
 .site-nav {
   float: right;
   line-height: 56px;
@@ -43,6 +71,10 @@
     &:not(:last-child) {
       margin-right: 20px;
     }
+  }
+
+  .page-selected {
+    font-weight: 600;
   }
 
   @include media-query($on-palm) {

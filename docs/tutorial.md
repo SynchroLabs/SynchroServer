@@ -3,6 +3,7 @@ layout: page
 title: Tutorial
 description: Synchro Tutorial
 permalink: /tutorial/
+collection: tutorial
 weight: 3
 ---
 
