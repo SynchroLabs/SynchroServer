@@ -4,10 +4,10 @@
 
 ## Synchro - The Cloud-Based Mobile App Platform for Node.js
 
-This project contains the Synchro application development platform, generally referred to as Synchro Server.  In addition the main app server, this project contains:
+This project contains the Synchro application development platform, generally referred to as Synchro Server.  In addition to the main app server, this project contains:
 
-* Syncho Studio - A web-based IDE allowing for drag-drop UX creation and editing, and a debugger for Synchro apps.
-* Synchro Web - An application server that serves Synchro apps as web apps (desktop and mobile optimized)
+* __Syncho Studio__ - A web-based IDE allowing for drag-drop UX creation and editing, and a debugger for Synchro apps.
+* __Synchro Web__ - An application server that serves Synchro apps as web apps (desktop and mobile optimized)
 
 Documentation for Synchro Server is available at: http://docs.synchro.io/
 
