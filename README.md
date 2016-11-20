@@ -6,7 +6,7 @@
 
 This project contains the Synchro application development platform, generally referred to as Synchro Server.  In addition to the main app server, this project contains:
 
-* __Syncho Studio__ - A web-based IDE allowing for drag-drop UX creation and editing, and a debugger for Synchro apps.
+* __Synchro Studio__ - A web-based IDE allowing for drag-drop UX creation and editing, and a debugger for Synchro apps.
 * __Synchro Web__ - An application server that serves Synchro apps as web apps (desktop and mobile optimized)
 
 Documentation for Synchro Server is available at: http://docs.synchro.io/
