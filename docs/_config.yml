@@ -4,6 +4,7 @@
 # 'bundle exec jekyll serve'. If you change this file, please restart the server process.
 
 # Site settings
+#
 # These are used to personalize your new site. If you look in the HTML files,
 # you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
 # You can create any custom variable you would like, and they will be accessible
@@ -11,8 +12,7 @@
 #
 title: Synchro Labs
 email: support@synchro.io
-description: > # this means to ignore newlines until "baseurl:"
-  This is the Synchro Labs documentation site.
+description: This is the Synchro Labs documentation site.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: synchrolabs
@@ -49,7 +49,7 @@ collections:
     output: true
     name: 'Frequently Asked Questions'
 
-# Default layout (per collection)
+# Defaults (per collection)
 #
 # Note: Anything we put under 'values' will be the default front matter value for pages at the given path, and can this
 #       be accessed in a template using {{ page.yourProp }}

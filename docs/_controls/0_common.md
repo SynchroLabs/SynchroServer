@@ -1,6 +1,5 @@
 ---
 title: Common Control Attributes
-permalink: /:collection/common
 slug: common
 ---
 
