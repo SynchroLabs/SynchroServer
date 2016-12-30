@@ -1,6 +1,6 @@
 {
   "name": "synchro-server",
-  "version": "1.5.9",
+  "version": "1.5.10",
   "dependencies": {
     "abbrev": {
       "version": "1.0.9",
@@ -1534,13 +1534,13 @@
       "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-2.0.0.tgz"
     },
     "synchro-api": {
-      "version": "1.5.9"
+      "version": "1.5.10"
     },
     "synchro-studio": {
-      "version": "1.5.9"
+      "version": "1.5.10"
     },
     "synchro-web": {
-      "version": "1.5.9",
+      "version": "1.5.10",
       "dependencies": {
         "extend": {
           "version": "3.0.0",
