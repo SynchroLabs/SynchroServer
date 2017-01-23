@@ -248,17 +248,17 @@ app.all(synchroApiUrlPrefix + '/:appPath/resources/:resource', function(request,
     var container = config.get("APPS:" + request.params.appPath + ":container");
     if (container)
     {
-        var moduleStore = synchroApi.createModuleStore(config);
-        if (moduleStore.localFileStore)
+        co(function * ()
         {
-            logger.debug("Getting resource from file store...");
-            response.sendfile(__dirname + '/' + config.get('APP_ROOT_PATH') + '/' + container + '/resources/' + request.params.resource, { maxAge: config.get('STATIC_CACHE_MAXAGE') });
-        }
-        else
-        {
-            logger.debug("Getting resource from module store...");
-            co(function * ()
+            var moduleStore = yield synchroApi.createModuleStoreAwaitable(config);
+            if (moduleStore.localFileStore)
             {
+                logger.debug("Getting resource from file store...");
+                response.sendfile(__dirname + '/' + config.get('APP_ROOT_PATH') + '/' + container + '/resources/' + request.params.resource, { maxAge: config.get('STATIC_CACHE_MAXAGE') });
+            }
+            else
+            {
+                logger.debug("Getting resource from module store...");
                 var appModuleStore = yield moduleStore.getAppModuleStoreAwaitable(container);
                 var content = yield appModuleStore.getModuleSourceAwaitable('resources/' + request.params.resource);
 
@@ -267,12 +267,11 @@ app.all(synchroApiUrlPrefix + '/:appPath/resources/:resource', function(request,
                     response.setHeader('Cache-Control', 'public, max-age=' + (config.get('STATIC_CACHE_MAXAGE') / 1000));
                 } 
                 response.end(content, 'binary');
-
-            }).catch(function(err)
-            {
-                logger.error("Error getting resource:", err);
-            });
-        }
+            }
+        }).catch(function(err)
+        {
+            logger.error("Error getting resource:", err);
+        });
     }
     else
     {
@@ -438,7 +437,7 @@ function * loadApiProcessorAwaitable(moduleStore, synchroAppPath, synchroApp)
 
 function * loadApiProcessorsAwaitable()
 {
-    var moduleStore = synchroApi.createModuleStore(config);
+    var moduleStore = yield synchroApi.createModuleStoreAwaitable(config);
 
     yield initSynchroAppsConfig(moduleStore);
 
@@ -504,7 +503,7 @@ function * reloadProcessors()
     //       least of which is that we wouldn't support any other configuration changes from those sources (service 
     //       definitions, PORT, etc).
     //
-    var moduleStore = synchroApi.createModuleStore(config);
+    var moduleStore = yield synchroApi.createModuleStoreAwaitable(config);
 
     if (yield initSynchroAppsConfig(moduleStore))
     {
